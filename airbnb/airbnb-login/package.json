@@ -9,6 +9,11 @@
     "@testing-library/user-event": "^13.5.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
+<<<<<<< HEAD:airbnb/airbnb-login/package.json
+=======
+    "react-icons": "^5.5.0",
+    "react-router-dom": "^7.9.3",
+>>>>>>> eb7a225 (Header vista):airbnb-react/package.json
     "react-scripts": "5.0.1",
     "web-vitals": "^2.1.4"
   },
