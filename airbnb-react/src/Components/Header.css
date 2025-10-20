@@ -1,3 +1,4 @@
+/* Header principal */
 .header {
   display: flex;
   align-items: center;
@@ -8,43 +9,59 @@
   position: sticky;
   top: 0;
   z-index: 100;
+  font-family: 'Arial', sans-serif;
 }
 
 /* Logo */
-.header__logo img {
-  height: 32px;
-  object-fit: contain;
+.header__logo h2 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #ff385c; /* rojo Airbnb */
   cursor: pointer;
 }
 
-
-.divider {
-  width: 1px;
-  height: 20px;
-  background-color: #ddd;
+/* Navegación principal */
+.header__nav {
+  display: flex;
+  gap: 20px;
 }
 
-/* Sección derecha */
+.nav-item {
+  text-decoration: none;
+  color: #222;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 6px 12px;
+  border-radius: 50px;
+  transition: background 0.2s, color 0.2s;
+}
+
+.nav-item:hover {
+  background-color: #f7f7f7;
+  color: #000;
+}
+
+.nav-item.active {
+  font-weight: 700;
+}
+
+/* Sección derecha (host + icons + menu) */
 .header__right {
   display: flex;
   align-items: center;
   gap: 20px;
 }
 
-.header__text {
+.header__right p.host {
   font-size: 14px;
   font-weight: 500;
-  color: #333;
+  color: #222;
   cursor: pointer;
-}
-
-.header__text:hover {
-  color: #000;
 }
 
 .header__icon {
   font-size: 18px;
-  color: #333;
+  color: #222;
   cursor: pointer;
 }
 
@@ -58,10 +75,106 @@
   padding: 6px 10px;
   cursor: pointer;
   transition: box-shadow 0.2s;
+  position: relative;
 }
 
 .header__menu:hover {
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
+/* Avatar del usuario */
+.user-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+}
 
+/* Divider */
+.divider {
+  width: 1px;
+  height: 20px;
+  background-color: #ddd;
+}
+
+/* Dropdown menú estilo Airbnb */
+.dropdown-menu-airbnb {
+  position: absolute;
+  top: 50px;
+  right: 0;
+  width: 220px;
+  background-color: #fff;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  padding: 8px 0;
+  z-index: 100;
+  animation: fadeIn 0.2s ease-out forwards;
+}
+
+/* Animación suave de entrada */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Cada opción del menú */
+.dropdown-item-airbnb {
+  padding: 12px 20px;
+  font-size: 14px;
+  color: #222;
+  text-decoration: none;
+  cursor: pointer;
+  border-radius: 12px;
+  margin: 4px 8px;
+  transition: background 0.2s, color 0.2s;
+}
+
+.dropdown-item-airbnb:hover {
+  background-color: #f7f7f7;
+}
+
+/* Botón Cerrar sesión */
+.logout-btn-airbnb {
+  background: none;
+  border: none;
+  text-align: left;
+  width: 100%;
+  padding: 12px 20px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #ff385c; /* rojo Airbnb */
+  border-radius: 12px;
+  margin: 4px 8px;
+}
+
+.logout-btn-airbnb:hover {
+  background-color: #ffe3eb; /* rojo suave */
+}
+
+/* Responsive para móviles */
+@media (max-width: 768px) {
+  .header__nav {
+    display: none; /* ocultamos nav principal en móviles */
+  }
+
+  .header__menu {
+    gap: 4px;
+  }
+
+  .dropdown-menu-airbnb {
+    width: 180px;
+  }
+}
+
+.logo-img {
+  height: 32px;
+  object-fit: contain;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.logo-img:hover {
+  transform: scale(1.05);
+}

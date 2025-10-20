@@ -1,0 +1,57 @@
+/* src/Register.css */
+@import "./Login.css"; /* reutiliza estilos del login */
+
+/* Botón Volver */
+.back-btn {
+  width: 100%;
+  padding: 0.75rem;
+  margin-top: 0.5rem;
+  background-color: #ddd;
+  color: #333;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.back-btn:hover {
+  background-color: #ccc;
+}
+
+/* Divisor */
+.divider {
+  margin: 1.5rem 0;
+  border: none;
+  border-top: 1px solid #ddd;
+}
+
+/* Botones de redes sociales */
+.google-btn,
+.facebook-btn {
+  width: 100%;
+  padding: 0.75rem;
+  margin-bottom: 0.5rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  color: white;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.google-btn {
+  background-color: #db4437; /* rojo Google */
+}
+
+.google-btn:hover {
+  background-color: #c33d2e;
+}
+
+.facebook-btn {
+  background-color: #4267b2; /* azul Facebook */
+}
+
+.facebook-btn:hover {
+  background-color: #365899;
+}
