@@ -699,9 +699,9 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* 3. Huéspedes */}
+              {/* 3. Huéspedes - CORREGIDO CON flex-1 */}
               <div 
-                className={`relative flex items-center py-2.5 pl-6 pr-2 cursor-pointer rounded-full transition-all duration-200 ${isGuestsOpen ? 'bg-gray-100' : 'hover:bg-gray-50'}`}
+                className={`relative flex-1 flex items-center py-2.5 pl-6 pr-2 cursor-pointer rounded-full transition-all duration-200 ${isGuestsOpen ? 'bg-gray-100' : 'hover:bg-gray-50'}`}
                 onClick={() => handleSearchClick('guests')}
               >
                 <div className="flex-1">
