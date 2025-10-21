@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
+import FlexibleDates from '../components/FlexibleDates';
 
 // Mock de la API para que el componente sea runnable
 const propertiesAPI = {
@@ -374,11 +375,14 @@ const DateRangePicker = ({ checkIn, checkOut, onSelectDate, onClose }) => {
       )}
 
       
-      {/* 4. Contenido para Flexible (Placeholder) */}
+      {/* 4. Contenido para Flexible */}
       {activeTab === 'Flexible' && (
-          <div className="text-center py-10 text-gray-500">
-              <p>Elige un rango de duración y un mes de inicio para tu estancia flexible.</p>
-          </div>
+          <FlexibleDates 
+              onSelectFlexible={(flexData) => {
+                  console.log('Datos flexibles seleccionados:', flexData);
+                  // Aquí puedes actualizar tus filtros si lo necesitas
+              }}
+          />
       )}
 
     </div>
