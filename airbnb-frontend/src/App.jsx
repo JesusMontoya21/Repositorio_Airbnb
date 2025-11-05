@@ -10,6 +10,7 @@ import MyProperties from './pages/MyProperties';
 import CreateProperty from './pages/CreateProperty';
 import MyBookings from './pages/MyBookings';
 import ProtectedRoute from './components/ProtectedRoute';
+import Footer from './components/Footer';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -63,7 +64,10 @@ function App() {
           </div>
         </Router>
       </AuthProvider>
+      <Footer />
     </QueryClientProvider>
+    
+
   );
 }
 
