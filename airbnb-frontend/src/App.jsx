@@ -10,6 +10,8 @@ import MyProperties from './pages/MyProperties';
 import CreateProperty from './pages/CreateProperty';
 import MyBookings from './pages/MyBookings';
 import ProtectedRoute from './components/ProtectedRoute';
+import Services from "./pages/Services";
+import Experiences from "./pages/Experiences";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -32,7 +34,8 @@ function App() {
               <Route path="/property/:id" element={<PropertyDetails />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
-              
+              <Route path="/services" element={<Services />} />
+              <Route path="/experiences" element={<Experiences />} />
               <Route
                 path="/my-properties"
                 element={

@@ -67,10 +67,16 @@ export default function Navbar() {
               <Link to="/" className="text-base font-normal text-gray-500 hover:text-gray-900 transition">
                 Alojamientos
               </Link>
-              <button className="text-base font-normal text-gray-500 hover:text-gray-900 transition">
+              <button 
+                className="text-base font-normal text-gray-500 hover:text-gray-900 transition"
+                onClick={() => navigate("/experiences")}
+              >
                 Experiencias
               </button>
-              <button className="text-base font-normal text-gray-500 hover:text-gray-900 transition">
+              <button 
+                className="text-base font-normal text-gray-500 hover:text-gray-900 transition"
+                onClick={() => navigate("/services")}
+              >
                 Servicios
               </button>
             </div>
