@@ -12,6 +12,7 @@ import MyBookings from './pages/MyBookings';
 import ProtectedRoute from './components/ProtectedRoute';
 import Services from "./pages/Services";
 import Experiences from "./pages/Experiences";
+import Footer from './components/Footer';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -66,7 +67,10 @@ function App() {
           </div>
         </Router>
       </AuthProvider>
+      <Footer />
     </QueryClientProvider>
+    
+
   );
 }
 
