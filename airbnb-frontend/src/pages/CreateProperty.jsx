@@ -388,7 +388,7 @@ const Step5BasicInfo = ({ basics, setBasics }) => {
     { id: 'guests', label: 'Huéspedes', min: 1 },
     { id: 'bedrooms', label: 'Recámaras', min: 0 },
     { id: 'beds', label: 'Camas', min: 1 },
-    { id: 'bathrooms', label: 'Baños', min: 0.5 } // Mínimo 0.5
+    { id: 'bathrooms', label: 'Baños', min: 0.5 }
   ];
 
   const handleIncrement = (field) => {
@@ -398,8 +398,6 @@ const Step5BasicInfo = ({ basics, setBasics }) => {
 
   const handleDecrement = (field) => {
     const decrement = field === 'bathrooms' ? 0.5 : 1;
-    
-    // Encontrar el valor mínimo para el campo actual
     const item = items.find(i => i.id === field);
     const minValue = item ? item.min : 0; 
     
@@ -409,11 +407,11 @@ const Step5BasicInfo = ({ basics, setBasics }) => {
   };
 
   return (
-    <div className="flex flex-col w-full max-w-2xl mx-auto px-10 py-16"> 
+    <div className="flex flex-col w-full max-w-2xl mx-auto px-10 py-8"> 
       
-      {/* Título y subtítulo - Aumenté el margen inferior */}
-      <div className="mb-12 text-center">
-        <h1 className="text-3xl md:text-4xl font-bold leading-tight text-gray-900 mb-3">
+      {/* Título y subtítulo con más espacio */}
+      <div className="mb-10 text-center">
+        <h1 className="text-3xl md:text-4xl font-bold leading-tight text-gray-900 mb-4">
           Agrega algunos datos básicos de tu espacio
         </h1>
         <p className="text-base text-gray-600">
@@ -772,7 +770,9 @@ const Step5BasicInfo = ({ basics, setBasics }) => {
 
       {/* Contenido principal */}
       <main className="flex-grow overflow-y-auto flex justify-center"> 
-        <div className={`w-full h-full flex justify-center ${[2, 7].includes(currentStep) ? 'items-start' : 'items-center'}`}>
+        <div className={`w-full h-full flex justify-center ${
+          [2, 5, 7].includes(currentStep) ? 'items-start pt-8' : 'items-center'
+        }`}>
           {renderStepContent()}
         </div>
       </main>
