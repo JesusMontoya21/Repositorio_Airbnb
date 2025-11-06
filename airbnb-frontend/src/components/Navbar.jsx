@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import LoginModal from './LoginModal';
-import BecomeHostModal from './BecomeHostModal';
+// import BecomeHostModal from './BecomeHostModal';
 import LanguageModal from './LanguageModal';
 
 export default function Navbar() {
@@ -26,7 +26,8 @@ export default function Navbar() {
 
   const handleOpenHost = () => {
     setIsMenuOpen(false);
-    setShowHostModal(true);
+    // Navega a la página de anuncio de alojamiento
+    navigate('/anuncio-alojamiento');
   };
 
   const handleOpenLanguage = () => {
@@ -238,12 +239,12 @@ export default function Navbar() {
         onClose={() => setShowLoginModal(false)} 
       />
 
-      {/* Modal de Conviértete en Anfitrión */}
-      <BecomeHostModal 
+      {/* Modal de Conviértete en Anfitrión - COMENTADO TEMPORALMENTE */}
+      {/* <BecomeHostModal 
         isOpen={showHostModal} 
         onClose={() => setShowHostModal(false)}
         onSelect={handleSelectHostOption}
-      />
+      /> */}
 
       {/* Modal de Idioma y Región */}
       <LanguageModal 
