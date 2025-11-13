@@ -6,22 +6,28 @@
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@drawable/ic_airbnb"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
+        android:roundIcon="@drawable/ic_airbnb"
         android:supportsRtl="true"
         android:theme="@style/Theme.Airbnb_1">
         <activity
-            android:name=".HomeActivity"
+            android:name=".ui.View.Alojamientos"
             android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/Theme.Airbnb_1">
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".ui.View.Experiencias"/>
+        <activity android:name=".ui.View.Servicios"/>
+        <activity android:name=".ui.View.Favoritos" />
+        <activity android:name=".ui.View.Viajes" />
+        <activity android:name=".ui.View.Mensajes" />
+        <activity android:name=".ui.View.Perfil" />
     </application>
 
 </manifest>

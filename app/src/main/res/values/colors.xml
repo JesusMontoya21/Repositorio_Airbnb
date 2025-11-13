@@ -7,4 +7,10 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="airbnb_red">#FF5A5F</color>
+    <color name="airbnb_dark">#222222</color>
+    <color name="muted_gray">#8A8A8A</color>
+    <color name="background">#F7F7F7</color>
+    <color name="card_bg">#454444</color>
+    <color name="nav_item_color">#454444</color>
 </resources>

@@ -1,5 +1,6 @@
-package com.equipo.airbnb_1;
+package com.equipo.airbnb_1.ui.View;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.widget.TextView;
@@ -7,11 +8,12 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.equipo.airbnb_1.R;
 import com.equipo.airbnb_1.ui.Components.CarruselAdapter;
 
 import java.util.ArrayList;
 
-public class HomeActivity extends AppCompatActivity {
+public class Experiencias extends AppCompatActivity {
 
     TextView btnAlojamientos, btnExperiencias, btnServicios;
     RecyclerView recyclerCarrusel;
@@ -26,13 +28,20 @@ public class HomeActivity extends AppCompatActivity {
         btnServicios = findViewById(R.id.btnServicios);
         recyclerCarrusel = findViewById(R.id.recyclerCarrusel);
 
-        // Inicial: Alojamientos seleccionados
-        seleccionarSeccion("Alojamientos");
+        seleccionarSeccion("Experiencias");
 
-        // Click listeners
-        btnAlojamientos.setOnClickListener(v -> seleccionarSeccion("Alojamientos"));
-        btnExperiencias.setOnClickListener(v -> seleccionarSeccion("Experiencias"));
-        btnServicios.setOnClickListener(v -> seleccionarSeccion("Servicios"));
+        btnExperiencias.setOnClickListener(v -> {
+            Intent intent = new Intent(Experiencias.this, Alojamientos.class);
+            startActivity(intent);
+        });
+        btnExperiencias.setOnClickListener(v -> {
+            Intent intent = new Intent(Experiencias.this, Experiencias.class);
+            startActivity(intent);
+        });
+        btnServicios.setOnClickListener(v -> {
+            Intent intent = new Intent(Experiencias.this, Servicios.class);
+            startActivity(intent);
+        });
     }
 
     private void seleccionarSeccion(String seccion) {
@@ -65,7 +74,6 @@ public class HomeActivity extends AppCompatActivity {
         ArrayList<Integer> imagenes = new ArrayList<>();
         // Imágenes locales en res/drawable
         imagenes.add(R.drawable.casa1);
-        imagenes.add(R.drawable.casa2);
         imagenes.add(R.drawable.casa3);
 
         CarruselAdapter adapter = new CarruselAdapter(imagenes, this);
@@ -74,4 +82,3 @@ public class HomeActivity extends AppCompatActivity {
         recyclerCarrusel.setAdapter(adapter);
     }
 }
-

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/nav_navegacion"
+        android:icon="@drawable/ic_search"
+        android:title="Explora" />
+
+    <item
+        android:id="@+id/nav_favoritos"
+        android:icon="@drawable/ic_favorite"
+        android:title="Favoritos" />
+
+    <item
+        android:id="@+id/nav_viajes"
+        android:icon="@drawable/ic_airbnb"
+        android:title="Viajes" />
+
+    <item
+        android:id="@+id/nav_mensajes"
+        android:icon="@drawable/ic_message"
+        android:title="Mensajes" />
+
+    <item
+        android:id="@+id/nav_perfil"
+        android:icon="@drawable/ic_profile"
+        android:title="Perfil" />
+
+</menu>
+
