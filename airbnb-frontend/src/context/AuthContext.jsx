@@ -1,57 +1,44 @@
 import { createContext, useContext, useState, useEffect } from 'react';
-import { authAPI } from '../services/api';
+import api, { getCSRFToken } from '../api/axios';
 
-const AuthContext = createContext({});
+const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // Se ejecuta al cargar la app para saber si ya hay sesión
   useEffect(() => {
-    checkAuth();
+    getUser().finally(() => setLoading(false));
   }, []);
 
-  const checkAuth = async () => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      try {
-        const response = await authAPI.getUser();
-        setUser(response.data);
-      } catch (error) {
-        localStorage.removeItem('token');
-      }
-    }
-    setLoading(false);
-  };
+  async function login(email, password) {
+    await getCSRFToken(); //Crear XSRF-TOKEN y laravel_session
+    await api.post('/login', { email, password });
+    return getUser(); //Obtenemos el Usuario
+  }
 
-  const login = async (email, password) => {
-    const response = await authAPI.login({ email, password });
-    localStorage.setItem('token', response.data.token);
-    setUser(response.data.user);
-    return response.data;
-  };
-
-  const register = async (name, email, password, password_confirmation) => {
-    const response = await authAPI.register({ 
-      name, 
-      email, 
-      password, 
-      password_confirmation 
-    });
-    localStorage.setItem('token', response.data.token);
-    setUser(response.data.user);
-    return response.data;
-  };
-
-  const logout = async () => {
+  async function getUser() {
     try {
-      await authAPI.logout();
-    } catch (error) {
-      console.error('Error al cerrar sesión:', error);
+      const res = await api.get('/api/user');
+      setUser(res.data);
+      return res.data;
+    } catch (err) {
+      setUser(null);
+      return null;
     }
-    localStorage.removeItem('token');
+  }
+
+  async function register(name, email, password, password_confirmation) {
+    await getCSRFToken();
+    await api.post('/register', { name, email, password, password_confirmation });
+    return getUser();
+  }
+
+  async function logout() {
+    await api.post('/logout');
     setUser(null);
-  };
+  }
 
   return (
     <AuthContext.Provider value={{ user, login, register, logout, loading }}>

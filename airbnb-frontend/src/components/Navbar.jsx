@@ -1,6 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import LoginModal from './LoginModal';
+import BecomeHostModal from './BecomeHostModal';
+import LanguageModal from './LanguageModal';
 
 export default function Navbar() {
   const { user, logout } = useAuth();
@@ -36,13 +39,14 @@ export default function Navbar() {
   }, []);
 
   return (
-    <nav className="bg-white border-b border-gray-200 sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-6 lg:px-10">
-        <div className="flex justify-between items-center h-20">
-          {/* Logo */}
-          <Link to="/" className="flex items-center">
-            <span className="text-xl font-bold text-[#FF385C]">airbnb</span>
-          </Link>
+    <>
+      <nav className="bg-white border-b border-gray-200 sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-6 lg:px-10">
+          <div className="flex justify-between items-center h-20">
+            {/* Logo */}
+            <Link to="/" className="flex items-center">
+              <span className="text-xl font-bold text-[#FF385C]">airbnb</span>
+            </Link>
 
           {/* ----- CAMBIO 1: MENÚ CENTRAL ACTUALIZADO ----- */}
           <div className="hidden lg:flex items-center space-x-8">
@@ -95,4 +99,5 @@ export default function Navbar() {
       </div>
     </nav>
   );
+  
 }

@@ -1,29 +1,10 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { Link } from 'react-router-dom';
-import FlexibleDates from '../components/FlexibleDates';
-
-// Mock de la API para que el componente sea runnable
-const propertiesAPI = {
-  getAll: async (filters) => {
-    console.log('Fetching properties with filters:', filters);
-    // Simula una respuesta de API con una lista vacía
-    await new Promise(resolve => setTimeout(resolve, 500));
-    const mockData = {
-      data: [
-      ],
-      meta: { total: 0 }
-    };
-    return { data: mockData };
-  }
-};
-
 
 // --- UTILERÍA DE FECHAS Y MESES ---
 const getMonthDetails = (date) => {
   const year = date.getFullYear();
   const month = date.getMonth();
-  const firstDay = new Date(year, month, 1).getDay(); // 0 (Dom) a 6 (Sáb)
+  const firstDay = new Date(year, month, 1).getDay();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const monthName = date.toLocaleDateString('es-ES', { month: 'long' });
   
@@ -33,77 +14,57 @@ const getMonthDetails = (date) => {
 const formatDateDisplayShort = (dateString) => {
   if (!dateString) return null;
   const date = new Date(dateString);
-  // Formato: sáb., 1 nov.
   return date.toLocaleDateString('es-MX', { weekday: 'short', day: 'numeric', month: 'short' }).replace(/\.$/g, '');
 };
 
 
 // --- Componente Selector de Duración por Mes (MonthDurationPicker) ---
 const MonthDurationPicker = ({ onSelectDuration, onSelectDate }) => {
-    const [duration, setDuration] = useState(1); // Duración inicial en meses
-    const [selectedMonth, setSelectedMonth] = useState(new Date()); // Mes de inicio
+    const [duration, setDuration] = useState(1);
+    const [selectedMonth, setSelectedMonth] = useState(new Date());
 
     const durations = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
     
-    // Cálculo de fechas de inicio y fin (ejemplo: 1 Nov al 1 Dic)
     const startDate = new Date(selectedMonth.getFullYear(), selectedMonth.getMonth(), 1);
     const endDate = new Date(selectedMonth.getFullYear(), selectedMonth.getMonth() + duration, 1);
     
-    // Formateo de fechas para el pie de página
     const startDateDisplay = formatDateDisplayShort(startDate.toISOString().split('T')[0]);
     const endDateDisplay = formatDateDisplayShort(endDate.toISOString().split('T')[0]);
 
-
-    // Componente del Dial (Círculo Giratorio)
     const Dial = () => (
         <div className="relative w-64 h-64 flex items-center justify-center mx-auto my-8">
-            {/* Círculo Exterior (Anillo con puntos) */}
             <div className="absolute w-full h-full rounded-full border-2 border-white/50 bg-white shadow-xl">
-                {/* Puntos para cada mes de duración */}
                 {durations.map((d) => {
-                    const angle = (360 / durations.length) * (d - 1) - 90; // Ángulo para rotar (empezando en el tope)
+                    const angle = (360 / durations.length) * (d - 1) - 90;
                     return (
                         <div
                             key={d}
                             className="absolute inset-0 flex justify-center items-start"
                             style={{ transform: `rotate(${angle}deg)` }}
                         >
-                            {/* Pequeño punto gris en el borde */}
                             <div className={`w-1.5 h-1.5 rounded-full ${d <= duration ? 'bg-gray-400' : 'bg-gray-300'}`} style={{ transform: 'translateY(15px)' }}></div>
                         </div>
                     );
                 })}
             </div>
 
-            {/* Selector Rojo/Blanco (El "botón" en el dial) */}
-            {/* Este se mueve al ángulo del mes seleccionado */}
             <div
                 className="absolute w-full h-full transition-transform duration-300"
                 style={{ transform: `rotate(${(360 / durations.length) * (duration - 1) - 90}deg)` }}
             >
                 <button 
                     className="absolute top-0 left-1/2 -translate-x-1/2 w-10 h-10 rounded-full shadow-lg bg-[#FF385C] border-2 border-white"
-                    onClick={() => setDuration(prev => (prev % 12) + 1)} // Simula un clic para avanzar
+                    onClick={() => setDuration(prev => (prev % 12) + 1)}
                     aria-label="Ajustar duración"
                 >
-                    {/* Círculo blanco interno */}
                     <div className="w-5 h-5 bg-white rounded-full absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"></div>
                 </button>
             </div>
             
-            {/* Círculo Central con el número */}
             <div className="w-40 h-40 rounded-full flex flex-col items-center justify-center bg-white shadow-inner-xl relative z-10">
                 <span className="text-5xl font-extrabold text-gray-900">{duration}</span>
                 <span className="text-base font-semibold text-gray-700">mes</span>
             </div>
-            
-             {/* Sombra interna para el efecto neumorphism */}
-            <style jsx>{`
-                .shadow-inner-xl {
-                    box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.05), inset 0 4px 6px 0 rgba(0, 0, 0, 0.05), 
-                                0 0 0 1px rgba(0, 0, 0, 0.05);
-                }
-            `}</style>
         </div>
     );
 
@@ -113,7 +74,6 @@ const MonthDurationPicker = ({ onSelectDuration, onSelectDate }) => {
             
             <Dial />
             
-            {/* Pie de página con las fechas calculadas */}
             <div className="text-center mt-6 text-base font-medium text-gray-700">
                 <span className="underline cursor-pointer hover:text-gray-900 transition-colors">
                     {startDateDisplay}
@@ -124,7 +84,6 @@ const MonthDurationPicker = ({ onSelectDuration, onSelectDate }) => {
                 </span>
             </div>
             
-            {/* Botón para seleccionar un mes específico (ejemplo de interacción) */}
             <button 
                 className="mt-6 text-sm text-gray-600 underline hover:text-gray-900 transition-colors"
                 onClick={() => setSelectedMonth(new Date(selectedMonth.getFullYear(), selectedMonth.getMonth() + 1, 1))}
@@ -136,7 +95,7 @@ const MonthDurationPicker = ({ onSelectDuration, onSelectDate }) => {
 };
 
 
-// --- Componente de Calendario de Fechas (sin cambios) ---
+// --- Componente de Calendario de Fechas ---
 const Day = ({ day, monthDate, checkInDate, checkOutDate, handleDayClick }) => {
     const today = new Date();
     const date = new Date(monthDate.getFullYear(), monthDate.getMonth(), day);
@@ -147,7 +106,6 @@ const Day = ({ day, monthDate, checkInDate, checkOutDate, handleDayClick }) => {
     
     const isToday = date.toDateString() === today.toDateString();
     const isSelected = (checkIn && dateString === checkInDate) || (checkOut && dateString === checkOutDate);
-    // Verificar si está en rango
     const isInRange = checkIn && checkOut && date > checkIn && date < checkOut;
     
     const isDisabled = date < new Date(today.getFullYear(), today.getMonth(), today.getDate());
@@ -174,12 +132,10 @@ const Day = ({ day, monthDate, checkInDate, checkOutDate, handleDayClick }) => {
         className={`relative w-10 h-10 ${isInRange ? 'bg-gray-100' : 'bg-transparent'}`}
         onClick={isDisabled ? null : () => handleDayClick(date)}
       >
-        {/* Fondo para el inicio y fin del rango */}
         {isSelected && (
             <div className={`absolute inset-0 z-0 ${isInRange ? 'bg-gray-100' : 'bg-transparent'}`}></div>
         )}
         
-        {/* Elemento del día (botón) */}
         <button
           className={`${baseClasses} ${bgClasses} ${textClasses}`}
           disabled={isDisabled}
@@ -187,7 +143,6 @@ const Day = ({ day, monthDate, checkInDate, checkOutDate, handleDayClick }) => {
             {day}
         </button>
         
-        {/* Línea de fondo para el rango (si no es el check-in ni check-out) */}
         {isInRange && (
             <div className={`absolute top-0 bottom-0 left-0 right-0 z-0 ${bgClasses}`}></div>
         )}
@@ -202,12 +157,10 @@ const Month = ({ monthDate, checkInDate, checkOutDate, handleDayClick }) => {
     
     const calendarDays = [];
     
-    // Días de relleno al inicio (para centrar el 1er día)
     for (let i = 0; i < firstDay; i++) {
       calendarDays.push(<div key={`empty-${i}`} className="w-10 h-10"></div>);
     }
     
-    // Días del mes
     for (let day = 1; day <= daysInMonth; day++) {
       calendarDays.push(
         <Day
@@ -243,17 +196,14 @@ const Month = ({ monthDate, checkInDate, checkOutDate, handleDayClick }) => {
   };
 
 
-// --- Componente Principal DateRangePicker (Modificado para ancho global de la barra de búsqueda) ---
+// --- Componente Principal DateRangePicker ---
 const DateRangePicker = ({ checkIn, checkOut, onSelectDate, onClose }) => {
-  // Estado para la pestaña activa (Fechas, Meses, Flexible)
   const [activeTab, setActiveTab] = useState('Fechas');
   
-  // Meses mostrados: el mes actual y el siguiente
   const today = new Date();
   const [currentMonth, setCurrentMonth] = useState(today);
   const [nextMonth, setNextMonth] = useState(new Date(today.getFullYear(), today.getMonth() + 1, 1));
 
-  // Función para avanzar o retroceder un mes
   const changeMonth = (offset) => {
     const newCurrent = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + offset, 1);
     setCurrentMonth(newCurrent);
@@ -277,7 +227,6 @@ const DateRangePicker = ({ checkIn, checkOut, onSelectDate, onClose }) => {
     }
   };
   
-  // Opciones de flexibilidad (solo para la pestaña 'Fechas')
   const flexibilityOptions = [
       { label: 'Fechas exactas', value: 0 },
       { label: '± 1 día', value: 1 },
@@ -287,13 +236,11 @@ const DateRangePicker = ({ checkIn, checkOut, onSelectDate, onClose }) => {
       { label: '± 14 días', value: 14 },
   ];
   
-  // Convertir las fechas a cadenas ISO para el componente Month
   const checkInISO = checkIn;
   const checkOutISO = checkOut;
 
   return (
     <div className="absolute top-full left-0 mt-4 p-6 w-full bg-white rounded-3xl shadow-2xl z-20 border border-gray-100">
-      {/* 1. Pestañas de selección (Fechas, Meses, Flexible) */}
       <div className="flex justify-center mb-6">
         <div className="p-1 bg-gray-100 rounded-full flex space-x-1">
           {['Fechas', 'Meses', 'Flexible'].map(tab => (
@@ -312,7 +259,6 @@ const DateRangePicker = ({ checkIn, checkOut, onSelectDate, onClose }) => {
         </div>
       </div>
 
-      {/* 2. Contenido de la Pestaña "Fechas" */}
       {activeTab === 'Fechas' && (
         <>
             <div className="flex justify-between items-center mb-4 text-gray-600">
@@ -366,7 +312,6 @@ const DateRangePicker = ({ checkIn, checkOut, onSelectDate, onClose }) => {
         </>
       )}
       
-      {/* 3. Contenido de la Pestaña "Meses" */}
       {activeTab === 'Meses' && (
           <MonthDurationPicker 
               onSelectDuration={(duration) => console.log('Duración en meses:', duration)} 
@@ -374,17 +319,11 @@ const DateRangePicker = ({ checkIn, checkOut, onSelectDate, onClose }) => {
           />
       )}
 
-      
-      {/* 4. Contenido para Flexible */}
       {activeTab === 'Flexible' && (
-          <FlexibleDates 
-              onSelectFlexible={(flexData) => {
-                  console.log('Datos flexibles seleccionados:', flexData);
-                  // Aquí puedes actualizar tus filtros si lo necesitas
-              }}
-          />
+          <div className="text-center py-10 text-gray-500">
+              <p>Elige un rango de duración y un mes de inicio para tu estancia flexible.</p>
+          </div>
       )}
-
     </div>
   );
 };
@@ -392,36 +331,21 @@ const DateRangePicker = ({ checkIn, checkOut, onSelectDate, onClose }) => {
 
 // --- Componente de Sugerencias de Destino ---
 const DestinationSuggestions = ({ onSelectCity }) => {
-  // Lista de sugerencias ampliada con datos de las imágenes
   const suggestions = [
     { name: 'Por la zona', description: 'Descubre qué hay a tu alrededor', icon: '✈️', color: 'text-blue-500 bg-blue-50' },
     { name: 'San Carlos, Sonora', description: 'Popular entre los viajeros de tu zona', icon: '🏙️', color: 'text-gray-500 bg-gray-100' },
     { name: 'Guadalajara, Jalisco', description: 'Por lugares de interés como este: Catedral de Guadalajara', icon: '🏰', color: 'text-yellow-600 bg-yellow-50' },
     { name: 'Mazatlán, Sinaloa', description: 'Un destino de playa popular', icon: '🏖️', color: 'text-pink-500 bg-pink-50' },
     { name: 'Ciudad Obregón, Sonora', description: 'Popular entre los viajeros de tu zona', icon: '🌊', color: 'text-cyan-500 bg-cyan-50' },
-    { name: 'Bahía de Kino, Sonora', description: 'Ideal para escapadas de fin de semana', icon: '🏠', color: 'text-teal-500 bg-teal-50' },
+    { name: 'Bahía de Kino, Sonora', description: 'Ideal para escapadas de fin de semana', icon: '🐠', color: 'text-teal-500 bg-teal-50' },
     { name: 'Tucson, Estados Unidos', description: 'Por lugares de interés como este: Museo del Desierto de Arizona-Sonora', icon: '🏜️', color: 'text-orange-500 bg-orange-50' },
     { name: 'Monterrey, Nuevo León', description: 'Por lugares de interés como este: Parque Fundidora', icon: '🏭', color: 'text-red-500 bg-red-50' },
-    { name: 'Phoenix, Estados Unidos', description: 'Para un viaje al extranjero', icon: '🇺🇸', color: 'text-purple-500 bg-purple-50' },
-    { name: 'Playa del Carmen, Quintana Roo', description: 'Un destino de playa popular', icon: '🌴', color: 'text-amber-500 bg-amber-50' },
-    { name: 'Cancún, Quintana Roo', description: 'Por su animada vida nocturna', icon: '🍹', color: 'text-green-500 bg-green-50' },
-    { name: 'Álamos, Sonora', description: 'Popular entre los viajeros de tu zona', icon: '🌳', color: 'text-lime-500 bg-lime-50' },
-    { name: 'Los Mochis, Sinaloa', description: 'Una joya escondida', icon: '✨', color: 'text-fuchsia-500 bg-fuchsia-50' },
-    { name: 'Nogales, Sonora', description: 'Fuera de las rutas más transitadas', icon: '🚧', color: 'text-sky-500 bg-sky-50' },
-    { name: 'Puerto Peñasco, Sonora', description: 'Un destino de playa popular', icon: '🚤', color: 'text-yellow-700 bg-yellow-100' },
-    { name: 'Flagstaff, Estados Unidos', description: 'Para los amantes de la naturaleza', icon: '🏔️', color: 'text-emerald-500 bg-emerald-50' },
-    { name: 'Ensenada, Baja California', description: 'Por su exquisita gastronomía', icon: '🍤', color: 'text-cyan-600 bg-cyan-100' },
-    { name: 'Zapopan, Jalisco', description: 'Por lugares de interés como este: Basílica de Nuestra Señora de Zapopan', icon: '⛪', color: 'text-blue-400 bg-blue-100' },
-    { name: 'La Paz, Baja California Sur', description: 'Para los amantes de la naturaleza', icon: '🐳', color: 'text-red-400 bg-red-100' },
-    { name: 'Mexicali, Baja California', description: 'Destino popular', icon: '☀️', color: 'text-green-400 bg-green-100' },
-    { name: 'Culiacán, Sinaloa', description: 'Una joya escondida', icon: '💎', color: 'text-pink-400 bg-pink-100' },
   ];
 
   return (
     <div className="absolute top-full left-0 mt-4 p-4 w-[450px] bg-white rounded-3xl shadow-2xl z-20 border border-gray-100">
       <h3 className="text-lg font-semibold mb-3 px-2 text-gray-800">Sugerencias de destinos</h3>
       
-      {/* Contenedor con altura máxima y scroll */}
       <div className="max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
         <ul>
           {suggestions.map((item, index) => (
@@ -430,7 +354,6 @@ const DestinationSuggestions = ({ onSelectCity }) => {
               className="flex items-center space-x-4 p-2 rounded-xl cursor-pointer hover:bg-gray-50 transition-colors"
               onClick={() => onSelectCity(item.name.split(',')[0].trim())}
             >
-              {/* Usando SVG para iconos más detallados (simulando los iconos de las imágenes) */}
               <div className={`p-3 rounded-xl flex items-center justify-center w-12 h-12 ${item.color}`}>
                 <span className="text-xl leading-none">{item.icon}</span>
               </div>
@@ -442,23 +365,6 @@ const DestinationSuggestions = ({ onSelectCity }) => {
           ))}
         </ul>
       </div>
-
-      {/* Estilos para una barra de desplazamiento discreta (opcional) */}
-      <style jsx>{`
-        .custom-scrollbar::-webkit-scrollbar {
-          width: 6px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-          background-color: #d1d5db; /* gray-300 */
-          border-radius: 3px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-          background-color: #9ca3af; /* gray-400 */
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-          background: transparent;
-        }
-      `}</style>
     </div>
   );
 };
@@ -473,7 +379,6 @@ const GuestsSelector = ({ guests, onSelectGuests, onClose }) => {
     pets: 0
   });
 
-  // Actualizar el total de huéspedes
   useEffect(() => {
     const total = guestCounts.adults + guestCounts.children;
     onSelectGuests({ 
@@ -553,11 +458,7 @@ const GuestsSelector = ({ guests, onSelectGuests, onClose }) => {
       />
       <GuestRow
         label="Mascotas"
-        description={
-          <span className="underline cursor-pointer hover:text-gray-700">
-            ¿Traes a un animal de servicio?
-          </span>
-        }
+        description="¿Traes a un animal de servicio?"
         type="pets"
         count={guestCounts.pets}
       />
@@ -566,27 +467,107 @@ const GuestsSelector = ({ guests, onSelectGuests, onClose }) => {
 };
 
 
+// --- Componente de Carrusel de Experiencias ---
+const ExperienceCarousel = ({ title, experiences }) => {
+  const scrollContainerRef = useRef(null);
+
+  const scroll = (direction) => {
+    const container = scrollContainerRef.current;
+    if (container) {
+      const scrollAmount = direction === 'left' ? -400 : 400;
+      container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+    }
+  };
+
+  return (
+    <div className="mb-12">
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-2xl font-semibold text-gray-900">{title}</h2>
+        <div className="flex space-x-2">
+          <button
+            onClick={() => scroll('left')}
+            className="p-2 rounded-full border border-gray-300 hover:border-gray-900 hover:shadow-md transition-all"
+            aria-label="Anterior"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+          <button
+            onClick={() => scroll('right')}
+            className="p-2 rounded-full border border-gray-300 hover:border-gray-900 hover:shadow-md transition-all"
+            aria-label="Siguiente"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div
+        ref={scrollContainerRef}
+        className="flex overflow-x-auto scrollbar-hide space-x-4 pb-4"
+        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+      >
+        {experiences.map((exp, index) => (
+          <div
+            key={index}
+            className="flex-none w-72 group cursor-pointer"
+          >
+            <div className="relative h-72 rounded-xl overflow-hidden mb-3">
+              <img
+                src={exp.image}
+                alt={exp.title}
+                className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+              />
+              <div className="absolute top-3 left-3 bg-white px-3 py-1 rounded-full text-xs font-semibold">
+                {exp.category}
+              </div>
+              {exp.rating && (
+                <div className="absolute top-3 right-3 bg-white px-2 py-1 rounded-lg shadow-md flex items-center space-x-1">
+                  <span className="text-yellow-500 text-sm">⭐</span>
+                  <span className="text-sm font-semibold">{exp.rating}</span>
+                </div>
+              )}
+            </div>
+            <div className="px-1">
+              <h3 className="font-semibold text-gray-900 mb-1 line-clamp-2">
+                {exp.title}
+              </h3>
+              <p className="text-gray-600 text-sm mb-2">
+                {exp.location}
+              </p>
+              <div className="flex items-center text-sm text-gray-500 mb-2">
+                <span>{exp.duration}</span>
+              </div>
+              <div>
+                <span className="font-semibold text-gray-900">Desde ${exp.price}</span>
+                <span className="text-gray-600 text-sm"> por persona</span>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+
 // --- Componente Principal HOME ---
-export default function Home() {
+export default function Experiences() {
   const [filters, setFilters] = useState({
     city: '',
     check_in: '',
     check_out: '',
     guests: 0,
   });
-  
-  // Estado para controlar los dropdowns
+
   const [isDestinationOpen, setIsDestinationOpen] = useState(false);
   const [isDatesOpen, setIsDatesOpen] = useState(false); 
   const [isGuestsOpen, setIsGuestsOpen] = useState(false);
   
   const searchRef = useRef(null); 
-  
-  // Consulta de propiedades
-  const { data: properties, isLoading } = useQuery({
-    queryKey: ['properties', filters],
-    queryFn: () => propertiesAPI.getAll(filters).then(res => res.data),
-  });
 
   const handleFilterChange = (e) => {
     setFilters({ ...filters, [e.target.name]: e.target.value });
@@ -597,17 +578,14 @@ export default function Home() {
     setIsDestinationOpen(false); 
   };
   
-  // Manejador de selección de fechas
   const handleSelectDates = useCallback((newDates) => {
     setFilters(prev => ({ ...prev, ...newDates }));
   }, []);
   
-  // Manejador de selección de huéspedes
   const handleSelectGuests = useCallback((guestData) => {
     setFilters(prev => ({ ...prev, ...guestData }));
   }, []);
   
-  // Lógica para cerrar los dropdowns cuando se hace clic fuera
   useEffect(() => {
     function handleClickOutside(event) {
       if (searchRef.current && !searchRef.current.contains(event.target)) {
@@ -623,12 +601,10 @@ export default function Home() {
   }, [searchRef]);
 
   const handleSearchClick = (section) => {
-      // Cierra todos
       setIsDestinationOpen(false);
       setIsDatesOpen(false); 
       setIsGuestsOpen(false);
 
-      // Abre el que corresponde
       if (section === 'destination') {
           setIsDestinationOpen(true);
       } else if (section === 'dates') {
@@ -638,7 +614,6 @@ export default function Home() {
       }
   };
 
-  // Función auxiliar para formatear la fecha mostrada
   const formatDateDisplay = (dateString) => {
       if (!dateString) return null;
       return new Date(dateString).toLocaleDateString('es-MX', { month: 'short', day: 'numeric' });
@@ -654,8 +629,201 @@ export default function Home() {
     ? `${filters.guests} huésped${filters.guests > 1 ? 'es' : ''}`
     : '¿Cuántos?';
 
+  // Datos de experiencias
+  const experienciasOriginales = [
+    {
+      image: 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=400',
+      category: 'Original',
+      title: 'Tour de Mezcalería con cóctel',
+      location: 'Ciudad de México',
+      duration: '2 horas',
+      rating: '4.95',
+      price: '1,200'
+    },
+    {
+      image: 'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=400',
+      category: 'Original',
+      title: 'Taller nacional con un estudio de danza especializado',
+      location: 'Ciudad de México',
+      duration: '3 horas',
+      rating: '4.92',
+      price: '850'
+    },
+    {
+      image: 'https://images.unsplash.com/photo-1518611012118-696072aa579a?w=400',
+      category: 'Cocina',
+      title: 'Sesión de pintura budista sagrada',
+      location: 'Ciudad de México',
+      duration: '2 horas',
+      rating: '4.88',
+      price: '950'
+    },
+    {
+      image: 'https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=400',
+      category: 'Bienestar',
+      title: 'Empieza por clase tequila',
+      location: 'Ciudad de México',
+      duration: '1.5 horas',
+      rating: '4.90',
+      price: '780'
+    },
+    {
+      image: 'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=400',
+      category: 'Original',
+      title: 'Colorea nuestra artística en una ceremonia',
+      location: 'Ciudad de México',
+      duration: '3 horas',
+      rating: '4.87',
+      price: '1,100'
+    }
+  ];
+
+  const experienciasCiudadMexico = [
+    {
+      image: 'https://images.unsplash.com/photo-1519331379826-f10be5486c6f?w=400',
+      category: 'Alimentos',
+      title: 'Clase de cocina con degustación de mezcal',
+      location: 'Ciudad de México',
+      duration: '3 horas',
+      rating: '4.92',
+      price: '1,500'
+    },
+    {
+      image: 'https://images.unsplash.com/photo-1464219789935-c2d9d9aba644?w=400',
+      category: 'Recorridos',
+      title: 'Tour a Teotihuacán',
+      location: 'Teotihuacán',
+      duration: '8 horas',
+      rating: '4.85',
+      price: '2,300'
+    },
+    {
+      image: 'https://images.unsplash.com/photo-1551632811-561732d1e306?w=400',
+      category: 'Original',
+      title: 'Clase de mezcal y cochinita',
+      location: 'Ciudad de México',
+      duration: '2.5 horas',
+      rating: '4.91',
+      price: '1,200'
+    },
+    {
+      image: 'https://images.unsplash.com/photo-1473492201326-7c01dd2e596b?w=400',
+      category: 'Recorridos',
+      title: 'Descubre la magia de Xochimilco',
+      location: 'Xochimilco',
+      duration: '4 horas',
+      rating: '4.88',
+      price: '980'
+    },
+    {
+      image: 'https://images.unsplash.com/photo-1577495508048-b635879837f1?w=400',
+      category: 'Bienestar',
+      title: 'Temazcal tradicional mexicano',
+      location: 'Ciudad de México',
+      duration: '2 horas',
+      rating: '4.93',
+      price: '850'
+    }
+  ];
+
+  const experienciasGuadalajara = [
+    {
+      image: 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=400',
+      category: 'Alimentos',
+      title: 'Tour a los Tequilas y Cantaritos',
+      location: 'Tlaquepaque, Guadalajara',
+      duration: '4 horas',
+      rating: '4.93',
+      price: '1,800'
+    },
+    {
+      image: 'https://images.unsplash.com/photo-1551218808-94e220e084d2?w=400',
+      category: 'Recorridos',
+      title: 'Recorre la ruta del tequila desde Guadalajara',
+      location: 'Tequila, Jalisco',
+      duration: '7 horas',
+      rating: '4.87',
+      price: '2,500'
+    },
+    {
+      image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400',
+      category: 'Recorridos',
+      title: 'Visita la villa del tequila con mariachis',
+      location: 'Tequila, Jalisco',
+      duration: '6 horas',
+      rating: '4.90',
+      price: '2,200'
+    },
+    {
+      image: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400',
+      category: 'Bienestar',
+      title: 'Descubre tu Tequila y los mariachis',
+      location: 'Guadalajara',
+      duration: '3 horas',
+      rating: '4.86',
+      price: '1,400'
+    },
+    {
+      image: 'https://images.unsplash.com/photo-1533777857889-4be7c70b33f7?w=400',
+      category: 'Original',
+      title: 'Pub Crawl: Tour de bares guadalajara',
+      location: 'Guadalajara',
+      duration: '4 horas',
+      rating: '4.89',
+      price: '750'
+    }
+  ];
+
+  const experienciasZapopan = [
+    {
+      image: 'https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=400',
+      category: 'Alimentos',
+      title: 'Lucha Libre en Martes de Glamour',
+      location: 'Zapopan',
+      duration: '3 horas',
+      rating: '4.94',
+      price: '950'
+    },
+    {
+      image: 'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=400',
+      category: 'Original',
+      title: 'Experiencia de Martes VIP',
+      location: 'Zapopan',
+      duration: '4 horas',
+      rating: '4.89',
+      price: '1,600'
+    },
+    {
+      image: 'https://images.unsplash.com/photo-1582555172866-f73bb12a2ab3?w=400',
+      category: 'Recorridos',
+      title: 'Recorre la hermosa Guadalajara',
+      location: 'Zapopan',
+      duration: '5 horas',
+      rating: '4.91',
+      price: '1,300'
+    },
+    {
+      image: 'https://images.unsplash.com/photo-1459865264687-595d652de67e?w=400',
+      category: 'Deportes',
+      title: 'Grita y celebra con las Chivas',
+      location: 'Zapopan',
+      duration: '3 horas',
+      rating: '4.87',
+      price: '2,100'
+    },
+    {
+      image: 'https://images.unsplash.com/photo-1505751172876-fa1923c5c528?w=400',
+      category: 'Arte',
+      title: 'Descubre el arte de Zapopan',
+      location: 'Zapopan',
+      duration: '2.5 horas',
+      rating: '4.92',
+      price: '890'
+    }
+  ];
+
   return (
-    <div>
+    <div className="min-h-screen bg-gray-50">
       {/* Hero Section con búsqueda estilo Airbnb */}
       <div className="bg-white border-b">
         <div className="max-w-4xl mx-auto px-4 py-6">
@@ -669,7 +837,7 @@ export default function Home() {
               
               {/* 1. Destino */}
               <div 
-                className={`relative flex-1 py-2.5 pl-8 pr-6 cursor-pointer rounded-full transition-all duration-200 ${isDestinationOpen ? 'bg-gray-100' : 'hover:bg-gray-50'}`}
+                className={`relative flex-1 py-2.5 pl-8 pr-6 cursor-pointer rounded-l-full transition-all duration-200 ${isDestinationOpen ? 'bg-gray-100' : 'hover:bg-gray-50'}`}
                 onClick={() => handleSearchClick('destination')}
               >
                 <label className="block text-xs font-semibold text-gray-900 mb-0.5">
@@ -692,7 +860,7 @@ export default function Home() {
 
               {/* 2. Fechas */}
               <div 
-                className={`relative flex-1 py-2.5 px-6 cursor-pointer rounded-full transition-all duration-200 ${isDatesOpen ? 'bg-gray-100' : 'hover:bg-gray-50'}`}
+                className={`relative flex-1 py-2.5 px-6 cursor-pointer transition-all duration-200 ${isDatesOpen ? 'bg-gray-100' : 'hover:bg-gray-50'}`}
                 onClick={() => handleSearchClick('dates')}
               >
                 <label className="block text-xs font-semibold text-gray-900 mb-0.5">
@@ -703,9 +871,9 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* 3. Huéspedes - CORREGIDO CON flex-1 */}
+              {/* 3. Huéspedes */}
               <div 
-                className={`relative flex-1 flex items-center py-2.5 pl-6 pr-2 cursor-pointer rounded-full transition-all duration-200 ${isGuestsOpen ? 'bg-gray-100' : 'hover:bg-gray-50'}`}
+                className={`relative flex-1 flex items-center py-2.5 pl-6 pr-2 cursor-pointer rounded-r-full transition-all duration-200 ${isGuestsOpen ? 'bg-gray-100' : 'hover:bg-gray-50'}`}
                 onClick={() => handleSearchClick('guests')}
               >
                 <div className="flex-1">
@@ -749,73 +917,27 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Listado de propiedades */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {isLoading ? (
-          <div className="flex justify-center items-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#FF385C]"></div>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {properties?.data?.map((property) => (
-              <Link
-                key={property.id}
-                to={`/property/${property.id}`}
-                className="group cursor-pointer"
-              >
-                <div className="relative h-64 rounded-xl overflow-hidden mb-3">
-                  {property.images?.[0] ? (
-                    <img
-                      src={property.images[0].url}
-                      alt={property.title}
-                      onError={(e) => { e.target.onerror = null; e.target.src = `https://placehold.co/400x400/FF385C/white?text=${property.city.charAt(0)}` }}
-                      className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
-                    />
-                  ) : (
-                    <div className="flex items-center justify-center h-full bg-gray-200 text-gray-400 text-5xl">
-                      🏠
-                    </div>
-                  )}
-                  {property.average_rating && (
-                    <div className="absolute top-3 right-3 bg-white px-2 py-1 rounded-lg shadow-md flex items-center space-x-1">
-                      <span className="text-yellow-500 text-sm">⭐</span>
-                      <span className="text-sm font-semibold">{property.average_rating.toFixed(1)}</span>
-                    </div>
-                  )}
-                </div>
-                
-                <div className="px-1">
-                  <div className="flex justify-between items-start mb-1">
-                    <h3 className="font-semibold text-gray-900 line-clamp-1">
-                      {property.city}, {property.country}
-                    </h3>
-                  </div>
-                  
-                  <p className="text-gray-600 text-sm line-clamp-1 mb-1">
-                    {property.title}
-                  </p>
-                  
-                  <p className="text-gray-500 text-sm mb-2">
-                    {property.guests} huéspedes · {property.bedrooms} habitaciones
-                  </p>
-                  
-                  <div>
-                    <span className="font-semibold text-gray-900">${property.price_per_night}</span>
-                    <span className="text-gray-600 text-sm"> noche</span>
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
-        )}
-
-        {properties?.data?.length === 0 && (
-          <div className="text-center py-12">
-            <div className="text-6xl mb-4">🏠</div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">No se encontraron propiedades</h3>
-            <p className="text-gray-500">Intenta ajustar tus filtros de búsqueda</p>
-          </div>
-        )}
+      {/* Carruseles de Experiencias */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <ExperienceCarousel 
+          title="Airbnb Originales"
+          experiences={experienciasOriginales}
+        />
+        
+        <ExperienceCarousel 
+          title="Popular entre los viajeros de tu zona"
+          experiences={experienciasCiudadMexico}
+        />
+        
+        <ExperienceCarousel 
+          title="Experiencias en Guadalajara"
+          experiences={experienciasGuadalajara}
+        />
+        
+        <ExperienceCarousel 
+          title="Experiencias en Zapopan"
+          experiences={experienciasZapopan}
+        />
       </div>
     </div>
   );
