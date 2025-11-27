@@ -1,88 +1,98 @@
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { AuthProvider } from './context/AuthContext.jsx'; // Corregido a .jsx
-import Navbar from './components/Navbar.jsx'; // Corregido a .jsx
-import Home from './pages/Home.jsx'; // Corregido a .jsx
-import PropertyDetails from './pages/PropertyDetails.jsx'; // Corregido a .jsx
-import Login from './pages/Login.jsx'; // Corregido a .jsx
-import Register from './pages/Register.jsx'; // Corregido a .jsx
-import MyProperties from './pages/MyProperties.jsx'; // Corregido a .jsx
-import CreateProperty from './pages/CreateProperty.jsx'; // Corregido a .jsx
-import MyBookings from './pages/MyBookings.jsx'; // Corregido a .jsx
-import ProtectedRoute from './components/ProtectedRoute.jsx'; // Corregido a .jsx
-import Services from "./pages/Services.jsx"; // Corregido a .jsx
-import Experiences from "./pages/Experiences.jsx"; // Corregido a .jsx
-import BecomeHostIntro from './pages/BecomeHostIntro.jsx'; // Corregido a .jsx
-import Footer from './components/Footer.jsx'; // Corregido a .jsx
+// Importaciones de Contexto y Componentes
+import { AuthProvider } from './context/AuthContext.jsx'; 
+import Navbar from './components/Navbar.jsx'; 
+import Footer from './components/Footer.jsx'; 
+import ProtectedRoute from './components/ProtectedRoute.jsx'; 
+
+// Importaciones de Páginas
+import Home from './pages/Home.jsx'; 
+import PropertyDetails from './pages/PropertyDetails.jsx'; 
+import Login from './pages/Login.jsx'; 
+import Register from './pages/Register.jsx'; 
+import MyProperties from './pages/MyProperties.jsx'; 
+import MyBookings from './pages/MyBookings.jsx'; 
+import Services from "./pages/Services.jsx"; 
+import Experiences from "./pages/Experiences.jsx"; 
+import BecomeHostIntro from './pages/BecomeHostIntro.jsx'; 
+import CreateProperty from './pages/CreateProperty.jsx'; 
+import CreateExperience from './pages/CreateExperience.jsx'; // <-- COMPONENTE AÑADIDO
+import CreateService from './pages/CreateService.jsx'; // <-- NUEVO COMPONENTE AÑADIDO
 
 const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      refetchOnWindowFocus: false,
-      retry: 1,
-    },
-  },
+	defaultOptions: {
+		queries: {
+			refetchOnWindowFocus: false,
+			retry: 1,
+		},
+	},
 });
 
-function Layout() {
-  const location = useLocation();
-  
-  // Rutas que NO deben mostrar Navbar y Footer
-  const noLayoutRoutes = ['/anuncio-alojamiento', '/create-property']; // Agregamos /create-property aquí para que el flujo de creación tenga su propio layout
-  const hideLayout = noLayoutRoutes.includes(location.pathname);
+function AppLayout() {
+  const location = useLocation();
+  // Determina si ocultar el Navbar/Footer basado en la ruta actual
+  const hideLayout = ['/create-property', '/anuncio-alojamiento', '/create-experience', '/create-service'].includes(location.pathname); // <-- RUTAS AÑADIDAS A LA LÓGICA DE OCULTAR LAYOUT
 
-  return (
-    <>
-      {/* Ocultamos Navbar y Footer en rutas de flujo completo (como anuncio-alojamiento y create-property) */}
-      {!hideLayout && <Navbar />} 
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/property/:id" element={<PropertyDetails />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/services" element={<Services />} />
-        <Route path="/experiences" element={<Experiences />} />
-        <Route path="/anuncio-alojamiento" element={<BecomeHostIntro />} />
-        
-        {/* TEMPORALMENTE: Se elimina ProtectedRoute para que puedas ver el flujo de creación. 
-            Recuerda volver a protegerla después de terminar el diseño. */}
-        <Route path="/create-property" element={<CreateProperty />} />
+  return (
+    <div className="flex flex-col min-h-screen">
+      {/* Oculta Navbar en las páginas de creación (create-property, create-experience y intro) */}
+      {!hideLayout && <Navbar />} 
+      
+      <main className="flex-grow">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/property/:id" element={<PropertyDetails />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/services" element={<Services />} />
+          <Route path="/experiences" element={<Experiences />} />
+          <Route path="/anuncio-alojamiento" element={<BecomeHostIntro />} />
+          
+          {/* Flujo de Creación de Alojamientos (Propiedades) */}
+          {/* TEMPORALMENTE: Se elimina ProtectedRoute para que puedas ver el flujo de creación. 
+              Recuerda volver a protegerla después de terminar el diseño. */}
+          <Route path="/create-property" element={<CreateProperty />} />
 
-        <Route
-          path="/my-properties"
-          element={
-            <ProtectedRoute>
-              <MyProperties />
-            </ProtectedRoute>
-          }
-        />
-        
-        <Route
-          path="/my-bookings"
-          element={
-            <ProtectedRoute>
-              <MyBookings />
-            </ProtectedRoute>
-          }
-        />
-      </Routes>
-      {!hideLayout && <Footer />}
-    </>
-  );
+          {/* Flujo de Creación de Experiencias */}
+          <Route path="/create-experience" element={<CreateExperience />} /> {/* <-- NUEVA RUTA AGREGADA */}
+
+          {/* Flujo de Creación de Servicios */}
+          <Route path="/create-service" element={<CreateService />} /> {/* <-- NUEVA RUTA AGREGADA */}
+
+          <Route
+            path="/my-properties"
+            element={
+              <ProtectedRoute>
+                <MyProperties />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/my-bookings"
+            element={
+              <ProtectedRoute>
+                <MyBookings />
+              </ProtectedRoute>
+            }
+          />
+        </Routes>
+      </main>
+
+      {!hideLayout && <Footer />}
+    </div>
+  );
 }
 
-function App() {
-  return (
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <Router>
-          <div className="min-h-screen bg-gray-50">
-            <Layout />
-          </div>
-        </Router>
-      </AuthProvider>
-    </QueryClientProvider>
-  );
+export default function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <Router>
+          <AppLayout />
+        </Router>
+      </AuthProvider>
+    </QueryClientProvider>
+  );
 }
-
-export default App;
