@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 // Componente principal del flujo de creación
@@ -19,8 +19,38 @@ export default function CreateProperty() {
       beds: 1,
       bathrooms: 0.5
     },
-    amenities: []
+    amenities: [],
+    title: '',
+    description: '',
+    bookingPreference: 'approve_first',
+    guestPreference: 'any_guest',
+    price: 387,
+    weekendPricePercentage: 0,
+    discounts: [],
+    safetyItems: [],
+    cameraDescription: ''
   });
+
+  // Funciones memoizadas para actualizar el estado
+  const updatePropertyData = useCallback((updates) => {
+    setPropertyData(prev => ({ ...prev, ...updates }));
+  }, []);
+
+  const updateBasics = useCallback((basics) => {
+    setPropertyData(prev => ({ ...prev, basics }));
+  }, []);
+
+  const updateAmenities = useCallback((amenities) => {
+    setPropertyData(prev => ({ ...prev, amenities }));
+  }, []);
+
+  const updateSafetyItems = useCallback((safetyItems) => {
+    setPropertyData(prev => ({ ...prev, safetyItems }));
+  }, []);
+
+  const updateCameraDescription = useCallback((cameraDescription) => {
+    setPropertyData(prev => ({ ...prev, cameraDescription }));
+  }, []);
 
   // --- COMPONENTE DE MODAL ---
   const HostIntroModal = ({ onClose }) => {
@@ -504,8 +534,8 @@ const Step5BasicInfo = ({ basics, setBasics }) => {
     const WiFiIcon = (props) => <svg {...props} viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path d="M16 20a4 4 0 1 0 0 8 4 4 0 0 0 0-8zM1.88 9.88a1 1 0 0 1 0-1.42 21.98 21.98 0 0 1 28.24 0 1 1 0 0 1 0 1.42l-1.42 1.42a1 1 0 0 1-1.38 0 18 18 0 0 0-22.64 0 1 1 0 0 1-1.38 0zm5.66 5.66a1 1 0 0 1 0-1.42 12.98 12.98 0 0 1 16.92 0 1 1 0 0 1 0 1.42l-1.42 1.42a1 1 0 0 1-1.38 0 9 9 0 0 0-11.32 0 1 1 0 0 1-1.38 0z"/></svg>;
     const TVIcon = (props) => <svg {...props} viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path d="M29 27V9H3v18zm0-20a2 2 0 0 1 2 2v18a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2zM7 21H5v2h2zm0-4H5v2h2zm0-4H5v2h2z"/></svg>;
     const KitchenIcon = (props) => <svg {...props} viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path d="M26 1a5 5 0 0 1 5 5c0 6.39-1.6 13.19-4 14.7V31h-2V20.7c-2.36-1.48-4-8.31-4-14.7a5 5 0 0 1 5-5zm-9 0v18.12c2.32.55 4 3 4 5.88 0 3.27-2.18 6-5 6s-5-2.73-5-6c0-2.87 1.68-5.33 4-5.88V1zM2 1h1c4.47 0 6 6.88 6 18.5V31h-2V19.5C7 10.09 5.89 3 2.16 3H2zm14 20c-1.6 0-3 1.75-3 4s1.4 4 3 4 3-1.75 3-4-1.4-4-3-4zM26 3a3 3 0 0 0-3 3c0 5.45 1.28 11.44 3 12.87 1.72-1.43 3-7.42 3-12.87a3 3 0 0 0-3-3z"/></svg>;
-    const WasherIcon = (props) => <svg {...props} viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path d="M26 2a4 4 0 0 1 4 4v20a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V6a4 4 0 0 1 4-4zm0 2H6a2 2 0 0 0-2 2v20a2 2 0 0 0 2 2h20a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zM16 7a9 9 0 1 1 0 18 9 9 0 0 1 0-18zm-5.84 7.5c-.48 0-.82.26-.97.62-.16.38-.06.84.23 1.24.64.91 2.02 1.64 3.58 1.64s2.94-.73 3.58-1.64c.29-.4.39-.86.23-1.24a1.04 1.04 0 0 0-.97-.62zm8.9 0c-.48 0-.82.26-.97.62-.16.38-.06.84.23 1.24.64.91 2.02 1.64 3.58 1.64.19 0 .38-.02.57-.05a8.99 8.99 0 0 1-3.4-3.45z"/></svg>;
-    const ParkingIcon = (props) => <svg {...props} viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path d="M26 2a4 4 0 0 1 4 4v20a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V6a4 4 0 0 1 4-4zm0 2H6a2 2 0 0 0-2 2v20a2 2 0 0 0 2 2h20a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm-9 3c2.7 0 5 2.3 5 5s-2.3 5-5 5h-3v6h-3V7zm0 3h-3v4h3c1.12 0 2-.88 2-2s-.88-2-2-2z"/></svg>;
+    const WasherIcon = (props) => <svg {...props} viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path d="M26 2a4 4 0 0 1 4 4v20a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V6a4 4 0 0 1 4-4zm0 2H6a2 2 0 0 0-2 2v20a2 2 0 0 0 2 2h20a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zM16 7a9 9 0 1 1 0 18 9 9 0 0 1 0-18zm0 2a7 7 0 1 0 0 14 7 7 0 0 0 0-14z"/></svg>;
+    const ParkingIcon = (props) => <svg {...props} viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path d="M26 2a4 4 0 0 1 4 4v20a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V6a4 4 0 0 1 4-4zm0 2H6a2 2 0 0 0-2 2v20a2 2 0 0 0 2 2h20a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zM16 8c2.7 0 5 2.3 5 5s-2.3 5-5 5h-3v6h-3V8zm0 3h-3v4h3c1.12 0 2-.88 2-2s-.88-2-2-2z"/></svg>;
     const ACIcon = (props) => <svg {...props} viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path d="M17 1v4.03l4.03-2.32 1 1.73L17 7.34v6.93l6-3.47V5l-4.03 2.32-1-1.73L22 3.27l4.03 2.32V12h2v5h-2v2.3l3 1.73-1 1.74-3-1.73-3 1.73-1-1.74 3-1.73V17H2v-2h22v-2H2V8h22V5.6l-6 3.47 1 1.73 3-1.73 3 1.73zm-2 23.27l1 1.73-4.03 2.32L12 30l4.03-2.32-1-1.73L11 28.27 7 25.93l1-1.73 3 1.73V19h2v6.93z"/></svg>;
     const WorkspaceIcon = (props) => <svg {...props} viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path d="M26 2a2 2 0 0 1 2 1.85V16h4v2h-4v12a2 2 0 0 1-1.85 2H6a2 2 0 0 1-2-1.85V4a2 2 0 0 1 1.85-2H6zm0 2H6v26h20zM16 7a9 9 0 1 1 0 18 9 9 0 0 1 0-18zm-5.84 7.5c-.48 0-.82.26-.97.62-.16.38-.06.84.23 1.24.64.91 2.02 1.64 3.58 1.64s2.94-.73 3.58-1.64c.29-.4.39-.86.23-1.24a1.04 1.04 0 0 0-.97-.62zm8.9 0c-.48 0-.82.26-.97.62-.16.38-.06.84.23 1.24.64.91 2.02 1.64 3.58 1.64.19 0 .38-.02.57-.05a8.99 8.99 0 0 1-3.4-3.45z"/></svg>;
     
@@ -532,7 +562,7 @@ const Step5BasicInfo = ({ basics, setBasics }) => {
     const LakeAccessIcon = (props) => <svg {...props} viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path d="M28 20c-1.4 0-2.4.4-3.2.8-.8.4-1.3.6-2.3.6s-1.5-.2-2.3-.6c-.8-.4-1.8-.8-3.2-.8s-2.4.4-3.2.8c-.8.4-1.3.6-2.3.6s-1.5-.2-2.3-.6c-.8-.4-1.8-.8-3.2-.8v-2c1.4 0 2.4.4 3.2.8.8.4 1.3.6 2.3.6s1.5-.2 2.3-.6c.8-.4 1.8-.8 3.2-.8s2.4.4 3.2.8c.8.4 1.3.6 2.3.6s1.5-.2 2.3-.6c.8-.4 1.8-.8 3.2-.8v2zm0 4c-1.4 0-2.4.4-3.2.8-.8.4-1.3.6-2.3.6s-1.5-.2-2.3-.6c-.8-.4-1.8-.8-3.2-.8s-2.4.4-3.2.8c-.8.4-1.3.6-2.3.6s-1.5-.2-2.3-.6c-.8-.4-1.8-.8-3.2-.8v-2c1.4 0 2.4.4 3.2.8.8.4 1.3.6 2.3.6s1.5-.2 2.3-.6c.8-.4 1.8-.8 3.2-.8s2.4.4 3.2.8c.8.4 1.3.6 2.3.6s1.5-.2 2.3-.6c.8-.4 1.8-.8 3.2-.8v2zM16 2l8 8-8 8-8-8 8-8zm0 2.83L10.83 10 16 15.17 21.17 10 16 4.83z"/></svg>;
     const HighChairIcon = (props) => <svg {...props} viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path d="M21 4a5 5 0 1 1 0 10 5 5 0 0 1 0-10zm0 2a3 3 0 1 0 0 6 3 3 0 0 0 0-6zM11 15v2H8v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V17h-3v-2h5v12a5 5 0 0 1-5 5H11a5 5 0 0 1-5-5V15h5z"/></svg>;
     const FireplaceIcon = (props) => <svg {...props} viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path d="M16 1c4 0 8 2 8 8v2c0 4-3 6-6 7v13h-4V18c-3-1-6-3-6-7V9c0-6 4-8 8-8zm0 2c-2.5 0-6 1.2-6 6v2c0 2.7 2 4.3 4.5 5.2l.5.2v-4.4c-.8-1.2-1.5-2.6-1.8-4.2a8 8 0 0 1 5.6-2.3c-.6.7-1.1 1.5-1.3 2.3h-.8c-1.1 0-2 .9-2 2v1c0 1.1.9 2 2 2h2.6c1.2 0 2.5-.4 3.4-1.2l.3-.3v-.5c0-4.8-3.5-6-6-6zM28 24v6H4v-6h2v4h20v-4h2z"/></svg>;
-    const TVStreamingIcon = (props) => <svg {...props} viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path d="M29 4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zm0 2H3v14h26V6zM6 25a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm4 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm4 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm4 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm4 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm4 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/></svg>;
+    const TVStreamingIcon = (props) => <svg {...props} viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path d="M29 4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zM29 6H3v14h26V6zM6 25a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm4 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm4 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm4 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm4 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm4 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/></svg>;
     const SoundSystemIcon = (props) => <svg {...props} viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path d="M28 2a2 2 0 0 1 2 2v24a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zm0 2H4v24h24V4zm-12 2a6 6 0 1 1 0 12 6 6 0 0 1 0-12zm0 2a4 4 0 1 0 0 8 4 4 0 0 0 0-8zm0 2a2 2 0 1 1 0 4 2 2 0 0 1 0-4zm0 12a4 4 0 1 1 0 8 4 4 0 0 1 0-8zm0 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/></svg>;
     
     const CoffeeIcon = (props) => <svg {...props} viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path d="M26 10h2a4 4 0 0 1 0 8h-2v2a4 4 0 0 1-4 4H10a4 4 0 0 1-4-4V10a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2zm0 2v4h2a2 2 0 0 0 0-4zM8 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8zM4 26v2h24v-2zM11 2v4H9V2zm4 0v4h-2V2zm4 0v4h-2V2z"/></svg>;
@@ -644,6 +674,1114 @@ const Step5BasicInfo = ({ basics, setBasics }) => {
     );
   };
 
+// --- PASO 8: AGREGAR FOTOS ---
+const Step8Photos = () => {
+  const [showUploadModal, setShowUploadModal] = useState(false);
+
+  // Modal para subir fotos
+  const UploadPhotosModal = ({ onClose }) => {
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-[100]">
+        <div className="bg-white rounded-xl shadow-2xl overflow-hidden w-11/12 max-w-2xl">
+          
+          {/* Header del modal */}
+          <div className="p-6 border-b border-gray-200">
+            <h2 className="text-2xl font-bold text-gray-900">Sube las fotos</h2>
+            <p className="text-gray-600 mt-1">No seleccionaste ningún elemento.</p>
+          </div>
+
+          {/* Área de drag and drop */}
+          <div className="p-8">
+            <div className="border-2 border-dashed border-gray-300 rounded-xl p-12 text-center hover:border-gray-400 transition-colors">
+              <p className="text-lg font-semibold text-gray-700 mb-2">Arrastra y suelta</p>
+              <p className="text-gray-600 mb-4">o busca fotos</p>
+              <button className="bg-gray-900 text-white py-3 px-6 rounded-lg text-base font-semibold hover:bg-black transition">
+                Explorar
+              </button>
+            </div>
+          </div>
+
+          {/* Footer del modal */}
+          <div className="p-6 border-t border-gray-200 flex justify-between items-center">
+            <button
+              onClick={onClose}
+              className="text-gray-900 text-base py-3 px-6 font-semibold hover:bg-gray-100 rounded-lg transition"
+            >
+              Listo
+            </button>
+            
+            <button
+              onClick={onClose}
+              className="bg-[#222222] text-white py-3 px-6 rounded-lg text-base font-semibold shadow-md hover:bg-black transition"
+            >
+              Subir
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <div className="flex flex-col w-full max-w-2xl mx-auto px-6 py-8">
+      
+      {/* Título principal - Centrado */}
+      <div className="mb-8 text-center">
+        <h1 className="text-3xl font-bold text-gray-900 mb-4">
+          Agrega algunas fotos de tu alojamiento de la categoría minicasa
+        </h1>
+        <p className="text-base text-gray-600">
+          Para empezar, necesitarás 5 fotos. Después podrás agregar más o hacer cambios.
+        </p>
+      </div>
+
+      {/* Recuadro con línea punteada y botón */}
+      <div className="border-2 border-dashed border-gray-300 rounded-xl p-24 text-center hover:border-gray-400 transition-colors">
+        <button 
+          onClick={() => setShowUploadModal(true)}
+          className="bg-gray-900 text-white py-4 px-8 rounded-lg text-base font-semibold hover:bg-black transition"
+        >
+          Agrega fotos
+        </button>
+      </div>
+
+      {/* Modal para subir fotos */}
+      {showUploadModal && <UploadPhotosModal onClose={() => setShowUploadModal(false)} />}
+
+    </div>
+  );
+};
+
+// --- PASO 9: TÍTULO DEL ALOJAMIENTO ---
+const Step9Title = ({ title, setTitle }) => {
+  const maxLength = 50;
+  const currentLength = title ? title.length : 0;
+
+  const handleTitleChange = (e) => {
+    const value = e.target.value;
+    if (value.length <= maxLength) {
+      setTitle(value);
+    }
+  };
+
+  return (
+    <div className="flex flex-col w-full max-w-2xl mx-auto px-6 py-8">
+      
+      {/* Título principal */}
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-900 mb-4">
+          Ponle un título a tu alojamiento de la categoría minicasa
+        </h1>
+        <p className="text-base text-gray-600">
+          Los títulos cortos funcionan mejor. No te preocupes, siempre puedes cambiarlo más tarde.
+        </p>
+      </div>
+
+      {/* Área del input del título */}
+      <div className="relative">
+        <textarea
+          value={title}
+          onChange={handleTitleChange}
+          placeholder=""
+          className="w-full min-h-[200px] p-6 text-lg font-normal text-gray-900 placeholder-gray-400 border border-gray-300 rounded-xl resize-none focus:outline-none focus:border-gray-900 focus:ring-0"
+          rows="6"
+        />
+        
+        {/* Contador de caracteres */}
+        <div className="absolute bottom-6 right-6 text-sm text-gray-500 font-normal">
+          {currentLength}/{maxLength}
+        </div>
+      </div>
+
+    </div>
+  );
+};
+
+// --- PASO 10: DESCRIPCIÓN DEL ALOJAMIENTO ---
+const Step10Description = ({ description, setDescription }) => {
+  const maxLength = 500;
+  const currentLength = description ? description.length : 0;
+
+  const handleDescriptionChange = (e) => {
+    const value = e.target.value;
+    if (value.length <= maxLength) {
+      setDescription(value);
+    }
+  };
+
+  return (
+    <div className="flex flex-col w-full max-w-2xl mx-auto px-6 py-8">
+      
+      {/* Título principal */}
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-900 mb-4">
+          Crea tu descripción
+        </h1>
+        <p className="text-base text-gray-600">
+          Explica qué hace que tu alojamiento sea especial.
+        </p>
+      </div>
+
+      {/* Área del textarea de descripción */}
+      <div className="relative mb-4">
+        <textarea
+          value={description}
+          onChange={handleDescriptionChange}
+          placeholder=""
+          className="w-full min-h-[240px] p-6 text-lg font-normal text-gray-900 placeholder-gray-400 border border-gray-300 rounded-xl resize-none focus:outline-none focus:border-gray-900 focus:ring-0"
+          rows="8"
+        />
+      </div>
+
+      {/* Contador de caracteres */}
+      <div className="text-sm text-gray-600 font-normal">
+        {currentLength}/{maxLength}
+      </div>
+
+    </div>
+  );
+};
+
+// --- PASO 11: INTRODUCCIÓN PASO 3 ---
+const Step11IntroStep3 = () => {
+  const placeholderImageUrl = 'https://placehold.co/600x600/FFFFFF/E75B8D?text=Ilustracion+Casa+3D';
+  
+  return (
+    <div className="flex w-full max-w-[1280px] h-full items-center justify-center p-8 mx-auto">
+      <div className="flex w-full max-w-6xl">
+        
+        <div className="flex-1 flex flex-col justify-center pr-12 max-w-xl">
+          <p className="text-lg font-semibold text-gray-900 mb-2">Paso 3</p>
+          <h1 className="text-5xl lg:text-[48px] font-extrabold text-gray-900 leading-tight mb-8">
+            Terminar y publicar
+          </h1>
+          <p className="text-lg text-gray-600">
+            Por último, tendrás que definir tus preferencias en las reservaciones, establecer los precios y publicar el anuncio.
+          </p>
+        </div>
+        
+        <div className="flex-1 flex justify-center items-center pl-12">
+          <div className="w-[500px] h-[500px] bg-white rounded-xl shadow-xl overflow-hidden relative">
+            <img 
+              src={placeholderImageUrl} 
+              alt="Ilustración 3D de casa moderna"
+              className="w-full h-full object-contain p-8"
+              onError={(e) => { e.target.onerror = null; e.target.src = 'https://placehold.co/600x600/FFFFFF/888888?text=Ilustracion+3D'; }}
+            />
+          </div>
+        </div>
+        
+      </div>
+    </div>
+  );
+};
+
+// --- PASO 12: PREFERENCIAS DE RESERVACIÓN ---
+const Step12BookingPreference = ({ bookingPreference, setBookingPreference }) => {
+  
+  // Icono de calendario con check
+  const CalendarCheckIcon = () => (
+    <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M38 6H34V4H32V6H16V4H14V6H10C8.9 6 8 6.9 8 8V40C8 41.1 8.9 42 10 42H38C39.1 42 40 41.1 40 40V8C40 6.9 39.1 6 38 6ZM38 40H10V16H38V40ZM10 14V8H14V10H16V8H32V10H34V8H38V14H10Z" fill="currentColor"/>
+      <path d="M21 28L19 26L17 28L21 32L29 24L27 22L21 28Z" fill="currentColor"/>
+    </svg>
+  );
+
+  // Icono de rayo
+  const LightningIcon = () => (
+    <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M27 4L15 26H24L21 44L33 22H24L27 4Z" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/>
+    </svg>
+  );
+
+  return (
+    <div className="flex flex-col w-full max-w-2xl mx-auto px-6 py-8">
+      
+      {/* Título principal */}
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-900 mb-4">
+          Elige tus preferencias para las reservaciones
+        </h1>
+        <p className="text-base text-gray-600">
+          Puedes modificar esto en cualquier momento.{' '}
+          <a href="#" className="underline text-gray-900 hover:text-gray-700">
+            Más información
+          </a>
+        </p>
+      </div>
+
+      {/* Opciones de reservación */}
+      <div className="space-y-4">
+        
+        {/* Opción 1: Aprobar primeras 5 reservaciones */}
+        <button
+          onClick={() => setBookingPreference('approve_first')}
+          className={`w-full text-left p-6 rounded-xl border-2 transition-all ${
+            bookingPreference === 'approve_first'
+              ? 'border-gray-900 bg-white'
+              : 'border-gray-200 bg-white hover:border-gray-400'
+          }`}
+        >
+          <div className="flex items-start justify-between">
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-2">
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Aprueba tus 5 primeras reservaciones
+                </h3>
+                <span className="bg-green-50 text-green-700 text-xs font-medium px-2 py-1 rounded">
+                  Recomendado
+                </span>
+              </div>
+              <p className="text-sm text-gray-600 leading-relaxed">
+                Para empezar, revisa las solicitudes de reservación y luego cambia a Reservación inmediata para que los huéspedes puedan reservar automáticamente.
+              </p>
+            </div>
+            <div className="ml-4 flex-shrink-0 text-gray-900">
+              <CalendarCheckIcon />
+            </div>
+          </div>
+        </button>
+
+        {/* Opción 2: Reservación inmediata */}
+        <button
+          onClick={() => setBookingPreference('instant_book')}
+          className={`w-full text-left p-6 rounded-xl border-2 transition-all ${
+            bookingPreference === 'instant_book'
+              ? 'border-gray-900 bg-white'
+              : 'border-gray-200 bg-white hover:border-gray-400'
+          }`}
+        >
+          <div className="flex items-start justify-between">
+            <div className="flex-1">
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                Utiliza la Reservación inmediata
+              </h3>
+              <p className="text-sm text-gray-600 leading-relaxed">
+                Deja que los huéspedes hagan reservaciones automáticas.
+              </p>
+            </div>
+            <div className="ml-4 flex-shrink-0 text-gray-900">
+              <LightningIcon />
+            </div>
+          </div>
+        </button>
+
+      </div>
+
+    </div>
+  );
+};
+
+// --- PASO 13: PREFERENCIA DE HUÉSPEDES ---
+const Step13GuestPreference = ({ guestPreference, setGuestPreference }) => {
+  
+  return (
+    <div className="flex flex-col w-full max-w-2xl mx-auto px-6 py-8">
+      
+      {/* Título principal */}
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-900 mb-4">
+          Elige a quién quieres recibir en tu primera reservación
+        </h1>
+        <p className="text-base text-gray-600">
+          Después de tu primer huésped, cualquiera va a poder reservar tu alojamiento.{' '}
+          <a href="#" className="underline text-gray-900 hover:text-gray-700">
+            Más información
+          </a>
+        </p>
+      </div>
+
+      {/* Opciones de huéspedes */}
+      <div className="space-y-4">
+        
+        {/* Opción 1: Cualquier huésped */}
+        <button
+          onClick={() => setGuestPreference('any_guest')}
+          className={`w-full text-left p-6 rounded-xl border-2 transition-all ${
+            guestPreference === 'any_guest'
+              ? 'border-gray-900 bg-white'
+              : 'border-gray-200 bg-white hover:border-gray-400'
+          }`}
+        >
+          <div className="flex items-start gap-4">
+            {/* Radio button */}
+            <div className="flex-shrink-0 mt-1">
+              <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
+                guestPreference === 'any_guest'
+                  ? 'border-gray-900'
+                  : 'border-gray-400'
+              }`}>
+                {guestPreference === 'any_guest' && (
+                  <div className="w-3 h-3 rounded-full bg-gray-900"></div>
+                )}
+              </div>
+            </div>
+            
+            <div className="flex-1">
+              <h3 className="text-base font-semibold text-gray-900 mb-2">
+                Cualquier huésped en Airbnb
+              </h3>
+              <p className="text-sm text-gray-600 leading-relaxed">
+                Para recibir reservaciones más pronto, admite a cualquier miembro de la comunidad de Airbnb.
+              </p>
+            </div>
+          </div>
+        </button>
+
+        {/* Opción 2: Huésped con experiencia */}
+        <button
+          onClick={() => setGuestPreference('experienced_guest')}
+          className={`w-full text-left p-6 rounded-xl border-2 transition-all ${
+            guestPreference === 'experienced_guest'
+              ? 'border-gray-900 bg-white'
+              : 'border-gray-200 bg-white hover:border-gray-400'
+          }`}
+        >
+          <div className="flex items-start gap-4">
+            {/* Radio button */}
+            <div className="flex-shrink-0 mt-1">
+              <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
+                guestPreference === 'experienced_guest'
+                  ? 'border-gray-900'
+                  : 'border-gray-400'
+              }`}>
+                {guestPreference === 'experienced_guest' && (
+                  <div className="w-3 h-3 rounded-full bg-gray-900"></div>
+                )}
+              </div>
+            </div>
+            
+            <div className="flex-1">
+              <h3 className="text-base font-semibold text-gray-900 mb-2">
+                Un huésped que lleve tiempo en la plataforma
+              </h3>
+              <p className="text-sm text-gray-600 leading-relaxed">
+                En tu primera reservación, recibe a una persona que tenga buenas evaluaciones y que te podrá dar consejos para mejorar como anfitrión.
+              </p>
+            </div>
+          </div>
+        </button>
+
+      </div>
+
+    </div>
+  );
+};
+
+// --- PASO 14: CONFIGURAR PRECIO ---
+const Step14Price = ({ price, setPrice }) => {
+  const [isEditing, setIsEditing] = useState(false);
+  const [inputValue, setInputValue] = useState(price.toString());
+  const [showPriceInfoModal, setShowPriceInfoModal] = useState(false);
+  
+  // Calcular precio con impuestos (aproximadamente 14% más)
+  const priceWithTaxes = Math.round(price * 1.14);
+  
+  const handlePriceClick = () => {
+    setIsEditing(true);
+  };
+  
+  const handleInputChange = (e) => {
+    const value = e.target.value.replace(/[^0-9]/g, '');
+    setInputValue(value);
+  };
+  
+  const handleInputBlur = () => {
+    const numValue = parseInt(inputValue) || 387;
+    setPrice(numValue);
+    setInputValue(numValue.toString());
+    setIsEditing(false);
+  };
+  
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      handleInputBlur();
+    }
+  };
+
+  // Modal de información de precios
+  const PriceInfoModal = ({ onClose }) => {
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[100] p-4">
+        <div className="bg-white rounded-xl shadow-2xl w-full max-w-xl max-h-[90vh] overflow-hidden flex flex-col">
+          
+          {/* Header del modal */}
+          <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+            <button
+              onClick={onClose}
+              className="p-2 hover:bg-gray-100 rounded-full transition"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+            <h2 className="text-base font-semibold text-gray-900">
+              Más información sobre los precios
+            </h2>
+            <div className="w-8"></div> {/* Espaciador para centrar el título */}
+          </div>
+
+          {/* Contenido del modal */}
+          <div className="px-6 py-6 overflow-y-auto">
+            
+            {/* Párrafo introductorio */}
+            <p className="text-sm text-gray-700 mb-6 leading-relaxed">
+              Tú eliges el precio y puedes cambiarlo cuando quieras. No podemos garantizarte que vayas a recibir reservaciones.
+            </p>
+
+            {/* Sección: Precio por noche */}
+            <div className="mb-6">
+              <h3 className="text-sm font-semibold text-gray-900 mb-2">
+                Precio por noche
+              </h3>
+              <p className="text-sm text-gray-700 leading-relaxed">
+                El precio que te recomendamos se basa en factores como la ubicación y las amenidades de tu alojamiento, la demanda de los huéspedes y otros anuncios similares.
+              </p>
+            </div>
+
+            {/* Sección: Información del precio para el huésped */}
+            <div className="mb-6">
+              <h3 className="text-sm font-semibold text-gray-900 mb-2">
+                Información del precio para el huésped
+              </h3>
+              <p className="text-sm text-gray-700 leading-relaxed">
+                Cuando estableces un precio y se muestra al desglose, la tarifa de servicio para huéspedes y los impuestos correspondientes aplicados pueden variar en función de los detalles de la reservación (como la duración de la estancia o el número de viajeros).
+              </p>
+            </div>
+
+            {/* Sección: Comparar anuncios similares */}
+            <div className="mb-4">
+              <h3 className="text-sm font-semibold text-gray-900 mb-2">
+                Comparar anuncios similares
+              </h3>
+              <p className="text-sm text-gray-700 leading-relaxed">
+                Para determinar qué anuncios son similares al tuyo, tomamos en cuenta ciertas variables, como la ubicación, el tipo de alojamiento, el número de habitaciones, las amenidades clave, los requisitos establecidos, las calificaciones y los anuncios que suelen consultar los huéspedes además del tuyo. Además, evitamos incluir alojamientos que no tengan mucha actividad. Por ejemplo, nunca te mostraremos un anuncio que no se haya reservado durante el último año o que no tenga disponibilidad. El precio promedio por noche se muestra tanto para los que están reservados como para los que están disponibles. Cuando eliges un rango de fechas, un alojamiento puede aparecer en el mapa como reservado y sin precio, y solo tiene algunas noches que no están disponibles.
+              </p>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+    );
+  };
+  
+  return (
+    <div className="flex flex-col w-full max-w-2xl mx-auto px-6 py-8 items-center">
+      
+      {/* Título principal */}
+      <div className="mb-12 text-center">
+        <h1 className="text-3xl font-bold text-gray-900 mb-4">
+          Configura un precio base para los días entre semana
+        </h1>
+        <p className="text-base text-gray-600">
+          Sugerencia: ${price} Luego establecerás uno para el fin de semana.
+        </p>
+      </div>
+
+      {/* Precio grande y editable */}
+      <div className="mb-8 flex items-center justify-center">
+        {isEditing ? (
+          <div className="flex items-center">
+            <span className="text-8xl font-bold text-gray-900">$</span>
+            <input
+              type="text"
+              value={inputValue}
+              onChange={handleInputChange}
+              onBlur={handleInputBlur}
+              onKeyPress={handleKeyPress}
+              autoFocus
+              className="text-8xl font-bold text-gray-900 border-b-4 border-gray-900 outline-none bg-transparent text-center w-64"
+            />
+          </div>
+        ) : (
+          <button
+            onClick={handlePriceClick}
+            className="text-8xl font-bold text-gray-900 hover:text-gray-700 transition cursor-text border-b-4 border-transparent hover:border-gray-300"
+          >
+            ${price}
+          </button>
+        )}
+      </div>
+
+      {/* Precio para el huésped */}
+      <div className="mb-12">
+        <button className="flex items-center gap-2 text-base text-gray-700 hover:text-gray-900">
+          <span>Precio para el huésped (sin impuestos): ${priceWithTaxes} MXN</span>
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+      </div>
+
+      {/* Botón ver anuncios similares */}
+      <div className="mb-6">
+        <button className="flex items-center gap-2 px-5 py-2.5 border-2 border-gray-900 rounded-full text-sm font-semibold text-gray-900 hover:bg-gray-50 transition">
+          <svg className="w-5 h-5 text-[#FF385C]" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+          </svg>
+          Ver anuncios similares
+        </button>
+      </div>
+
+      {/* Enlace más información */}
+      <div>
+        <button 
+          onClick={() => setShowPriceInfoModal(true)}
+          className="text-sm text-gray-700 underline hover:text-gray-900"
+        >
+          Más información sobre los precios
+        </button>
+      </div>
+
+      {/* Modal de información */}
+      {showPriceInfoModal && <PriceInfoModal onClose={() => setShowPriceInfoModal(false)} />}
+
+    </div>
+  );
+};
+
+// --- PASO 15: PRECIO FIN DE SEMANA ---
+const Step15WeekendPrice = ({ price, weekendPricePercentage, setWeekendPricePercentage }) => {
+  const [inputValue, setInputValue] = useState(weekendPricePercentage.toString());
+  
+  // Calcular precio del fin de semana con el suplemento
+  const weekendPrice = Math.round(price * (1 + weekendPricePercentage / 100));
+  
+  // Calcular precio con impuestos (aproximadamente 14% más)
+  const priceWithTaxes = Math.round(weekendPrice * 1.14);
+  
+  const handleInputChange = (e) => {
+    let value = e.target.value.replace(/[^0-9]/g, '');
+    let numValue = parseInt(value) || 0;
+    
+    // Limitar entre 0 y 99
+    if (numValue > 99) numValue = 99;
+    
+    setInputValue(numValue.toString());
+    setWeekendPricePercentage(numValue);
+  };
+  
+  const handleSliderChange = (e) => {
+    const value = parseInt(e.target.value);
+    setInputValue(value.toString());
+    setWeekendPricePercentage(value);
+  };
+  
+  return (
+    <div className="flex flex-col w-full max-w-2xl mx-auto px-6 py-8 items-center">
+      
+      {/* Estilos para el slider */}
+      <style>{`
+        input[type="range"]::-webkit-slider-thumb {
+          appearance: none;
+          width: 24px;
+          height: 24px;
+          border-radius: 50%;
+          background: #222222;
+          cursor: pointer;
+          border: 3px solid white;
+          box-shadow: 0 0 0 1px rgba(0,0,0,0.1), 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        input[type="range"]::-moz-range-thumb {
+          width: 24px;
+          height: 24px;
+          border-radius: 50%;
+          background: #222222;
+          cursor: pointer;
+          border: 3px solid white;
+          box-shadow: 0 0 0 1px rgba(0,0,0,0.1), 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        input[type="range"]::-webkit-slider-runnable-track {
+          height: 6px;
+          border-radius: 3px;
+        }
+        
+        input[type="range"]::-moz-range-track {
+          height: 6px;
+          border-radius: 3px;
+        }
+      `}</style>
+      
+      {/* Título principal */}
+      <div className="mb-12 text-center">
+        <h1 className="text-3xl font-bold text-gray-900 mb-4">
+          Establece un precio para el fin de semana
+        </h1>
+        <p className="text-base text-gray-600">
+          Agrega un suplemento para los viernes y los sábados.
+        </p>
+      </div>
+
+      {/* Precio grande que cambia con el slider */}
+      <div className="mb-8 flex items-center justify-center">
+        <div className="text-7xl font-bold text-gray-900">
+          $ {weekendPrice} MXN
+        </div>
+      </div>
+
+      {/* Precio para el huésped */}
+      <div className="mb-16">
+        <button className="flex items-center gap-2 text-base text-gray-700 hover:text-gray-900">
+          <span>Precio para el huésped (sin impuestos): ${priceWithTaxes} MXN</span>
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+      </div>
+
+      {/* Suplemento de fin de semana */}
+      <div className="w-full max-w-xl">
+        <div className="flex items-start justify-between mb-6">
+          <div>
+            <h3 className="text-base font-semibold text-gray-900 mb-1">
+              Suplemento de fin de semana
+            </h3>
+            <p className="text-sm text-gray-600">
+              Sugerencia: intenta con un 6%.
+            </p>
+          </div>
+          
+          {/* Input de porcentaje */}
+          <div className="flex items-center gap-1">
+            <input
+              type="text"
+              value={inputValue}
+              onChange={handleInputChange}
+              className="w-16 text-right text-lg font-normal text-gray-900 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-gray-900"
+            />
+            <span className="text-lg text-gray-900">%</span>
+          </div>
+        </div>
+
+        {/* Slider */}
+        <div className="relative w-full">
+          <input
+            type="range"
+            min="0"
+            max="99"
+            value={weekendPricePercentage}
+            onChange={handleSliderChange}
+            className="w-full appearance-none cursor-pointer"
+            style={{
+              background: `linear-gradient(to right, #222222 0%, #222222 ${weekendPricePercentage}%, #E5E7EB ${weekendPricePercentage}%, #E5E7EB 100%)`,
+              height: '6px',
+              borderRadius: '3px'
+            }}
+          />
+          
+          {/* Etiquetas del slider */}
+          <div className="flex justify-between mt-2">
+            <span className="text-xs text-gray-600">0%</span>
+            <span className="text-xs text-gray-600">99%</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  );
+};
+
+// --- PASO 16: AGREGAR DESCUENTOS ---
+const Step16Discounts = ({ discounts, setDiscounts }) => {
+  
+  const discountOptions = [
+    {
+      id: 'new_listing',
+      percentage: '20%',
+      title: 'Promoción para anuncio nuevo',
+      description: 'Ofrece un 20% de descuento en tus primeras 3 reservaciones'
+    },
+    {
+      id: 'last_minute',
+      percentage: '18%',
+      title: 'Descuento de último minuto',
+      description: 'Para las estancias reservadas con 14 días de anticipación o menos'
+    },
+    {
+      id: 'weekly',
+      percentage: '10%',
+      title: 'Descuento por semana',
+      description: 'Para estancias de 7 noches o más'
+    },
+    {
+      id: 'monthly',
+      percentage: '25%',
+      title: 'Descuento mensual',
+      description: 'Para estancias de 28 noches o más'
+    }
+  ];
+
+  const toggleDiscount = (discountId) => {
+    if (discounts.includes(discountId)) {
+      setDiscounts(discounts.filter(id => id !== discountId));
+    } else {
+      setDiscounts([...discounts, discountId]);
+    }
+  };
+
+  return (
+    <div className="flex flex-col w-full max-w-2xl mx-auto px-6 py-8">
+      
+      {/* Título principal */}
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-900 mb-4">
+          Agregar descuentos
+        </h1>
+        <p className="text-base text-gray-600">
+          Destaca tu alojamiento para conseguir reservaciones más rápido y obtener tus primeras evaluaciones.
+        </p>
+      </div>
+
+      {/* Opciones de descuento */}
+      <div className="space-y-4 mb-6">
+        {discountOptions.map((option) => {
+          const isSelected = discounts.includes(option.id);
+          
+          return (
+            <button
+              key={option.id}
+              onClick={() => toggleDiscount(option.id)}
+              className={`w-full text-left p-6 rounded-xl border-2 transition-all ${
+                isSelected
+                  ? 'border-gray-900 bg-gray-50'
+                  : 'border-gray-200 bg-white hover:border-gray-400'
+              }`}
+            >
+              <div className="flex items-start justify-between">
+                <div className="flex items-start gap-4 flex-1">
+                  {/* Porcentaje */}
+                  <div className="flex-shrink-0">
+                    <span className={`text-3xl font-bold ${
+                      isSelected ? 'text-gray-900' : 'text-gray-300'
+                    }`}>
+                      {option.percentage}
+                    </span>
+                  </div>
+                  
+                  {/* Texto */}
+                  <div className="flex-1">
+                    <h3 className="text-base font-semibold text-gray-900 mb-1">
+                      {option.title}
+                    </h3>
+                    <p className="text-sm text-gray-600">
+                      {option.description}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Checkbox */}
+                <div className="flex-shrink-0 ml-4">
+                  <div className={`w-6 h-6 rounded border-2 flex items-center justify-center transition-all ${
+                    isSelected
+                      ? 'bg-gray-900 border-gray-900'
+                      : 'bg-white border-gray-400'
+                  }`}>
+                    {isSelected && (
+                      <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                      </svg>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Nota final */}
+      <div className="text-center">
+        <p className="text-sm text-gray-600">
+          Solo se aplicará un descuento por estancia.{' '}
+          <a href="#" className="underline text-gray-900 hover:text-gray-700">
+            Más información
+          </a>
+        </p>
+      </div>
+
+    </div>
+  );
+};
+
+// --- MODAL DE CÁMARAS DE SEGURIDAD ---
+const CameraInfoModal = ({ onClose, onContinue, cameraDescription, setCameraDescription }) => {
+  const maxLength = 300;
+  const remainingChars = maxLength - cameraDescription.length;
+  
+  const handleCameraDescriptionChange = useCallback((e) => {
+    const value = e.target.value;
+    if (value.length <= maxLength) {
+      setCameraDescription(value);
+    }
+  }, [setCameraDescription, maxLength]);
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[100] p-4">
+      <div className="bg-white rounded-xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-hidden flex flex-col">
+        
+        {/* Header del modal */}
+        <div className="flex items-start justify-between px-6 py-4 border-b border-gray-200">
+          <button
+            onClick={onClose}
+            className="p-2 hover:bg-gray-100 rounded-full transition -ml-2"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        {/* Contenido del modal */}
+        <div className="px-6 py-6 overflow-y-auto flex-1">
+          
+          {/* Título */}
+          <h2 className="text-xl font-semibold text-gray-900 mb-3">
+            Informa a los huéspedes sobre las cámaras de seguridad exteriores
+          </h2>
+          
+          {/* Subtítulo */}
+          <p className="text-sm text-gray-600 mb-6">
+            Describe la zona que graba cada cámara, como el patio o la alberca.{' '}
+            <a href="#" className="underline text-gray-900 hover:text-gray-700">
+              Más información
+            </a>
+          </p>
+
+          {/* Textarea */}
+          <div className="mb-2">
+            <textarea
+              value={cameraDescription}
+              onChange={handleCameraDescriptionChange}
+              placeholder=""
+              className="w-full min-h-[120px] p-4 text-base font-normal text-gray-900 placeholder-gray-400 border border-gray-300 rounded-xl resize-none focus:outline-none focus:border-gray-900 focus:ring-0"
+              rows="5"
+              autoFocus
+            />
+          </div>
+
+          {/* Contador de caracteres */}
+          <div className="text-right text-sm text-gray-600 mb-6">
+            {remainingChars} caracteres disponibles
+          </div>
+
+        </div>
+
+        {/* Footer del modal */}
+        <div className="px-6 py-4 border-t border-gray-200 flex justify-end">
+          <button
+            onClick={onContinue}
+            className="bg-gray-900 text-white px-6 py-3 rounded-lg text-base font-semibold hover:bg-black transition"
+          >
+            Continuar
+          </button>
+        </div>
+
+      </div>
+    </div>
+  );
+};
+
+// --- PASO 17: DATOS DE SEGURIDAD ---
+const Step17Safety = ({ safetyItems, setSafetyItems, cameraDescription, setCameraDescription }) => {
+  const [showCameraModal, setShowCameraModal] = useState(false);
+  
+  const safetyOptions = [
+    {
+      id: 'carbon_monoxide',
+      title: 'Detector de monóxido de carbono',
+      description: 'Los anfitriones con alojamientos en México deben instalar un detector o se retendrá un monto de su cobro.'
+    },
+    {
+      id: 'security_camera',
+      title: 'Hay una cámara de seguridad exterior',
+      description: null
+    },
+    {
+      id: 'decibel_monitor',
+      title: 'Monitor de decibelios presente',
+      description: null
+    },
+    {
+      id: 'weapons',
+      title: 'Presencia de armas en la propiedad',
+      description: null
+    }
+  ];
+
+  const toggleSafetyItem = useCallback((itemId) => {
+    if (itemId === 'security_camera') {
+      if (!safetyItems.includes(itemId)) {
+        // Si se está activando, mostrar el modal
+        setShowCameraModal(true);
+      } else {
+        // Si se está desactivando, remover del array y limpiar descripción
+        setSafetyItems(safetyItems.filter(id => id !== itemId));
+        setCameraDescription('');
+      }
+    } else {
+      // Para otros items, toggle normal
+      if (safetyItems.includes(itemId)) {
+        setSafetyItems(safetyItems.filter(id => id !== itemId));
+      } else {
+        setSafetyItems([...safetyItems, itemId]);
+      }
+    }
+  }, [safetyItems, setSafetyItems, setCameraDescription]);
+
+  const handleCameraModalContinue = useCallback(() => {
+    // Solo marcar el checkbox si hay descripción
+    if (cameraDescription.trim()) {
+      if (!safetyItems.includes('security_camera')) {
+        setSafetyItems([...safetyItems, 'security_camera']);
+      }
+      setShowCameraModal(false);
+    } else {
+      // Si no hay descripción, asegurar que no esté marcado
+      setSafetyItems(safetyItems.filter(id => id !== 'security_camera'));
+    }
+  }, [cameraDescription, safetyItems, setSafetyItems]);
+
+  const handleCameraModalClose = useCallback(() => {
+    setShowCameraModal(false);
+    // Si no hay descripción, asegurar que no esté marcado
+    if (!cameraDescription.trim()) {
+      setSafetyItems(safetyItems.filter(id => id !== 'security_camera'));
+    }
+  }, [cameraDescription, safetyItems, setSafetyItems]);
+
+  const handleEditCamera = useCallback(() => {
+    setShowCameraModal(true);
+  }, []);
+
+  return (
+    <div className="flex flex-col w-full max-w-2xl mx-auto px-6 py-8">
+      
+      {/* Título principal */}
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-900 mb-6">
+          Comparte los datos de seguridad
+        </h1>
+        
+        {/* Pregunta con ícono de información */}
+        <div className="flex items-center gap-2 mb-6">
+          <h2 className="text-base font-semibold text-gray-900">
+            ¿Tu alojamiento tiene alguno de estos?
+          </h2>
+          <button className="text-gray-600 hover:text-gray-900">
+            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+            </svg>
+          </button>
+        </div>
+
+        {/* Opciones de seguridad */}
+        <div className="space-y-4 mb-12">
+          {safetyOptions.map((option) => {
+            const isChecked = safetyItems.includes(option.id);
+            const isCamera = option.id === 'security_camera';
+            
+            return (
+              <div key={option.id}>
+                <div className="flex items-start gap-4">
+                  {/* Checkbox */}
+                  <button
+                    onClick={() => toggleSafetyItem(option.id)}
+                    className="flex-shrink-0 mt-1"
+                  >
+                    <div className={`w-6 h-6 rounded border-2 flex items-center justify-center transition-all ${
+                      isChecked
+                        ? 'bg-gray-900 border-gray-900'
+                        : 'bg-white border-gray-400'
+                    }`}>
+                      {isChecked && (
+                        <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                        </svg>
+                      )}
+                    </div>
+                  </button>
+                  
+                  {/* Texto */}
+                  <button
+                    onClick={() => toggleSafetyItem(option.id)}
+                    className="flex-1 text-left"
+                  >
+                    <div className="text-base text-gray-900 mb-1">
+                      {option.title}
+                    </div>
+                    {option.description && (
+                      <div className="text-sm text-gray-600">
+                        {option.description}
+                      </div>
+                    )}
+                  </button>
+                </div>
+
+                {/* Mostrar descripción de cámara si está marcado y hay descripción */}
+                {isCamera && isChecked && cameraDescription && (
+                  <div className="ml-10 mt-3 p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                    <p className="text-sm text-gray-700 mb-3">
+                      {cameraDescription}
+                    </p>
+                    <button
+                      onClick={handleEditCamera}
+                      className="text-sm font-semibold text-gray-900 px-4 py-2 border border-gray-900 rounded-lg hover:bg-gray-100 transition"
+                    >
+                      Editar
+                    </button>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Separador */}
+      <div className="border-t border-gray-200 my-8"></div>
+
+      {/* Nota legal */}
+      <div>
+        <h3 className="text-base font-semibold text-gray-900 mb-4">
+          Debes tener en cuenta lo siguiente
+        </h3>
+        <p className="text-sm text-gray-700 leading-relaxed mb-4">
+          No puede haber cámaras de seguridad que monitoreen los interiores del alojamiento, aunque estén apagadas. Debes informar la presencia de todas las cámaras de seguridad que haya en los exteriores de tu espacio.
+        </p>
+        <p className="text-sm text-gray-700 leading-relaxed">
+          Asegúrate de que cumples con la{' '}
+          <a href="#" className="underline text-gray-900 hover:text-gray-700">
+            legislación local
+          </a>
+          {' '}y de revisar la{' '}
+          <a href="#" className="underline text-gray-900 hover:text-gray-700">
+            Política contra la Discriminación
+          </a>
+          , así como la relativa a las{' '}
+          <a href="#" className="underline text-gray-900 hover:text-gray-700">
+            tarifas para anfitriones y huéspedes
+          </a>
+          .
+        </p>
+      </div>
+
+      {/* Modal de cámaras */}
+      {showCameraModal && (
+        <CameraInfoModal 
+          onClose={handleCameraModalClose}
+          onContinue={handleCameraModalContinue}
+          cameraDescription={cameraDescription}
+          setCameraDescription={setCameraDescription}
+        />
+      )}
+
+    </div>
+  );
+};
+
   // Esta función se llama al cerrar el modal
   const handleModalClose = (isHost) => {
     setShowIntroModal(false);
@@ -665,6 +1803,16 @@ const Step5BasicInfo = ({ basics, setBasics }) => {
       console.error("Por favor, ingresa una dirección antes de continuar.");
       return;
     }
+    
+    // Si estamos en el paso 17 (último paso), crear el anuncio
+    if (currentStep === 17) {
+      console.log("¡Anuncio creado! Datos recopilados:", propertyData);
+      // Aquí puedes hacer una llamada a la API para guardar los datos
+      // navigate('/success'); // Redirigir a página de éxito
+      alert("¡Felicidades! Tu anuncio ha sido creado exitosamente.");
+      return;
+    }
+    
     setCurrentStep(prev => prev + 1);
   };
 
@@ -685,28 +1833,28 @@ const Step5BasicInfo = ({ basics, setBasics }) => {
         return (
           <Step2PropertyType 
             propertyType={propertyData.propertyType}
-            setPropertyType={(type) => setPropertyData({...propertyData, propertyType: type})}
+            setPropertyType={(type) => updatePropertyData({ propertyType: type })}
           />
         );
       case 3:
         return (
           <Step3PlaceType 
             placeType={propertyData.placeType}
-            setPlaceType={(type) => setPropertyData({...propertyData, placeType: type})}
+            setPlaceType={(type) => updatePropertyData({ placeType: type })}
           />
         );
       case 4:
         return (
           <Step4Location
             address={propertyData.address}
-            setAddress={(addr) => setPropertyData({...propertyData, address: addr})}
+            setAddress={(addr) => updatePropertyData({ address: addr })}
           />
         );
       case 5:
         return (
           <Step5BasicInfo
             basics={propertyData.basics}
-            setBasics={(basics) => setPropertyData({...propertyData, basics: basics})}
+            setBasics={updateBasics}
           />
         );
       case 6:
@@ -715,7 +1863,70 @@ const Step5BasicInfo = ({ basics, setBasics }) => {
         return (
           <Step7Amenities
             amenities={propertyData.amenities}
-            setAmenities={(amenities) => setPropertyData({...propertyData, amenities: amenities})}
+            setAmenities={updateAmenities}
+          />
+        );
+      case 8:
+        return <Step8Photos />;
+      case 9:
+        return (
+          <Step9Title
+            title={propertyData.title}
+            setTitle={(title) => updatePropertyData({ title })}
+          />
+        );
+      case 10:
+        return (
+          <Step10Description
+            description={propertyData.description}
+            setDescription={(description) => updatePropertyData({ description })}
+          />
+        );
+      case 11:
+        return <Step11IntroStep3 />;
+      case 12:
+        return (
+          <Step12BookingPreference
+            bookingPreference={propertyData.bookingPreference}
+            setBookingPreference={(preference) => updatePropertyData({ bookingPreference: preference })}
+          />
+        );
+      case 13:
+        return (
+          <Step13GuestPreference
+            guestPreference={propertyData.guestPreference}
+            setGuestPreference={(preference) => updatePropertyData({ guestPreference: preference })}
+          />
+        );
+      case 14:
+        return (
+          <Step14Price
+            price={propertyData.price}
+            setPrice={(price) => updatePropertyData({ price })}
+          />
+        );
+      case 15:
+        return (
+          <Step15WeekendPrice
+            price={propertyData.price}
+            weekendPricePercentage={propertyData.weekendPricePercentage}
+            setWeekendPricePercentage={(percentage) => updatePropertyData({ weekendPricePercentage: percentage })}
+          />
+        );
+      case 16:
+        return (
+          <Step16Discounts
+            discounts={propertyData.discounts}
+            setDiscounts={(discounts) => updatePropertyData({ discounts })}
+          />
+        );
+      case 17:
+        return (
+          <Step17Safety
+            safetyItems={propertyData.safetyItems}
+            setSafetyItems={updateSafetyItems}
+            cameraDescription={propertyData.cameraDescription}
+            setCameraDescription={updateCameraDescription}
           />
         );
       default:
@@ -734,7 +1945,7 @@ const Step5BasicInfo = ({ basics, setBasics }) => {
     }
   };
 
-  const totalSteps = 15; 
+  const totalSteps = 17; 
   const progress = (currentStep / totalSteps) * 100;
 
   // Lógica para deshabilitar el botón "Siguiente"
@@ -771,7 +1982,7 @@ const Step5BasicInfo = ({ basics, setBasics }) => {
       {/* Contenido principal */}
       <main className="flex-grow overflow-y-auto flex justify-center"> 
         <div className={`w-full h-full flex justify-center ${
-          [2, 5, 7].includes(currentStep) ? 'items-start pt-8' : 'items-center'
+          [2, 5, 7, 9, 10, 12, 13, 16, 17].includes(currentStep) ? 'items-start pt-8' : 'items-center'
         }`}>
           {renderStepContent()}
         </div>
@@ -800,7 +2011,7 @@ const Step5BasicInfo = ({ basics, setBasics }) => {
               </button>
             </div>
 
-            {/* Botón Siguiente */}
+            {/* Botón Siguiente o Crear anuncio */}
             <button
               onClick={nextStep}
               disabled={isNextDisabled()}
@@ -811,7 +2022,7 @@ const Step5BasicInfo = ({ basics, setBasics }) => {
                 }
               `}
             >
-              Siguiente
+              {currentStep === 17 ? 'Crear anuncio' : 'Siguiente'}
             </button>
             
           </div>
