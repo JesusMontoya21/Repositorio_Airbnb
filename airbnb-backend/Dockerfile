@@ -21,10 +21,15 @@ WORKDIR /var/www/html
 COPY . .
 
 # Instalar dependencias
-RUN composer install --no-dev --optimize-autoloader --no-interaction
+RUN composer install --optimize-autoloader --no-interaction
 
-# Permisos correctos
-RUN chown -R www-data:www-data storage bootstrap/cache
+# Crear carpetas necesarias para Laravel y asignar permisos
+RUN mkdir -p storage/framework/views \
+    && mkdir -p storage/framework/sessions \
+    && mkdir -p storage/framework/cache \
+    && mkdir -p bootstrap/cache \
+    && chown -R www-data:www-data storage bootstrap/cache \
+    && chmod -R 775 storage bootstrap/cache
 
 # Exponer puerto
 EXPOSE 9000

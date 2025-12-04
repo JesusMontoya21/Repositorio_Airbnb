@@ -14,18 +14,26 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Proxies
         $middleware->trustProxies(at: TrustProxies::class);
 
-        // API usa CORS
+        // CORS debe estar global y no solo en API
+        // Esto es un requisito para Laravel 12 + Sanctum
+        $middleware->append(\Illuminate\Http\Middleware\HandleCors::class);
+
+        // Middleware API
         $middleware->api(prepend: [
-            \Illuminate\Http\Middleware\HandleCors::class,
+            // Nada más aquí, CORS ya está global
         ]);
 
-        // Rutas web con sesión + Sanctum stateful
-        $middleware->web(append: [
-            \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
+        // Middleware WEB
+        $middleware->web(prepend: [
+            \Illuminate\Cookie\Middleware\EncryptCookies::class,
+            \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
+            \Illuminate\Session\Middleware\StartSession::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
-    })->create();
+    })
+    ->create();

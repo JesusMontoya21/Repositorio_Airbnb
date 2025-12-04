@@ -1,25 +1,19 @@
-import axios from 'axios';
+import axios from "axios";
 
 const api = axios.create({
-  baseURL: 'http://localhost',
+  baseURL: "http://localhost/api",
   withCredentials: true,
-  xsrfCookieName: 'XSRF-TOKEN',
-  xsrfHeaderName: 'X-XSRF-TOKEN',
 });
 
-// Interceptor para enviar el token descifrado manualmente
+// Interceptor para poner automáticamente el Bearer token
 api.interceptors.request.use((config) => {
-  const token = document.cookie
-    .split('; ')
-    .find((row) => row.startsWith('XSRF-TOKEN='))
-    ?.split('=')[1];
+  const token = localStorage.getItem("token");
 
   if (token) {
-    config.headers['X-XSRF-TOKEN'] = decodeURIComponent(token);
+    config.headers.Authorization = `Bearer ${token}`;
   }
 
   return config;
 });
 
-export const getCSRFToken = () => api.get('/sanctum/csrf-cookie');
 export default api;

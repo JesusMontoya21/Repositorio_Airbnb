@@ -1,47 +1,40 @@
-import { createContext, useContext, useState, useEffect } from 'react';
-import api, { getCSRFToken } from '../api/axios';
+import { createContext, useContext, useState, useEffect } from "react";
+import api from "../api/axios";
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
 
-  // Se ejecuta al cargar la app para saber si ya hay sesión
+  // Cargar usuario al refrescar página (si hay token)
   useEffect(() => {
-    getUser().finally(() => setLoading(false));
+    const token = localStorage.getItem("token");
+
+    if (token) {
+      api.get("/user")
+        .then((res) => setUser(res.data))
+        .catch(() => setUser(null));
+    }
   }, []);
 
-  async function login(email, password) {
-    await getCSRFToken(); //Crear XSRF-TOKEN y laravel_session
-    await api.post('/login', { email, password });
-    return getUser(); //Obtenemos el Usuario
-  }
+  //  Aquí se guarda el token
+  const login = async (email, password) => {
+    const response = await api.post("/login", { email, password });
 
-  async function getUser() {
-    try {
-      const res = await api.get('/api/user');
-      setUser(res.data);
-      return res.data;
-    } catch (err) {
-      setUser(null);
-      return null;
-    }
-  }
+    localStorage.setItem("token", response.data.token);
 
-  async function register(name, email, password, password_confirmation) {
-    await getCSRFToken();
-    await api.post('/register', { name, email, password, password_confirmation });
-    return getUser();
-  }
+    setUser(response.data.user);
 
-  async function logout() {
-    await api.post('/logout');
+    return response;
+  };
+
+  const logout = async () => {
+    localStorage.removeItem("token");
     setUser(null);
-  }
+  };
 
   return (
-    <AuthContext.Provider value={{ user, login, register, logout, loading }}>
+    <AuthContext.Provider value={{ user, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
