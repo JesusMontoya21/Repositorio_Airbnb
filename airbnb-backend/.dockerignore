@@ -1,0 +1,9 @@
+node_modules
+npm-debug.log
+.git
+.env
+
+storage/logs
+storage/framework/cache
+storage/framework/views
+storage/framework/sessions
