@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'http://localhost:8000/api',
+  baseURL: 'http://localhost:9000',
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
@@ -28,7 +28,7 @@ export const authAPI = {
   register: (data) => api.post('/register', data),
   login: (data) => api.post('/login', data),
   logout: () => api.post('/logout'),
-  getUser: () => api.get('/user'),
+  getUser: () => api.get('/api/user'),
 };
 
 // Properties
