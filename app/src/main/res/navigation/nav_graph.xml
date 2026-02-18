@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/nav_navegacion">
+
+    <fragment
+        android:id="@+id/nav_navegacion"
+        android:name="com.equipo.airbnb_1.ui.View.AlojamientosFragment"
+        android:label="Explorar" />
+
+    <fragment
+        android:id="@+id/nav_favoritos"
+        android:name="com.equipo.airbnb_1.ui.View.FavoritosFragment"
+        android:label="Favoritos" />
+
+    <fragment
+        android:id="@+id/nav_mensajes"
+        android:name="com.equipo.airbnb_1.ui.View.MensajesFragment"
+        android:label="Mensajes" />
+
+    <fragment
+        android:id="@+id/nav_viajes"
+        android:name="com.equipo.airbnb_1.ui.View.ViajesFragment"
+        android:label="Viajes" />
+
+    <fragment
+        android:id="@+id/nav_perfil"
+        android:name="com.equipo.airbnb_1.ui.View.PerfilFragment"
+        android:label="Perfil" />
+
+    <fragment
+        android:id="@+id/btnExperiencias"
+        android:name="com.equipo.airbnb_1.ui.View.ExperienciasFragment"
+        android:label="Experiencias" />
+
+    <fragment
+        android:id="@+id/btnServicios"
+        android:name="com.equipo.airbnb_1.ui.View.ServiciosFragment"
+        android:label="Servicios" />
+
+</navigation>

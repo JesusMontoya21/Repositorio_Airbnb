@@ -13,7 +13,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Airbnb_1">
         <activity
-            android:name=".ui.View.Alojamientos"
+            android:name=".ui.View.MainActivity"
             android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/Theme.Airbnb_1">
@@ -23,12 +23,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".ui.View.Experiencias"/>
-        <activity android:name=".ui.View.Servicios"/>
-        <activity android:name=".ui.View.Favoritos" />
-        <activity android:name=".ui.View.Viajes" />
-        <activity android:name=".ui.View.Mensajes" />
-        <activity android:name=".ui.View.Perfil" />
     </application>
 
 </manifest>
