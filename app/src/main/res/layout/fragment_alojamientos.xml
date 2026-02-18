@@ -4,8 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background"
-    tools:context=".ui.View.AlojamientosFragment">
+    android:background="@color/background">
 
     <include
         android:id="@+id/header_home"
@@ -16,7 +15,7 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerCarrusel"
         android:layout_width="match_parent"
-        android:layout_height="200dp"
+        android:layout_height="wrap_content"
         android:layout_below="@id/header_home"
         android:padding="10dp"
         android:clipToPadding="false"

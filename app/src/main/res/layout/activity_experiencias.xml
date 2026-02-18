@@ -8,7 +8,6 @@
 
     <include layout="@layout/header_home" />
 
-    <!-- RecyclerView de experiencias -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerExperiencias"
         android:layout_width="match_parent"

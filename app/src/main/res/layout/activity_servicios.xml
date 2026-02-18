@@ -6,9 +6,6 @@
     android:layout_height="match_parent"
     android:padding="16dp">
 
-    <include layout="@layout/header_home" />
-
-    <!-- RecyclerView de servicios -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerServicios"
         android:layout_width="match_parent"
