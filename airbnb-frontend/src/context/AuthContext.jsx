@@ -6,10 +6,8 @@ const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
 
-  // Cargar usuario al refrescar página (si hay token)
   useEffect(() => {
     const token = localStorage.getItem("token");
-
     if (token) {
       api.get("/user")
         .then((res) => setUser(res.data))
@@ -17,14 +15,22 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
-  //  Aquí se guarda el token
   const login = async (email, password) => {
     const response = await api.post("/login", { email, password });
-
     localStorage.setItem("token", response.data.token);
-
     setUser(response.data.user);
+    return response;
+  };
 
+  const register = async (name, email, password, password_confirmation) => {
+    const response = await api.post("/register", {
+      name,
+      email,
+      password,
+      password_confirmation,
+    });
+    localStorage.setItem("token", response.data.token);
+    setUser(response.data.user);
     return response;
   };
 
@@ -34,7 +40,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, login, logout, register }}>
       {children}
     </AuthContext.Provider>
   );
