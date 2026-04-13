@@ -3,12 +3,172 @@ import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import FlexibleDates from '../components/FlexibleDates';
 
-const propertiesAPI = {
-  getAll: async (filters) => {
-    console.log('Fetching properties with filters:', filters);
-    await new Promise(resolve => setTimeout(resolve, 500));
-    return { data: { data: [], meta: { total: 0 } } };
-  }
+const mockProperties = [
+  {
+    id: 1, city: 'Mazatlán', country: 'México', title: 'Departamento frente al mar',
+    price_per_night: 850, guests: 4, bedrooms: 2, average_rating: 4.91,
+    images: [{ url: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=400' }]
+  },
+  {
+    id: 2, city: 'Mazatlán', country: 'México', title: 'Casa con alberca privada',
+    price_per_night: 1200, guests: 6, bedrooms: 3, average_rating: 4.85,
+    images: [{ url: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=400' }]
+  },
+  {
+    id: 3, city: 'Mazatlán', country: 'México', title: 'Habitación en zona dorada',
+    price_per_night: 550, guests: 2, bedrooms: 1, average_rating: 4.78,
+    images: [{ url: 'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=400' }]
+  },
+  {
+    id: 4, city: 'Mazatlán', country: 'México', title: 'Penthouse con vista al océano',
+    price_per_night: 2100, guests: 8, bedrooms: 4, average_rating: 4.96,
+    images: [{ url: 'https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=400' }]
+  },
+  {
+    id: 5, city: 'Mazatlán', country: 'México', title: 'Estudio moderno en el centro',
+    price_per_night: 420, guests: 2, bedrooms: 1, average_rating: 4.72,
+    images: [{ url: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400' }]
+  },
+  {
+    id: 6, city: 'Guadalajara', country: 'México', title: 'Loft en Providencia',
+    price_per_night: 780, guests: 2, bedrooms: 1, average_rating: 4.88,
+    images: [{ url: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=400' }]
+  },
+  {
+    id: 7, city: 'Guadalajara', country: 'México', title: 'Casa en Zapopan con jardín',
+    price_per_night: 950, guests: 5, bedrooms: 3, average_rating: 4.82,
+    images: [{ url: 'https://images.unsplash.com/photo-1583608205776-bfd35f0d9f83?w=400' }]
+  },
+  {
+    id: 8, city: 'Guadalajara', country: 'México', title: 'Departamento en Chapalita',
+    price_per_night: 650, guests: 3, bedrooms: 2, average_rating: 4.75,
+    images: [{ url: 'https://images.unsplash.com/photo-1493809842364-78817add7ffb?w=400' }]
+  },
+  {
+    id: 9, city: 'Guadalajara', country: 'México', title: 'Suite ejecutiva en el centro',
+    price_per_night: 890, guests: 2, bedrooms: 1, average_rating: 4.91,
+    images: [{ url: 'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=400' }]
+  },
+  {
+    id: 10, city: 'Cancún', country: 'México', title: 'Villa en zona hotelera',
+    price_per_night: 3200, guests: 10, bedrooms: 5, average_rating: 4.95,
+    images: [{ url: 'https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=400' }]
+  },
+  {
+    id: 11, city: 'Cancún', country: 'México', title: 'Departamento frente al mar',
+    price_per_night: 1800, guests: 4, bedrooms: 2, average_rating: 4.87,
+    images: [{ url: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400' }]
+  },
+  {
+    id: 12, city: 'Cancún', country: 'México', title: 'Habitación en hotel boutique',
+    price_per_night: 920, guests: 2, bedrooms: 1, average_rating: 4.79,
+    images: [{ url: 'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=400' }]
+  },
+  {
+    id: 13, city: 'Ciudad de México', country: 'México', title: 'Apartamento en Condesa',
+    price_per_night: 980, guests: 3, bedrooms: 2, average_rating: 4.93,
+    images: [{ url: 'https://images.unsplash.com/photo-1484154218962-a197022b5858?w=400' }]
+  },
+  {
+    id: 14, city: 'Ciudad de México', country: 'México', title: 'Loft en Roma Norte',
+    price_per_night: 750, guests: 2, bedrooms: 1, average_rating: 4.86,
+    images: [{ url: 'https://images.unsplash.com/photo-1536376072261-38c75010e6c9?w=400' }]
+  },
+  {
+    id: 15, city: 'Ciudad de México', country: 'México', title: 'Casa en Coyoacán',
+    price_per_night: 1100, guests: 6, bedrooms: 3, average_rating: 4.89,
+    images: [{ url: 'https://images.unsplash.com/photo-1598928636135-d146006ff4be?w=400' }]
+  },
+];
+
+const cities = ['Mazatlán', 'Guadalajara', 'Cancún', 'Ciudad de México'];
+
+const PropertyCard = ({ property }) => (
+  <Link to={`/property/${property.id}`} className="group cursor-pointer flex-shrink-0 w-64">
+    <div className="relative h-48 rounded-xl overflow-hidden mb-3">
+      <img
+        src={property.images[0].url}
+        alt={property.title}
+        className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+      />
+      <button
+        className="absolute top-3 right-3 text-white hover:scale-110 transition"
+        onClick={(e) => e.preventDefault()}
+      >
+        <svg className="w-6 h-6" fill="none" stroke="white" strokeWidth="2" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+        </svg>
+      </button>
+      {property.average_rating >= 4.9 && (
+        <div className="absolute top-3 left-3 bg-white px-2 py-1 rounded-full text-xs font-semibold shadow">
+          Favorito entre huéspedes
+        </div>
+      )}
+    </div>
+    <div className="px-1">
+      <div className="flex justify-between items-start">
+        <h3 className="font-semibold text-gray-900 text-sm line-clamp-1">{property.title}</h3>
+        <div className="flex items-center gap-1 ml-2 flex-shrink-0">
+          <svg className="w-3 h-3 fill-gray-900" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          <span className="text-xs font-medium">{property.average_rating}</span>
+        </div>
+      </div>
+      <p className="text-gray-500 text-xs mt-0.5">{property.guests} huéspedes · {property.bedrooms} hab.</p>
+      <p className="text-sm mt-1">
+        <span className="font-semibold">${property.price_per_night} MXN</span>
+        <span className="text-gray-500"> noche</span>
+      </p>
+    </div>
+  </Link>
+);
+
+const CityCarousel = ({ city, properties }) => {
+  const scrollRef = useRef(null);
+
+  const scroll = (direction) => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollBy({ left: direction * 280, behavior: 'smooth' });
+    }
+  };
+
+  const cityProperties = properties.filter(p => p.city === city);
+
+  return (
+    <div className="mb-12">
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-2xl font-semibold text-gray-900">
+          Alojamientos populares en {city} →
+        </h2>
+        <div className="flex gap-2">
+          <button
+            onClick={() => scroll(-1)}
+            className="p-2 border border-gray-300 rounded-full hover:shadow-md transition"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+          <button
+            onClick={() => scroll(1)}
+            className="p-2 border border-gray-300 rounded-full hover:shadow-md transition"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        </div>
+      </div>
+      <div
+        ref={scrollRef}
+        className="flex gap-4 overflow-x-auto scrollbar-hide pb-4"
+        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+      >
+        {cityProperties.map(property => (
+          <PropertyCard key={property.id} property={property} />
+        ))}
+      </div>
+    </div>
+  );
 };
 
 const getMonthDetails = (date) => {
@@ -18,12 +178,6 @@ const getMonthDetails = (date) => {
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const monthName = date.toLocaleDateString('es-ES', { month: 'long' });
   return { year, month, firstDay, daysInMonth, monthName };
-};
-
-const formatDateDisplayShort = (dateString) => {
-  if (!dateString) return null;
-  const date = new Date(dateString);
-  return date.toLocaleDateString('es-MX', { weekday: 'short', day: 'numeric', month: 'short' }).replace(/\.$/g, '');
 };
 
 const Day = ({ day, monthDate, checkInDate, checkOutDate, handleDayClick }) => {
@@ -41,27 +195,14 @@ const Day = ({ day, monthDate, checkInDate, checkOutDate, handleDayClick }) => {
   let textClasses = 'text-gray-900';
   let bgClasses = 'hover:border hover:border-gray-900';
 
-  if (isDisabled) {
-    textClasses = 'text-gray-300 pointer-events-none';
-    bgClasses = '';
-  } else if (isSelected) {
-    bgClasses = 'bg-gray-900';
-    textClasses = 'text-white font-semibold';
-  } else if (isInRange) {
-    bgClasses = 'bg-gray-100 rounded-none';
-    textClasses = 'text-gray-900';
-  } else if (isToday) {
-    textClasses = 'font-semibold underline';
-  }
+  if (isDisabled) { textClasses = 'text-gray-300 pointer-events-none'; bgClasses = ''; }
+  else if (isSelected) { bgClasses = 'bg-gray-900'; textClasses = 'text-white font-semibold'; }
+  else if (isInRange) { bgClasses = 'bg-gray-100 rounded-none'; textClasses = 'text-gray-900'; }
+  else if (isToday) { textClasses = 'font-semibold underline'; }
 
   return (
-    <div
-      className={`relative w-10 h-10 ${isInRange ? 'bg-gray-100' : 'bg-transparent'}`}
-      onClick={isDisabled ? null : () => handleDayClick(date)}
-    >
-      <button className={`${baseClasses} ${bgClasses} ${textClasses}`} disabled={isDisabled}>
-        {day}
-      </button>
+    <div className={`relative w-10 h-10 ${isInRange ? 'bg-gray-100' : 'bg-transparent'}`} onClick={isDisabled ? null : () => handleDayClick(date)}>
+      <button className={`${baseClasses} ${bgClasses} ${textClasses}`} disabled={isDisabled}>{day}</button>
     </div>
   );
 };
@@ -70,23 +211,15 @@ const Month = ({ monthDate, checkInDate, checkOutDate, handleDayClick }) => {
   const { year, firstDay, daysInMonth, monthName } = getMonthDetails(monthDate);
   const daysOfWeek = ['D', 'L', 'M', 'J', 'V', 'S'];
   const calendarDays = [];
-
-  for (let i = 0; i < firstDay; i++) {
-    calendarDays.push(<div key={`empty-${i}`} className="w-10 h-10"></div>);
-  }
+  for (let i = 0; i < firstDay; i++) calendarDays.push(<div key={`empty-${i}`} className="w-10 h-10"></div>);
   for (let day = 1; day <= daysInMonth; day++) {
-    calendarDays.push(
-      <Day key={day} day={day} monthDate={monthDate} checkInDate={checkInDate} checkOutDate={checkOutDate} handleDayClick={handleDayClick} />
-    );
+    calendarDays.push(<Day key={day} day={day} monthDate={monthDate} checkInDate={checkInDate} checkOutDate={checkOutDate} handleDayClick={handleDayClick} />);
   }
-
   return (
     <div className="w-1/2 px-4">
       <h4 className="text-base font-medium mb-4 capitalize text-gray-800">{monthName} {year}</h4>
       <div className="grid grid-cols-7 gap-y-2 mb-2">
-        {daysOfWeek.map(day => (
-          <span key={day} className="text-center text-xs font-semibold text-gray-500 w-10">{day}</span>
-        ))}
+        {daysOfWeek.map(day => <span key={day} className="text-center text-xs font-semibold text-gray-500 w-10">{day}</span>)}
       </div>
       <div className="grid grid-cols-7 gap-y-2">{calendarDays}</div>
     </div>
@@ -107,15 +240,10 @@ const DateRangePicker = ({ checkIn, checkOut, onSelectDate }) => {
 
   const handleDayClick = (dayDate) => {
     const dateString = dayDate.toISOString().split('T')[0];
-    if (!checkIn) {
-      onSelectDate({ check_in: dateString, check_out: '' });
-    } else if (dayDate < new Date(checkIn)) {
-      onSelectDate({ check_in: dateString, check_out: '' });
-    } else if (!checkOut || dayDate > new Date(checkIn)) {
-      onSelectDate({ check_in: checkIn, check_out: dateString });
-    } else {
-      onSelectDate({ check_in: dateString, check_out: '' });
-    }
+    if (!checkIn) onSelectDate({ check_in: dateString, check_out: '' });
+    else if (dayDate < new Date(checkIn)) onSelectDate({ check_in: dateString, check_out: '' });
+    else if (!checkOut || dayDate > new Date(checkIn)) onSelectDate({ check_in: checkIn, check_out: dateString });
+    else onSelectDate({ check_in: dateString, check_out: '' });
   };
 
   return (
@@ -123,19 +251,15 @@ const DateRangePicker = ({ checkIn, checkOut, onSelectDate }) => {
       <div className="flex justify-center mb-6">
         <div className="p-1 bg-gray-100 rounded-full flex space-x-1">
           {['Fechas', 'Flexible'].map(tab => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`py-2 px-6 rounded-full text-sm font-medium transition-colors duration-200 ${activeTab === tab ? 'bg-white shadow-md text-gray-900' : 'text-gray-600 hover:bg-gray-50'}`}
-            >
+            <button key={tab} onClick={() => setActiveTab(tab)}
+              className={`py-2 px-6 rounded-full text-sm font-medium transition-colors duration-200 ${activeTab === tab ? 'bg-white shadow-md text-gray-900' : 'text-gray-600 hover:bg-gray-50'}`}>
               {tab}
             </button>
           ))}
         </div>
       </div>
-
       {activeTab === 'Fechas' && (
-        <div className="flex justify-between items-center mb-4 text-gray-600">
+        <div className="flex justify-between items-center mb-4">
           <button onClick={() => changeMonth(-1)} className="p-2 border border-gray-300 rounded-full hover:bg-gray-50">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7"></path></svg>
           </button>
@@ -148,7 +272,6 @@ const DateRangePicker = ({ checkIn, checkOut, onSelectDate }) => {
           </button>
         </div>
       )}
-
       {activeTab === 'Flexible' && (
         <FlexibleDates onSelectFlexible={(flexData) => console.log('Flexible:', flexData)} />
       )}
@@ -164,20 +287,14 @@ const DestinationSuggestions = ({ onSelectCity }) => {
     { name: 'Ciudad de México', icon: '🏙️', color: 'text-gray-500 bg-gray-100' },
     { name: 'Cancún, Quintana Roo', icon: '🌴', color: 'text-green-500 bg-green-50' },
     { name: 'Monterrey, Nuevo León', icon: '🏭', color: 'text-red-500 bg-red-50' },
-    { name: 'Playa del Carmen', icon: '🌊', color: 'text-cyan-500 bg-cyan-50' },
     { name: 'Culiacán, Sinaloa', icon: '💎', color: 'text-pink-400 bg-pink-100' },
   ];
-
   return (
     <div className="absolute top-full left-0 mt-4 p-4 w-[450px] bg-white rounded-3xl shadow-2xl z-20 border border-gray-100">
       <h3 className="text-lg font-semibold mb-3 px-2 text-gray-800">Sugerencias de destinos</h3>
       <ul>
         {suggestions.map((item, index) => (
-          <li
-            key={index}
-            className="flex items-center space-x-4 p-2 rounded-xl cursor-pointer hover:bg-gray-50 transition-colors"
-            onClick={() => onSelectCity(item.name.split(',')[0].trim())}
-          >
+          <li key={index} className="flex items-center space-x-4 p-2 rounded-xl cursor-pointer hover:bg-gray-50 transition-colors" onClick={() => onSelectCity(item.name.split(',')[0].trim())}>
             <div className={`p-3 rounded-xl flex items-center justify-center w-12 h-12 ${item.color}`}>
               <span className="text-xl">{item.icon}</span>
             </div>
@@ -191,31 +308,21 @@ const DestinationSuggestions = ({ onSelectCity }) => {
 
 const GuestsSelector = ({ onSelectGuests }) => {
   const [guestCounts, setGuestCounts] = useState({ adults: 0, children: 0, babies: 0, pets: 0 });
-
   useEffect(() => {
-    const total = guestCounts.adults + guestCounts.children;
-    onSelectGuests({ guests: total, ...guestCounts });
+    onSelectGuests({ guests: guestCounts.adults + guestCounts.children, ...guestCounts });
   }, [guestCounts, onSelectGuests]);
 
   const GuestRow = ({ label, description, type, count }) => (
     <div className="flex items-center justify-between py-6 border-b border-gray-200 last:border-b-0">
-      <div>
-        <p className="font-medium text-gray-900">{label}</p>
-        <p className="text-sm text-gray-500">{description}</p>
-      </div>
+      <div><p className="font-medium text-gray-900">{label}</p><p className="text-sm text-gray-500">{description}</p></div>
       <div className="flex items-center space-x-4">
-        <button
-          onClick={() => setGuestCounts(prev => ({ ...prev, [type]: Math.max(0, prev[type] - 1) }))}
-          disabled={count === 0}
-          className={`w-8 h-8 rounded-full border flex items-center justify-center ${count === 0 ? 'border-gray-200 text-gray-300 cursor-not-allowed' : 'border-gray-400 text-gray-600 hover:border-gray-900'}`}
-        >
+        <button onClick={() => setGuestCounts(prev => ({ ...prev, [type]: Math.max(0, prev[type] - 1) }))} disabled={count === 0}
+          className={`w-8 h-8 rounded-full border flex items-center justify-center ${count === 0 ? 'border-gray-200 text-gray-300 cursor-not-allowed' : 'border-gray-400 text-gray-600 hover:border-gray-900'}`}>
           <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" /></svg>
         </button>
         <span className="w-8 text-center font-medium text-gray-900">{count}</span>
-        <button
-          onClick={() => setGuestCounts(prev => ({ ...prev, [type]: prev[type] + 1 }))}
-          className="w-8 h-8 rounded-full border border-gray-400 text-gray-600 hover:border-gray-900 flex items-center justify-center"
-        >
+        <button onClick={() => setGuestCounts(prev => ({ ...prev, [type]: prev[type] + 1 }))}
+          className="w-8 h-8 rounded-full border border-gray-400 text-gray-600 hover:border-gray-900 flex items-center justify-center">
           <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
         </button>
       </div>
@@ -239,30 +346,14 @@ export default function Home() {
   const [isGuestsOpen, setIsGuestsOpen] = useState(false);
   const searchRef = useRef(null);
 
-  const { data: properties, isLoading } = useQuery({
-    queryKey: ['properties', filters],
-    queryFn: () => propertiesAPI.getAll(filters).then(res => res.data),
-  });
-
-  const handleSelectCity = (city) => {
-    setFilters(prev => ({ ...prev, city }));
-    setIsDestinationOpen(false);
-  };
-
-  const handleSelectDates = useCallback((newDates) => {
-    setFilters(prev => ({ ...prev, ...newDates }));
-  }, []);
-
-  const handleSelectGuests = useCallback((guestData) => {
-    setFilters(prev => ({ ...prev, ...guestData }));
-  }, []);
+  const handleSelectCity = (city) => { setFilters(prev => ({ ...prev, city })); setIsDestinationOpen(false); };
+  const handleSelectDates = useCallback((newDates) => { setFilters(prev => ({ ...prev, ...newDates })); }, []);
+  const handleSelectGuests = useCallback((guestData) => { setFilters(prev => ({ ...prev, ...guestData })); }, []);
 
   useEffect(() => {
     function handleClickOutside(event) {
       if (searchRef.current && !searchRef.current.contains(event.target)) {
-        setIsDestinationOpen(false);
-        setIsDatesOpen(false);
-        setIsGuestsOpen(false);
+        setIsDestinationOpen(false); setIsDatesOpen(false); setIsGuestsOpen(false);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
@@ -270,9 +361,7 @@ export default function Home() {
   }, []);
 
   const handleSearchClick = (section) => {
-    setIsDestinationOpen(false);
-    setIsDatesOpen(false);
-    setIsGuestsOpen(false);
+    setIsDestinationOpen(false); setIsDatesOpen(false); setIsGuestsOpen(false);
     if (section === 'destination') setIsDestinationOpen(true);
     else if (section === 'dates') setIsDatesOpen(true);
     else if (section === 'guests') setIsGuestsOpen(true);
@@ -289,41 +378,28 @@ export default function Home() {
 
   const guestsDisplay = filters.guests > 0 ? `${filters.guests} huésped${filters.guests > 1 ? 'es' : ''}` : '¿Cuántos?';
 
+  const filteredCities = filters.city
+    ? cities.filter(c => c.toLowerCase().includes(filters.city.toLowerCase()))
+    : cities;
+
   return (
     <div>
       <div className="bg-white border-b">
         <div className="max-w-4xl mx-auto px-4 py-6">
           <div className="relative bg-white rounded-full shadow-md border border-gray-200 hover:shadow-lg transition-shadow duration-200" ref={searchRef}>
             <div className="flex items-center divide-x divide-gray-200">
-
-              <div
-                className={`relative flex-1 py-2.5 pl-8 pr-6 cursor-pointer rounded-full transition-all duration-200 ${isDestinationOpen ? 'bg-gray-100' : 'hover:bg-gray-50'}`}
-                onClick={() => handleSearchClick('destination')}
-              >
+              <div className={`relative flex-1 py-2.5 pl-8 pr-6 cursor-pointer rounded-full transition-all duration-200 ${isDestinationOpen ? 'bg-gray-100' : 'hover:bg-gray-50'}`} onClick={() => handleSearchClick('destination')}>
                 <label className="block text-xs font-semibold text-gray-900 mb-0.5">Destino</label>
-                <input
-                  type="text"
-                  name="city"
-                  placeholder="Buscar destinos"
-                  value={filters.city}
+                <input type="text" name="city" placeholder="Buscar destinos" value={filters.city}
                   onChange={(e) => setFilters({ ...filters, city: e.target.value })}
-                  className="w-full text-sm text-gray-500 placeholder-gray-400 focus:outline-none bg-transparent"
-                />
+                  className="w-full text-sm text-gray-500 placeholder-gray-400 focus:outline-none bg-transparent" />
                 {isDestinationOpen && <DestinationSuggestions onSelectCity={handleSelectCity} />}
               </div>
-
-              <div
-                className={`relative flex-1 py-2.5 px-6 cursor-pointer rounded-full transition-all duration-200 ${isDatesOpen ? 'bg-gray-100' : 'hover:bg-gray-50'}`}
-                onClick={() => handleSearchClick('dates')}
-              >
+              <div className={`relative flex-1 py-2.5 px-6 cursor-pointer rounded-full transition-all duration-200 ${isDatesOpen ? 'bg-gray-100' : 'hover:bg-gray-50'}`} onClick={() => handleSearchClick('dates')}>
                 <label className="block text-xs font-semibold text-gray-900 mb-0.5">Fechas</label>
                 <div className="text-sm text-gray-500">{datesDisplay}</div>
               </div>
-
-              <div
-                className={`relative flex-1 flex items-center py-2.5 pl-6 pr-2 cursor-pointer rounded-full transition-all duration-200 ${isGuestsOpen ? 'bg-gray-100' : 'hover:bg-gray-50'}`}
-                onClick={() => handleSearchClick('guests')}
-              >
+              <div className={`relative flex-1 flex items-center py-2.5 pl-6 pr-2 cursor-pointer rounded-full transition-all duration-200 ${isGuestsOpen ? 'bg-gray-100' : 'hover:bg-gray-50'}`} onClick={() => handleSearchClick('guests')}>
                 <div className="flex-1">
                   <label className="block text-xs font-semibold text-gray-900 mb-0.5">Huéspedes</label>
                   <div className="text-sm text-gray-500">{guestsDisplay}</div>
@@ -336,63 +412,16 @@ export default function Home() {
                 {isGuestsOpen && <GuestsSelector onSelectGuests={handleSelectGuests} />}
               </div>
             </div>
-
-            {isDatesOpen && (
-              <DateRangePicker checkIn={filters.check_in} checkOut={filters.check_out} onSelectDate={handleSelectDates} />
-            )}
+            {isDatesOpen && <DateRangePicker checkIn={filters.check_in} checkOut={filters.check_out} onSelectDate={handleSelectDates} />}
           </div>
         </div>
       </div>
 
-      {/* Carrusel de propiedades por ciudad */}
+      {/* Carruseles por ciudad */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {isLoading ? (
-          <div className="flex justify-center items-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#FF385C]"></div>
-          </div>
-        ) : (
-          <>
-            {/* Sección: Alojamientos populares */}
-            <div className="mb-10">
-              <h2 className="text-2xl font-semibold text-gray-900 mb-6">Alojamientos populares</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {properties?.data?.length === 0 && (
-                  <div className="col-span-4 text-center py-12">
-                    <div className="text-6xl mb-4">🏠</div>
-                    <h3 className="text-xl font-semibold text-gray-900 mb-2">No se encontraron propiedades</h3>
-                    <p className="text-gray-500">Intenta ajustar tus filtros de búsqueda</p>
-                  </div>
-                )}
-                {properties?.data?.map((property) => (
-                  <Link key={property.id} to={`/property/${property.id}`} className="group cursor-pointer">
-                    <div className="relative h-64 rounded-xl overflow-hidden mb-3">
-                      {property.images?.[0] ? (
-                        <img src={property.images[0].url} alt={property.title} className="w-full h-full object-cover group-hover:scale-105 transition duration-300" />
-                      ) : (
-                        <div className="flex items-center justify-center h-full bg-gray-200 text-gray-400 text-5xl">🏠</div>
-                      )}
-                      {property.average_rating && (
-                        <div className="absolute top-3 right-3 bg-white px-2 py-1 rounded-lg shadow-md flex items-center space-x-1">
-                          <span className="text-yellow-500 text-sm">⭐</span>
-                          <span className="text-sm font-semibold">{property.average_rating.toFixed(1)}</span>
-                        </div>
-                      )}
-                    </div>
-                    <div className="px-1">
-                      <h3 className="font-semibold text-gray-900 line-clamp-1">{property.city}, {property.country}</h3>
-                      <p className="text-gray-600 text-sm line-clamp-1 mb-1">{property.title}</p>
-                      <p className="text-gray-500 text-sm mb-2">{property.guests} huéspedes · {property.bedrooms} habitaciones</p>
-                      <div>
-                        <span className="font-semibold text-gray-900">${property.price_per_night}</span>
-                        <span className="text-gray-600 text-sm"> noche</span>
-                      </div>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            </div>
-          </>
-        )}
+        {filteredCities.map(city => (
+          <CityCarousel key={city} city={city} properties={mockProperties} />
+        ))}
       </div>
     </div>
   );
