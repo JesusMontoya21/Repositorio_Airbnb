@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import api from '../api/axios';
 import FlexibleDates from '../components/FlexibleDates';
 
 const mockProperties = [
@@ -25,59 +26,34 @@ const mockProperties = [
     images: [{ url: 'https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=400' }]
   },
   {
-    id: 5, city: 'Mazatlán', country: 'México', title: 'Estudio moderno en el centro',
-    price_per_night: 420, guests: 2, bedrooms: 1, average_rating: 4.72,
-    images: [{ url: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400' }]
-  },
-  {
-    id: 6, city: 'Guadalajara', country: 'México', title: 'Loft en Providencia',
+    id: 5, city: 'Guadalajara', country: 'México', title: 'Loft en Providencia',
     price_per_night: 780, guests: 2, bedrooms: 1, average_rating: 4.88,
     images: [{ url: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=400' }]
   },
   {
-    id: 7, city: 'Guadalajara', country: 'México', title: 'Casa en Zapopan con jardín',
+    id: 6, city: 'Guadalajara', country: 'México', title: 'Casa en Zapopan con jardín',
     price_per_night: 950, guests: 5, bedrooms: 3, average_rating: 4.82,
     images: [{ url: 'https://images.unsplash.com/photo-1583608205776-bfd35f0d9f83?w=400' }]
   },
   {
-    id: 8, city: 'Guadalajara', country: 'México', title: 'Departamento en Chapalita',
-    price_per_night: 650, guests: 3, bedrooms: 2, average_rating: 4.75,
-    images: [{ url: 'https://images.unsplash.com/photo-1493809842364-78817add7ffb?w=400' }]
-  },
-  {
-    id: 9, city: 'Guadalajara', country: 'México', title: 'Suite ejecutiva en el centro',
-    price_per_night: 890, guests: 2, bedrooms: 1, average_rating: 4.91,
-    images: [{ url: 'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=400' }]
-  },
-  {
-    id: 10, city: 'Cancún', country: 'México', title: 'Villa en zona hotelera',
+    id: 7, city: 'Cancún', country: 'México', title: 'Villa en zona hotelera',
     price_per_night: 3200, guests: 10, bedrooms: 5, average_rating: 4.95,
     images: [{ url: 'https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=400' }]
   },
   {
-    id: 11, city: 'Cancún', country: 'México', title: 'Departamento frente al mar',
+    id: 8, city: 'Cancún', country: 'México', title: 'Departamento frente al mar',
     price_per_night: 1800, guests: 4, bedrooms: 2, average_rating: 4.87,
     images: [{ url: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400' }]
   },
   {
-    id: 12, city: 'Cancún', country: 'México', title: 'Habitación en hotel boutique',
-    price_per_night: 920, guests: 2, bedrooms: 1, average_rating: 4.79,
-    images: [{ url: 'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=400' }]
-  },
-  {
-    id: 13, city: 'Ciudad de México', country: 'México', title: 'Apartamento en Condesa',
+    id: 9, city: 'Ciudad de México', country: 'México', title: 'Apartamento en Condesa',
     price_per_night: 980, guests: 3, bedrooms: 2, average_rating: 4.93,
     images: [{ url: 'https://images.unsplash.com/photo-1484154218962-a197022b5858?w=400' }]
   },
   {
-    id: 14, city: 'Ciudad de México', country: 'México', title: 'Loft en Roma Norte',
+    id: 10, city: 'Ciudad de México', country: 'México', title: 'Loft en Roma Norte',
     price_per_night: 750, guests: 2, bedrooms: 1, average_rating: 4.86,
     images: [{ url: 'https://images.unsplash.com/photo-1536376072261-38c75010e6c9?w=400' }]
-  },
-  {
-    id: 15, city: 'Ciudad de México', country: 'México', title: 'Casa en Coyoacán',
-    price_per_night: 1100, guests: 6, bedrooms: 3, average_rating: 4.89,
-    images: [{ url: 'https://images.unsplash.com/photo-1598928636135-d146006ff4be?w=400' }]
   },
 ];
 
@@ -87,14 +63,11 @@ const PropertyCard = ({ property }) => (
   <Link to={`/property/${property.id}`} className="group cursor-pointer flex-shrink-0 w-64">
     <div className="relative h-48 rounded-xl overflow-hidden mb-3">
       <img
-        src={property.images[0].url}
+        src={property.images?.[0]?.url || 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=400'}
         alt={property.title}
         className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
       />
-      <button
-        className="absolute top-3 right-3 text-white hover:scale-110 transition"
-        onClick={(e) => e.preventDefault()}
-      >
+      <button className="absolute top-3 right-3 text-white hover:scale-110 transition" onClick={(e) => e.preventDefault()}>
         <svg className="w-6 h-6" fill="none" stroke="white" strokeWidth="2" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
         </svg>
@@ -124,48 +97,27 @@ const PropertyCard = ({ property }) => (
 
 const CityCarousel = ({ city, properties }) => {
   const scrollRef = useRef(null);
-
   const scroll = (direction) => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollBy({ left: direction * 280, behavior: 'smooth' });
-    }
+    if (scrollRef.current) scrollRef.current.scrollBy({ left: direction * 280, behavior: 'smooth' });
   };
-
   const cityProperties = properties.filter(p => p.city === city);
+  if (cityProperties.length === 0) return null;
 
   return (
     <div className="mb-12">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl font-semibold text-gray-900">
-          Alojamientos populares en {city} →
-        </h2>
+        <h2 className="text-2xl font-semibold text-gray-900">Alojamientos populares en {city} →</h2>
         <div className="flex gap-2">
-          <button
-            onClick={() => scroll(-1)}
-            className="p-2 border border-gray-300 rounded-full hover:shadow-md transition"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
+          <button onClick={() => scroll(-1)} className="p-2 border border-gray-300 rounded-full hover:shadow-md transition">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
           </button>
-          <button
-            onClick={() => scroll(1)}
-            className="p-2 border border-gray-300 rounded-full hover:shadow-md transition"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
+          <button onClick={() => scroll(1)} className="p-2 border border-gray-300 rounded-full hover:shadow-md transition">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
           </button>
         </div>
       </div>
-      <div
-        ref={scrollRef}
-        className="flex gap-4 overflow-x-auto scrollbar-hide pb-4"
-        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-      >
-        {cityProperties.map(property => (
-          <PropertyCard key={property.id} property={property} />
-        ))}
+      <div ref={scrollRef} className="flex gap-4 overflow-x-auto pb-4" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+        {cityProperties.map(property => <PropertyCard key={property.id} property={property} />)}
       </div>
     </div>
   );
@@ -286,7 +238,6 @@ const DestinationSuggestions = ({ onSelectCity }) => {
     { name: 'Guadalajara, Jalisco', icon: '🏰', color: 'text-yellow-600 bg-yellow-50' },
     { name: 'Ciudad de México', icon: '🏙️', color: 'text-gray-500 bg-gray-100' },
     { name: 'Cancún, Quintana Roo', icon: '🌴', color: 'text-green-500 bg-green-50' },
-    { name: 'Monterrey, Nuevo León', icon: '🏭', color: 'text-red-500 bg-red-50' },
     { name: 'Culiacán, Sinaloa', icon: '💎', color: 'text-pink-400 bg-pink-100' },
   ];
   return (
@@ -346,6 +297,20 @@ export default function Home() {
   const [isGuestsOpen, setIsGuestsOpen] = useState(false);
   const searchRef = useRef(null);
 
+  const { data: apiProperties, isLoading } = useQuery({
+    queryKey: ['properties', filters],
+    queryFn: async () => {
+      try {
+        const res = await api.get('/properties', { params: filters });
+        return res.data.data || [];
+      } catch {
+        return [];
+      }
+    },
+  });
+
+  const allProperties = (apiProperties && apiProperties.length > 0) ? apiProperties : mockProperties;
+
   const handleSelectCity = (city) => { setFilters(prev => ({ ...prev, city })); setIsDestinationOpen(false); };
   const handleSelectDates = useCallback((newDates) => { setFilters(prev => ({ ...prev, ...newDates })); }, []);
   const handleSelectGuests = useCallback((guestData) => { setFilters(prev => ({ ...prev, ...guestData })); }, []);
@@ -378,8 +343,8 @@ export default function Home() {
 
   const guestsDisplay = filters.guests > 0 ? `${filters.guests} huésped${filters.guests > 1 ? 'es' : ''}` : '¿Cuántos?';
 
-  const filteredCities = filters.city
-    ? cities.filter(c => c.toLowerCase().includes(filters.city.toLowerCase()))
+  const availableCities = filters.city
+    ? [...new Set(allProperties.filter(p => p.city.toLowerCase().includes(filters.city.toLowerCase())).map(p => p.city))]
     : cities;
 
   return (
@@ -417,11 +382,16 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Carruseles por ciudad */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {filteredCities.map(city => (
-          <CityCarousel key={city} city={city} properties={mockProperties} />
-        ))}
+        {isLoading ? (
+          <div className="flex justify-center items-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#FF385C]"></div>
+          </div>
+        ) : (
+          availableCities.map(city => (
+            <CityCarousel key={city} city={city} properties={allProperties} />
+          ))
+        )}
       </div>
     </div>
   );

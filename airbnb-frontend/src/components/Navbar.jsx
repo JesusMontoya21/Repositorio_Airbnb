@@ -70,7 +70,7 @@ export default function Navbar() {
                     }`}
                   >
                     {cat.isNew && (
-                      <span className="absolute -top-3 -right-5 bg-black text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full">
+                      <span className="absolute -top-3 -right-5 bg-black cd text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full">
                         NUEVO
                       </span>
                     )}
