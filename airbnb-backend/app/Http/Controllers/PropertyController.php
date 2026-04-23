@@ -49,8 +49,8 @@ class PropertyController extends Controller
             'address'         => 'required|string',
             'price_per_night' => 'required|numeric|min:1',
             'guests'          => 'required|integer|min:1',
-            'bedrooms'        => 'required|integer|min:1',
-            'bathrooms'       => 'required|integer|min:1',
+            'bedrooms'        => 'required|integer|min:0',
+            'bathrooms'       => 'required|numeric|min:0.5',
             'type'            => 'sometimes|string',
             'images'          => 'sometimes|array',
             'images.*'        => 'url',
@@ -94,8 +94,8 @@ class PropertyController extends Controller
             'address'         => 'sometimes|string',
             'price_per_night' => 'sometimes|numeric|min:1',
             'guests'          => 'sometimes|integer|min:1',
-            'bedrooms'        => 'sometimes|integer|min:1',
-            'bathrooms'       => 'sometimes|integer|min:1',
+            'bedrooms'        => 'sometimes|integer|min:0',
+            'bathrooms'       => 'sometimes|numeric|min:0.5',
             'is_active'       => 'sometimes|boolean',
         ]);
 

@@ -1,12 +1,34 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
-import { bookingsAPI } from '../services/api';
+import api from '../api/axios';
 
 export default function MyBookings() {
+  const queryClient = useQueryClient();
+
   const { data: bookings, isLoading } = useQuery({
     queryKey: ['my-bookings'],
-    queryFn: () => bookingsAPI.getMyBookings().then(res => res.data),
+    queryFn: async () => {
+      const res = await api.get('/my-bookings');
+      return res.data;
+    },
   });
+
+  const cancelMutation = useMutation({
+    mutationFn: (id) => api.put(`/bookings/${id}/cancel`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['my-bookings'] });
+      alert('Reserva cancelada exitosamente');
+    },
+    onError: () => {
+      alert('Error al cancelar la reserva');
+    },
+  });
+
+  const handleCancel = (id) => {
+    if (window.confirm('¿Estás seguro de cancelar esta reserva?')) {
+      cancelMutation.mutate(id);
+    }
+  };
 
   const getStatusColor = (status) => {
     const colors = {
@@ -39,7 +61,7 @@ export default function MyBookings() {
   if (isLoading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#FF385C]"></div>
       </div>
     );
   }
@@ -48,72 +70,68 @@ export default function MyBookings() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <h1 className="text-3xl font-bold mb-6">Mis reservas</h1>
 
-      {bookings?.length === 0 ? (
-        <div className="text-center py-12 bg-white rounded-lg shadow-md">
+      {!bookings || bookings.length === 0 ? (
+        <div className="text-center py-12 bg-white rounded-xl shadow-md">
+          <div className="text-6xl mb-4">🗓️</div>
           <p className="text-gray-500 text-lg mb-4">No tienes reservas aún</p>
-          <Link
-            to="/"
-            className="inline-block bg-primary text-white px-6 py-3 rounded-lg hover:bg-primary-dark transition"
-          >
+          <Link to="/" className="inline-block bg-[#FF385C] text-white px-6 py-3 rounded-lg hover:bg-[#E0314F] transition">
             Explorar propiedades
           </Link>
         </div>
       ) : (
         <div className="space-y-4">
-          {bookings?.map((booking) => (
-            <div
-              key={booking.id}
-              className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition"
-            >
+          {bookings.map((booking) => (
+            <div key={booking.id} className="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition">
               <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center space-x-3 mb-2">
-                    <Link
-                      to={`/property/${booking.property?.id}`}
-                      className="text-xl font-semibold hover:text-primary transition"
-                    >
-                      {booking.property?.title}
-                    </Link>
-                    <span
-                      className={`px-3 py-1 rounded-full text-white text-sm font-medium ${getStatusColor(
-                        booking.status
-                      )}`}
-                    >
-                      {getStatusText(booking.status)}
-                    </span>
-                  </div>
-
-                  <p className="text-gray-600 mb-3">
-                    {booking.property?.city}, {booking.property?.country}
-                  </p>
-
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                    <div>
-                      <span className="text-gray-500">Check-in:</span>
-                      <p className="font-medium">{formatDate(booking.check_in)}</p>
+                <div className="flex gap-4">
+                  {booking.property?.images?.[0] && (
+                    <img src={booking.property.images[0].url} alt={booking.property.title}
+                      className="w-24 h-24 rounded-xl object-cover flex-shrink-0" />
+                  )}
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-2">
+                      <Link to={`/property/${booking.property?.id}`}
+                        className="text-xl font-semibold hover:text-[#FF385C] transition">
+                        {booking.property?.title}
+                      </Link>
+                      <span className={`px-3 py-1 rounded-full text-white text-sm font-medium ${getStatusColor(booking.status)}`}>
+                        {getStatusText(booking.status)}
+                      </span>
                     </div>
-                    <div>
-                      <span className="text-gray-500">Check-out:</span>
-                      <p className="font-medium">{formatDate(booking.check_out)}</p>
-                    </div>
-                    <div>
-                      <span className="text-gray-500">Huéspedes:</span>
-                      <p className="font-medium">{booking.guests}</p>
+                    <p className="text-gray-600 mb-3">{booking.property?.city}, {booking.property?.country}</p>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                      <div>
+                        <span className="text-gray-500">Check-in:</span>
+                        <p className="font-medium">{formatDate(booking.check_in)}</p>
+                      </div>
+                      <div>
+                        <span className="text-gray-500">Check-out:</span>
+                        <p className="font-medium">{formatDate(booking.check_out)}</p>
+                      </div>
+                      <div>
+                        <span className="text-gray-500">Huéspedes:</span>
+                        <p className="font-medium">{booking.guests}</p>
+                      </div>
                     </div>
                   </div>
                 </div>
 
-                <div className="mt-4 md:mt-0 md:ml-6 text-right">
-                  <p className="text-gray-500 text-sm mb-1">Total pagado</p>
-                  <p className="text-2xl font-bold text-primary">
-                    ${parseFloat(booking.total_price).toFixed(2)}
+                <div className="mt-4 md:mt-0 md:ml-6 text-right flex flex-col items-end">
+                  <p className="text-gray-500 text-sm mb-1">Total</p>
+                  <p className="text-2xl font-bold text-[#FF385C]">
+                    ${parseFloat(booking.total_price).toFixed(2)} MXN
                   </p>
-                  <Link
-                    to={`/property/${booking.property?.id}`}
-                    className="inline-block mt-3 text-primary hover:underline text-sm"
-                  >
+                  <Link to={`/property/${booking.property?.id}`}
+                    className="mt-2 text-[#FF385C] hover:underline text-sm">
                     Ver propiedad →
                   </Link>
+                  {booking.status === 'pending' && (
+                    <button onClick={() => handleCancel(booking.id)}
+                      disabled={cancelMutation.isPending}
+                      className="mt-2 text-red-500 hover:underline text-sm disabled:opacity-50">
+                      Cancelar reserva
+                    </button>
+                  )}
                 </div>
               </div>
             </div>

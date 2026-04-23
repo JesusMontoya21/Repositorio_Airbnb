@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PropertyController;
+use App\Http\Controllers\BookingController;
 
 // Rutas públicas
 Route::post('/login', [AuthController::class, 'login']);
@@ -17,8 +18,15 @@ Route::middleware('auth:sanctum')->group(function () {
         return $request->user();
     });
     Route::post('/logout', [AuthController::class, 'logout']);
+
+    // Propiedades
     Route::post('/properties', [PropertyController::class, 'store']);
     Route::put('/properties/{id}', [PropertyController::class, 'update']);
     Route::delete('/properties/{id}', [PropertyController::class, 'destroy']);
     Route::get('/my-properties', [PropertyController::class, 'myProperties']);
+
+    // Reservas
+    Route::post('/bookings', [BookingController::class, 'store']);
+    Route::get('/my-bookings', [BookingController::class, 'myBookings']);
+    Route::put('/bookings/{id}/cancel', [BookingController::class, 'cancel']);
 });
