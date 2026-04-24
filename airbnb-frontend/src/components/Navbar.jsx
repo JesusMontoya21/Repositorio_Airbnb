@@ -60,17 +60,12 @@ export default function Navbar() {
               {categories.map((cat) => {
                 const isActive = location.pathname === cat.path;
                 return (
-                  <Link
-                    key={cat.label}
-                    to={cat.path}
+                  <Link key={cat.label} to={cat.path}
                     className={`relative flex flex-col items-center gap-1 pb-2 border-b-2 transition-all duration-200 ${
-                      isActive
-                        ? 'border-gray-900 text-gray-900'
-                        : 'border-transparent text-gray-500 hover:text-gray-900 hover:border-gray-300'
-                    }`}
-                  >
+                      isActive ? 'border-gray-900 text-gray-900' : 'border-transparent text-gray-500 hover:text-gray-900 hover:border-gray-300'
+                    }`}>
                     {cat.isNew && (
-                      <span className="absolute -top-3 -right-5 bg-black cd text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full">
+                      <span className="absolute -top-3 -right-5 bg-black text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full">
                         NUEVO
                       </span>
                     )}
@@ -85,17 +80,12 @@ export default function Navbar() {
             <div className="flex items-center space-x-4">
               {user ? (
                 <>
-                  <button
-                    onClick={handleOpenHost}
-                    className="hidden lg:block text-sm font-medium text-gray-900 hover:bg-gray-50 px-4 py-2 rounded-full transition"
-                  >
+                  <button onClick={handleOpenHost}
+                    className="hidden lg:block text-sm font-medium text-gray-900 hover:bg-gray-50 px-4 py-2 rounded-full transition">
                     Conviértete en anfitrión
                   </button>
 
-                  <button
-                    onClick={() => setShowLanguageModal(true)}
-                    className="p-3 hover:bg-gray-100 rounded-full transition"
-                  >
+                  <button onClick={() => setShowLanguageModal(true)} className="p-3 hover:bg-gray-100 rounded-full transition">
                     <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 text-gray-700" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                       <circle cx="12" cy="12" r="9" strokeWidth="1.5"/>
                       <path d="M12 3c2 0 3.5 4 3.5 9s-1.5 9-3.5 9-3.5-4-3.5-9 1.5-9 3.5-9z" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
@@ -116,16 +106,17 @@ export default function Navbar() {
                     </button>
 
                     <div className="absolute right-0 mt-2 w-60 bg-white rounded-xl shadow-lg border border-gray-200 py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
+                      <Link to="/profile" className="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-100">
+                        Mi perfil
+                      </Link>
                       <Link to="/my-properties" className="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-100">
                         Mis propiedades
                       </Link>
                       <Link to="/my-bookings" className="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-100">
                         Mis reservas
                       </Link>
-                      <button
-                        onClick={handleOpenHost}
-                        className="block w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 lg:hidden"
-                      >
+                      <button onClick={handleOpenHost}
+                        className="block w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 lg:hidden">
                         Publicar propiedad
                       </button>
                       <hr className="my-2" />
@@ -137,17 +128,12 @@ export default function Navbar() {
                 </>
               ) : (
                 <>
-                  <button
-                    onClick={handleOpenHost}
-                    className="hidden lg:block text-sm font-medium text-gray-900 hover:bg-gray-50 px-4 py-2 rounded-full transition"
-                  >
+                  <button onClick={handleOpenHost}
+                    className="hidden lg:block text-sm font-medium text-gray-900 hover:bg-gray-50 px-4 py-2 rounded-full transition">
                     Conviértete en anfitrión
                   </button>
 
-                  <button
-                    onClick={() => setShowLanguageModal(true)}
-                    className="p-3 hover:bg-gray-100 rounded-full transition"
-                  >
+                  <button onClick={() => setShowLanguageModal(true)} className="p-3 hover:bg-gray-100 rounded-full transition">
                     <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 text-gray-700" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                       <circle cx="12" cy="12" r="9" strokeWidth="1.5"/>
                       <path d="M12 3c2 0 3.5 4 3.5 9s-1.5 9-3.5 9-3.5-4-3.5-9 1.5-9 3.5-9z" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
@@ -156,10 +142,8 @@ export default function Navbar() {
                   </button>
 
                   <div className="relative" ref={menuRef}>
-                    <button
-                      onClick={() => setIsMenuOpen(!isMenuOpen)}
-                      className="p-3 border border-gray-300 rounded-full hover:shadow-md transition"
-                    >
+                    <button onClick={() => setIsMenuOpen(!isMenuOpen)}
+                      className="p-3 border border-gray-300 rounded-full hover:shadow-md transition">
                       <svg className="w-4 h-4 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 6h16M4 12h16M4 18h16" />
                       </svg>
@@ -168,38 +152,28 @@ export default function Navbar() {
                     {isMenuOpen && (
                       <div className="absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-xl border border-gray-200 py-2 z-50">
                         <div className="py-2">
-                          <button
-                            onClick={() => setIsMenuOpen(false)}
-                            className="block w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition"
-                          >
+                          <button onClick={() => setIsMenuOpen(false)}
+                            className="block w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition">
                             Centro de ayuda
                           </button>
-                          <button
-                            onClick={handleOpenHost}
-                            className="block w-full text-left px-4 py-3 text-sm hover:bg-gray-50 transition"
-                          >
+                          <button onClick={handleOpenHost}
+                            className="block w-full text-left px-4 py-3 text-sm hover:bg-gray-50 transition">
                             <p className="font-semibold text-gray-900">Conviértete en anfitrión</p>
                             <p className="text-xs text-gray-500">Es fácil comenzar a hospedar y ganar un dinero extra.</p>
                           </button>
-                          <button
-                            onClick={() => setIsMenuOpen(false)}
-                            className="block w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition"
-                          >
+                          <button onClick={() => setIsMenuOpen(false)}
+                            className="block w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition">
                             Invita a un anfitrión
                           </button>
-                          <button
-                            onClick={() => setIsMenuOpen(false)}
-                            className="block w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition"
-                          >
+                          <button onClick={() => setIsMenuOpen(false)}
+                            className="block w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition">
                             Tarjetas de regalo
                           </button>
                         </div>
                         <hr className="my-2 border-gray-200" />
                         <div className="py-2">
-                          <button
-                            onClick={handleOpenLogin}
-                            className="block w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition"
-                          >
+                          <button onClick={handleOpenLogin}
+                            className="block w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition">
                             Inicia sesión o regístrate
                           </button>
                         </div>
@@ -210,30 +184,6 @@ export default function Navbar() {
               )}
             </div>
           </div>
-        </div>
-
-        {/* Categorías móvil */}
-<div className="hidden flex items-center gap-6 px-6 pb-3 overflow-x-auto">
-          {categories.map((cat) => {
-            const isActive = location.pathname === cat.path;
-            return (
-              <Link
-                key={cat.label}
-                to={cat.path}
-                className={`relative flex flex-col items-center gap-1 pb-2 border-b-2 flex-shrink-0 transition-all duration-200 ${
-                  isActive ? 'border-gray-900 text-gray-900' : 'border-transparent text-gray-500'
-                }`}
-              >
-                {cat.isNew && (
-                  <span className="absolute -top-3 -right-5 bg-black text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full">
-                    NUEVO
-                  </span>
-                )}
-                <span className="text-xl">{cat.icon}</span>
-                <span className="text-xs font-medium whitespace-nowrap">{cat.label}</span>
-              </Link>
-            );
-          })}
         </div>
       </nav>
 
