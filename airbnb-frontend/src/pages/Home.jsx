@@ -57,8 +57,6 @@ const mockProperties = [
   },
 ];
 
-const cities = ['Mazatlán', 'Guadalajara', 'Cancún', 'Ciudad de México'];
-
 const PropertyCard = ({ property }) => (
   <Link to={`/property/${property.id}`} className="group cursor-pointer flex-shrink-0 w-64">
     <div className="relative h-48 rounded-xl overflow-hidden mb-3">
@@ -122,6 +120,46 @@ const CityCarousel = ({ city, properties }) => {
     </div>
   );
 };
+
+const SearchResults = ({ properties, searchCity }) => (
+  <div className="mb-12">
+    <h2 className="text-2xl font-semibold text-gray-900 mb-4">
+      {properties.length > 0
+        ? `${properties.length} alojamientos en "${searchCity}"`
+        : `No se encontraron alojamientos en "${searchCity}"`}
+    </h2>
+    {properties.length > 0 ? (
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {properties.map(property => (
+          <Link key={property.id} to={`/property/${property.id}`} className="group cursor-pointer">
+            <div className="relative h-48 rounded-xl overflow-hidden mb-3">
+              <img src={property.images?.[0]?.url || 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=400'}
+                alt={property.title} className="w-full h-full object-cover group-hover:scale-105 transition duration-300" />
+              {property.average_rating >= 4.9 && (
+                <div className="absolute top-3 left-3 bg-white px-2 py-1 rounded-full text-xs font-semibold shadow">
+                  Favorito entre huéspedes
+                </div>
+              )}
+            </div>
+            <div className="px-1">
+              <h3 className="font-semibold text-gray-900 text-sm line-clamp-1">{property.title}</h3>
+              <p className="text-gray-500 text-xs mt-0.5">{property.city}, {property.country}</p>
+              <p className="text-sm mt-1">
+                <span className="font-semibold">${property.price_per_night} MXN</span>
+                <span className="text-gray-500"> noche</span>
+              </p>
+            </div>
+          </Link>
+        ))}
+      </div>
+    ) : (
+      <div className="text-center py-12">
+        <div className="text-6xl mb-4">🔍</div>
+        <p className="text-gray-500">Intenta con otra ciudad o ajusta tus filtros</p>
+        </div>
+    )}
+  </div>
+);
 
 const getMonthDetails = (date) => {
   const year = date.getFullYear();
@@ -292,16 +330,17 @@ const GuestsSelector = ({ onSelectGuests }) => {
 
 export default function Home() {
   const [filters, setFilters] = useState({ city: '', check_in: '', check_out: '', guests: 0 });
+  const [searchParams, setSearchParams] = useState({ city: '', guests: 0 });
   const [isDestinationOpen, setIsDestinationOpen] = useState(false);
   const [isDatesOpen, setIsDatesOpen] = useState(false);
   const [isGuestsOpen, setIsGuestsOpen] = useState(false);
   const searchRef = useRef(null);
 
   const { data: apiProperties, isLoading } = useQuery({
-    queryKey: ['properties', filters],
+    queryKey: ['properties', searchParams],
     queryFn: async () => {
       try {
-        const res = await api.get('/properties', { params: filters });
+        const res = await api.get('/properties', { params: searchParams });
         return res.data.data || [];
       } catch {
         return [];
@@ -311,9 +350,19 @@ export default function Home() {
 
   const allProperties = (apiProperties && apiProperties.length > 0) ? apiProperties : mockProperties;
 
-  const handleSelectCity = (city) => { setFilters(prev => ({ ...prev, city })); setIsDestinationOpen(false); };
+  const handleSelectCity = (city) => {
+    setFilters(prev => ({ ...prev, city }));
+    setIsDestinationOpen(false);
+  };
   const handleSelectDates = useCallback((newDates) => { setFilters(prev => ({ ...prev, ...newDates })); }, []);
   const handleSelectGuests = useCallback((guestData) => { setFilters(prev => ({ ...prev, ...guestData })); }, []);
+
+  const handleSearch = () => {
+    setSearchParams({ city: filters.city, guests: filters.guests });
+    setIsDestinationOpen(false);
+    setIsDatesOpen(false);
+    setIsGuestsOpen(false);
+  };
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -343,9 +392,13 @@ export default function Home() {
 
   const guestsDisplay = filters.guests > 0 ? `${filters.guests} huésped${filters.guests > 1 ? 'es' : ''}` : '¿Cuántos?';
 
-  const availableCities = filters.city
-    ? [...new Set(allProperties.filter(p => p.city.toLowerCase().includes(filters.city.toLowerCase())).map(p => p.city))]
-    : cities;
+  const isSearching = searchParams.city !== '';
+
+  const availableCities = [...new Set(allProperties.map(p => p.city))];
+
+  const filteredProperties = isSearching
+    ? allProperties.filter(p => p.city.toLowerCase().includes(searchParams.city.toLowerCase()))
+    : [];
 
   return (
     <div>
@@ -357,6 +410,7 @@ export default function Home() {
                 <label className="block text-xs font-semibold text-gray-900 mb-0.5">Destino</label>
                 <input type="text" name="city" placeholder="Buscar destinos" value={filters.city}
                   onChange={(e) => setFilters({ ...filters, city: e.target.value })}
+                  onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
                   className="w-full text-sm text-gray-500 placeholder-gray-400 focus:outline-none bg-transparent" />
                 {isDestinationOpen && <DestinationSuggestions onSelectCity={handleSelectCity} />}
               </div>
@@ -369,7 +423,9 @@ export default function Home() {
                   <label className="block text-xs font-semibold text-gray-900 mb-0.5">Huéspedes</label>
                   <div className="text-sm text-gray-500">{guestsDisplay}</div>
                 </div>
-                <button className="bg-[#FF385C] hover:bg-[#E0314F] text-white rounded-full p-3.5 ml-4 transition-colors duration-200 flex items-center justify-center">
+                <button
+                  onClick={handleSearch}
+                  className="bg-[#FF385C] hover:bg-[#E0314F] text-white rounded-full p-3.5 ml-4 transition-colors duration-200 flex items-center justify-center">
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                   </svg>
@@ -379,6 +435,17 @@ export default function Home() {
             </div>
             {isDatesOpen && <DateRangePicker checkIn={filters.check_in} checkOut={filters.check_out} onSelectDate={handleSelectDates} />}
           </div>
+
+          {/* Botón limpiar búsqueda */}
+          {isSearching && (
+            <div className="flex justify-center mt-3">
+              <button
+                onClick={() => { setFilters({ city: '', check_in: '', check_out: '', guests: 0 }); setSearchParams({ city: '', guests: 0 }); }}
+                className="text-sm text-gray-600 hover:text-gray-900 underline">
+                ✕ Limpiar búsqueda
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
@@ -387,6 +454,8 @@ export default function Home() {
           <div className="flex justify-center items-center py-12">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#FF385C]"></div>
           </div>
+        ) : isSearching ? (
+          <SearchResults properties={filteredProperties} searchCity={searchParams.city} />
         ) : (
           availableCities.map(city => (
             <CityCarousel key={city} city={city} properties={allProperties} />
