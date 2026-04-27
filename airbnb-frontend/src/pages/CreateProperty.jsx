@@ -19,6 +19,7 @@ export default function CreateProperty() {
       bathrooms: 0.5
     },
     amenities: [],
+    images: [],
     title: '',
     description: '',
     bookingPreference: 'approve_first',
@@ -63,6 +64,7 @@ export default function CreateProperty() {
         bedrooms: propertyData.basics.bedrooms,
         bathrooms: propertyData.basics.bathrooms,
         type: propertyData.propertyType || 'apartment',
+        images: propertyData.images,
       });
       alert('¡Felicidades! Tu propiedad ha sido creada exitosamente.');
       navigate('/my-properties');
@@ -294,20 +296,87 @@ export default function CreateProperty() {
     );
   };
 
-  const Step8Photos = () => (
-    <div className="flex flex-col w-full max-w-2xl mx-auto px-6 py-8">
-      <div className="mb-8 text-center">
-        <h1 className="text-3xl font-bold text-gray-900 mb-4">Agrega fotos de tu alojamiento</h1>
-        <p className="text-base text-gray-600">Para empezar, necesitarás al menos 5 fotos.</p>
+  const Step8Photos = () => {
+    const [imageUrls, setImageUrls] = useState(propertyData.images || []);
+    const [inputUrl, setInputUrl] = useState('');
+    const [error, setError] = useState('');
+
+    const handleAddUrl = () => {
+      if (!inputUrl.trim()) return;
+      if (!inputUrl.startsWith('http')) {
+        setError('La URL debe comenzar con http:// o https://');
+        return;
+      }
+      if (imageUrls.length >= 10) {
+        setError('Máximo 10 imágenes');
+        return;
+      }
+      setError('');
+      const newUrls = [...imageUrls, inputUrl.trim()];
+      setImageUrls(newUrls);
+      updatePropertyData({ images: newUrls });
+      setInputUrl('');
+    };
+
+    const handleRemoveUrl = (index) => {
+      const newUrls = imageUrls.filter((_, i) => i !== index);
+      setImageUrls(newUrls);
+      updatePropertyData({ images: newUrls });
+    };
+
+    return (
+      <div className="flex flex-col w-full max-w-2xl mx-auto px-6 py-8">
+        <div className="mb-8 text-center">
+          <h1 className="text-3xl font-bold text-gray-900 mb-4">Agrega fotos de tu alojamiento</h1>
+          <p className="text-base text-gray-600">Pega las URLs de tus imágenes. Puedes usar imágenes de internet.</p>
+        </div>
+
+        <div className="flex gap-2 mb-4">
+          <input type="text" value={inputUrl}
+            onChange={(e) => setInputUrl(e.target.value)}
+            onKeyPress={(e) => e.key === 'Enter' && handleAddUrl()}
+            placeholder="https://ejemplo.com/foto.jpg"
+            className="flex-1 border-2 border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-gray-900" />
+          <button onClick={handleAddUrl}
+            className="bg-gray-900 text-white px-6 py-3 rounded-xl font-semibold hover:bg-black transition">
+            Agregar
+          </button>
+        </div>
+
+        {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
+
+        {imageUrls.length > 0 ? (
+          <div className="grid grid-cols-2 gap-3">
+            {imageUrls.map((url, index) => (
+              <div key={index} className="relative h-36 rounded-xl overflow-hidden group">
+                <img src={url} alt={`Imagen ${index + 1}`}
+                  className="w-full h-full object-cover"
+                  onError={(e) => { e.target.src = 'https://placehold.co/400x300/gray/white?text=Error'; }} />
+                <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all">
+                  <button onClick={() => handleRemoveUrl(index)}
+                    className="absolute top-2 right-2 bg-white rounded-full w-7 h-7 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all hover:bg-red-500 hover:text-white">
+                    ✕
+                  </button>
+                </div>
+                {index === 0 && (
+                  <div className="absolute bottom-2 left-2 bg-white px-2 py-0.5 rounded-full text-xs font-semibold">
+                    Principal
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="border-2 border-dashed border-gray-300 rounded-xl p-12 text-center">
+            <div className="text-4xl mb-3">🖼️</div>
+            <p className="text-gray-500">Agrega al menos una imagen para continuar</p>
+          </div>
+        )}
+
+        <p className="text-sm text-gray-500 mt-4 text-center">{imageUrls.length}/10 imágenes agregadas</p>
       </div>
-      <div className="border-2 border-dashed border-gray-300 rounded-xl p-24 text-center hover:border-gray-400 transition-colors">
-        <p className="text-gray-500 mb-4">Las fotos se podrán agregar una vez publicada la propiedad</p>
-        <button className="bg-gray-900 text-white py-4 px-8 rounded-lg text-base font-semibold hover:bg-black transition">
-          Agregar fotos
-        </button>
-      </div>
-    </div>
-  );
+    );
+  };
 
   const Step9Title = ({ title, setTitle }) => {
     const maxLength = 50;
@@ -576,7 +645,7 @@ export default function CreateProperty() {
       </header>
 
       <main className="flex-grow overflow-y-auto flex justify-center">
-        <div className={`w-full h-full flex justify-center ${[2, 5, 7, 9, 10, 12, 13, 16, 17].includes(currentStep) ? 'items-start pt-8' : 'items-center'}`}>
+        <div className={`w-full h-full flex justify-center ${[2, 5, 7, 8, 9, 10, 12, 13, 16, 17].includes(currentStep) ? 'items-start pt-8' : 'items-center'}`}>
           {renderStepContent()}
         </div>
       </main>
