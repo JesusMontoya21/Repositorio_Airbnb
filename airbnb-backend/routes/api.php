@@ -6,12 +6,14 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PropertyController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ReviewController;
 
 // Rutas públicas
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']);
 Route::get('/properties', [PropertyController::class, 'index']);
 Route::get('/properties/{id}', [PropertyController::class, 'show']);
+Route::get('/properties/{id}/reviews', [ReviewController::class, 'index']);
 
 // Rutas protegidas
 Route::middleware('auth:sanctum')->group(function () {
@@ -34,4 +36,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/bookings', [BookingController::class, 'store']);
     Route::get('/my-bookings', [BookingController::class, 'myBookings']);
     Route::put('/bookings/{id}/cancel', [BookingController::class, 'cancel']);
+
+    // Reseñas
+    Route::post('/properties/{id}/reviews', [ReviewController::class, 'store']);
+    Route::delete('/reviews/{id}', [ReviewController::class, 'destroy']);
 });
