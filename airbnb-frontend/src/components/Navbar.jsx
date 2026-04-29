@@ -115,6 +115,9 @@ export default function Navbar() {
                       <Link to="/my-bookings" className="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-100">
                         Mis reservas
                       </Link>
+                      <Link to="/favorites" className="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-100">
+                        Mis favoritos
+                      </Link>
                       <button onClick={handleOpenHost}
                         className="block w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 lg:hidden">
                         Publicar propiedad

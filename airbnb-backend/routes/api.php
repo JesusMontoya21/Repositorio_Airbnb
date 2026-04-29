@@ -7,6 +7,7 @@ use App\Http\Controllers\PropertyController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\FavoriteController;
 
 // Rutas públicas
 Route::post('/login', [AuthController::class, 'login']);
@@ -40,4 +41,9 @@ Route::middleware('auth:sanctum')->group(function () {
     // Reseñas
     Route::post('/properties/{id}/reviews', [ReviewController::class, 'store']);
     Route::delete('/reviews/{id}', [ReviewController::class, 'destroy']);
+
+    // Favoritos
+    Route::get('/favorites', [FavoriteController::class, 'index']);
+    Route::post('/favorites/{propertyId}', [FavoriteController::class, 'toggle']);
+    Route::get('/favorites/{propertyId}/check', [FavoriteController::class, 'check']);
 });

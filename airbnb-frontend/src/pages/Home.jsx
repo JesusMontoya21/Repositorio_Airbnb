@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import api from '../api/axios';
 import FlexibleDates from '../components/FlexibleDates';
+import { useAuth } from '../context/AuthContext';
+import { useQueryClient } from '@tanstack/react-query';
 
 const mockProperties = [
   {
@@ -57,41 +59,53 @@ const mockProperties = [
   },
 ];
 
-const PropertyCard = ({ property }) => (
-  <Link to={`/property/${property.id}`} className="group cursor-pointer flex-shrink-0 w-64">
-    <div className="relative h-48 rounded-xl overflow-hidden mb-3">
-      <img
-        src={property.images?.[0]?.url || 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=400'}
-        alt={property.title}
-        className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
-      />
-      <button className="absolute top-3 right-3 text-white hover:scale-110 transition" onClick={(e) => e.preventDefault()}>
-        <svg className="w-6 h-6" fill="none" stroke="white" strokeWidth="2" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-        </svg>
-      </button>
-      {property.average_rating >= 4.9 && (
-        <div className="absolute top-3 left-3 bg-white px-2 py-1 rounded-full text-xs font-semibold shadow">
-          Favorito entre huéspedes
-        </div>
-      )}
-    </div>
-    <div className="px-1">
-      <div className="flex justify-between items-start">
-        <h3 className="font-semibold text-gray-900 text-sm line-clamp-1">{property.title}</h3>
-        <div className="flex items-center gap-1 ml-2 flex-shrink-0">
-          <svg className="w-3 h-3 fill-gray-900" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-          <span className="text-xs font-medium">{property.average_rating}</span>
-        </div>
+const PropertyCard = ({ property }) => {
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+
+  const toggleFavorite = async (e) => {
+    e.preventDefault();
+    if (!user) return;
+    await api.post(`/favorites/${property.id}`);
+    queryClient.invalidateQueries({ queryKey: ['favorites'] });
+  };
+
+  return (
+    <Link to={`/property/${property.id}`} className="group cursor-pointer flex-shrink-0 w-64">
+      <div className="relative h-48 rounded-xl overflow-hidden mb-3">
+        <img
+          src={property.images?.[0]?.url || 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=400'}
+          alt={property.title}
+          className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+        />
+        <button className="absolute top-3 right-3 text-white hover:scale-110 transition" onClick={toggleFavorite}>
+          <svg className="w-6 h-6" fill="none" stroke="white" strokeWidth="2" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+          </svg>
+        </button>
+        {property.average_rating >= 4.9 && (
+          <div className="absolute top-3 left-3 bg-white px-2 py-1 rounded-full text-xs font-semibold shadow">
+            Favorito entre huéspedes
+          </div>
+        )}
       </div>
-      <p className="text-gray-500 text-xs mt-0.5">{property.guests} huéspedes · {property.bedrooms} hab.</p>
-      <p className="text-sm mt-1">
-        <span className="font-semibold">${property.price_per_night} MXN</span>
-        <span className="text-gray-500"> noche</span>
-      </p>
-    </div>
-  </Link>
-);
+      <div className="px-1">
+        <div className="flex justify-between items-start">
+          <h3 className="font-semibold text-gray-900 text-sm line-clamp-1">{property.title}</h3>
+          <div className="flex items-center gap-1 ml-2 flex-shrink-0">
+            <svg className="w-3 h-3 fill-gray-900" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            <span className="text-xs font-medium">{property.average_rating}</span>
+          </div>
+        </div>
+        <p className="text-gray-500 text-xs mt-0.5">{property.guests} huéspedes · {property.bedrooms} hab.</p>
+        <p className="text-sm mt-1">
+          <span className="font-semibold">${property.price_per_night} MXN</span>
+          <span className="text-gray-500"> noche</span>
+        </p>
+      </div>
+    </Link>
+  );
+};
 
 const CityCarousel = ({ city, properties }) => {
   const scrollRef = useRef(null);

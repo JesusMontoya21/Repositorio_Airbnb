@@ -18,6 +18,7 @@ import BecomeHostIntro from './pages/BecomeHostIntro.jsx';
 import CreateProperty from './pages/CreateProperty.jsx'; 
 import CreateExperience from './pages/CreateExperience.jsx';
 import CreateService from './pages/CreateService.jsx';
+import Favorites from './pages/Favorites.jsx';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -52,6 +53,7 @@ function AppLayout() {
           <Route path="/my-properties" element={<ProtectedRoute><MyProperties /></ProtectedRoute>} />
           <Route path="/my-bookings" element={<ProtectedRoute><MyBookings /></ProtectedRoute>} />
           <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+          <Route path="/favorites" element={<ProtectedRoute><Favorites /></ProtectedRoute>} />
         </Routes>
       </main>
 
