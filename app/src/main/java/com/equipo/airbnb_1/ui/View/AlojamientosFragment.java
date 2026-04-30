@@ -38,8 +38,6 @@ public class AlojamientosFragment extends Fragment {
 
         seleccionarSeccion("Alojamientos");
 
-        // --- BOTONES DE NAVEGACIÓN CORREGIDOS ---
-
         btnAlojamientos.setOnClickListener(v -> seleccionarSeccion("Alojamientos"));
         btnExperiencias.setOnClickListener(v -> {
             Navigation.findNavController(v).navigate(R.id.btnExperiencias);

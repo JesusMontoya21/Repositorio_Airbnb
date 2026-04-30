@@ -6,8 +6,8 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class RetrofitClient {
 
     private static Retrofit retrofit = null;
-    // Cambia esto por tu URL real (terminada en /)
-    private static final String BASE_URL = "https://tu-api.com/api/";
+
+    private static final String BASE_URL = "http://10.0.2.2:8000/";
 
     public static ApiService getApiService() {
         if (retrofit == null) {
