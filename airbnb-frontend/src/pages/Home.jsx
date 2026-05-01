@@ -62,10 +62,15 @@ const mockProperties = [
 const PropertyCard = ({ property }) => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const [isFavorited, setIsFavorited] = useState(false);
+  const [isAnimating, setIsAnimating] = useState(false);
 
   const toggleFavorite = async (e) => {
     e.preventDefault();
     if (!user) return;
+    setIsAnimating(true);
+    setIsFavorited(prev => !prev);
+    setTimeout(() => setIsAnimating(false), 300);
     await api.post(`/favorites/${property.id}`);
     queryClient.invalidateQueries({ queryKey: ['favorites'] });
   };
@@ -78,8 +83,17 @@ const PropertyCard = ({ property }) => {
           alt={property.title}
           className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
         />
-        <button className="absolute top-3 right-3 text-white hover:scale-110 transition" onClick={toggleFavorite}>
-          <svg className="w-6 h-6" fill="none" stroke="white" strokeWidth="2" viewBox="0 0 24 24">
+        <button
+          className="absolute top-3 right-3 hover:scale-110 transition-all"
+          onClick={toggleFavorite}
+        >
+          <svg
+            className={`w-6 h-6 transition-all duration-300 ${isAnimating ? 'scale-150' : 'scale-100'}`}
+            fill={isFavorited ? '#FF385C' : 'none'}
+            stroke={isFavorited ? '#FF385C' : 'white'}
+            strokeWidth="2"
+            viewBox="0 0 24 24"
+          >
             <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
           </svg>
         </button>

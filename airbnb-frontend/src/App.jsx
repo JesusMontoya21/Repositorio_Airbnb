@@ -19,6 +19,7 @@ import CreateProperty from './pages/CreateProperty.jsx';
 import CreateExperience from './pages/CreateExperience.jsx';
 import CreateService from './pages/CreateService.jsx';
 import Favorites from './pages/Favorites.jsx';
+import NotFound from './pages/NotFound.jsx';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -54,6 +55,7 @@ function AppLayout() {
           <Route path="/my-bookings" element={<ProtectedRoute><MyBookings /></ProtectedRoute>} />
           <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
           <Route path="/favorites" element={<ProtectedRoute><Favorites /></ProtectedRoute>} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
 
