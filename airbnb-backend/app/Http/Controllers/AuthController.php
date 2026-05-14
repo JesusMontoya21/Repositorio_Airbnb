@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\WelcomeMail;
 
 class AuthController extends Controller
 {
@@ -45,6 +47,12 @@ class AuthController extends Controller
         ]);
 
         $token = $user->createToken('auth_token')->plainTextToken;
+
+        try {
+            Mail::to($user->email)->send(new WelcomeMail($user->name));
+        } catch (\Exception $e) {
+            // Si falla el correo, no afecta el registro
+        }
 
         return response()->json([
             'message' => 'Usuario registrado correctamente',

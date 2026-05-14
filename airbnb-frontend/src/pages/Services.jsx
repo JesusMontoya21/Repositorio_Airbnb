@@ -1,13 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-
-const getMonthDetails = (date) => {
-  const year = date.getFullYear();
-  const month = date.getMonth();
-  const firstDay = new Date(year, month, 1).getDay();
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const monthName = date.toLocaleDateString('es-ES', { month: 'long' });
-  return { year, month, firstDay, daysInMonth, monthName };
-};
+import { Link } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import api from '../api/axios';
 
 const Day = ({ day, monthDate, checkInDate, checkOutDate, handleDayClick }) => {
   const today = new Date();
@@ -37,7 +31,11 @@ const Day = ({ day, monthDate, checkInDate, checkOutDate, handleDayClick }) => {
 };
 
 const Month = ({ monthDate, checkInDate, checkOutDate, handleDayClick }) => {
-  const { year, firstDay, daysInMonth, monthName } = getMonthDetails(monthDate);
+  const year = monthDate.getFullYear();
+  const month = monthDate.getMonth();
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const monthName = monthDate.toLocaleDateString('es-ES', { month: 'long' });
   const daysOfWeek = ['D', 'L', 'M', 'J', 'V', 'S'];
   const calendarDays = [];
   for (let i = 0; i < firstDay; i++) calendarDays.push(<div key={`empty-${i}`} className="w-10 h-10"></div>);
@@ -174,25 +172,13 @@ const GuestsSelector = ({ onSelectGuests }) => {
 
 const ServiceCarousel = ({ title, services, activeCategory }) => {
   const scrollRef = useRef(null);
-  const [showLeft, setShowLeft] = useState(false);
-  const [showRight, setShowRight] = useState(true);
 
   const scroll = (direction) => {
     if (scrollRef.current) scrollRef.current.scrollBy({ left: direction === 'left' ? -400 : 400, behavior: 'smooth' });
   };
 
-  const checkArrows = () => {
-    const c = scrollRef.current;
-    if (c) { setShowLeft(c.scrollLeft > 0); setShowRight(c.scrollLeft < c.scrollWidth - c.clientWidth - 10); }
-  };
-
-  useEffect(() => {
-    const c = scrollRef.current;
-    if (c) { c.addEventListener('scroll', checkArrows); checkArrows(); return () => c.removeEventListener('scroll', checkArrows); }
-  }, []);
-
   const filtered = activeCategory === 'Todos' ? services : services.filter(s => s.category === activeCategory);
-  if (filtered.length === 0) return null;
+  if (!filtered || filtered.length === 0) return null;
 
   return (
     <div className="mb-12">
@@ -209,31 +195,31 @@ const ServiceCarousel = ({ title, services, activeCategory }) => {
       </div>
       <div ref={scrollRef} className="flex gap-4 overflow-x-auto pb-4" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
         {filtered.map((service) => (
-          <div key={service.id} className="flex-none w-72 cursor-pointer group">
+          <Link to={`/services/${service.id}`} key={service.id} className="flex-none w-72 cursor-pointer group">
             <div className="relative h-64 rounded-xl overflow-hidden mb-3">
-              <img src={service.image} alt={service.title} className="w-full h-full object-cover group-hover:scale-105 transition duration-300" />
-              <button className="absolute top-3 right-3 text-white hover:scale-110 transition" onClick={(e) => e.preventDefault()}>
-                <svg className="w-6 h-6" fill="none" stroke="white" strokeWidth="2" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                </svg>
-              </button>
+              <img src={service.image} alt={service.title}
+                className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+                onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1556909212-d5b604d0c90d?w=400'; }} />
               {service.category && (
                 <div className="absolute top-3 left-3 bg-white px-2 py-1 rounded-full text-xs font-semibold">{service.category}</div>
+              )}
+              {service.rating > 0 && (
+                <div className="absolute top-3 right-3 bg-white px-2 py-1 rounded-lg shadow-md flex items-center space-x-1">
+                  <span className="text-yellow-500 text-sm">⭐</span>
+                  <span className="text-sm font-semibold">{Number(service.rating).toFixed(2)}</span>
+                </div>
               )}
             </div>
             <div className="px-1">
               <p className="text-sm font-semibold text-gray-900 mb-1 line-clamp-2">{service.title}</p>
               <p className="text-xs text-gray-500 mb-1">{service.location}</p>
-              <div className="flex items-center mb-2">
-                <span className="text-xs font-semibold">★ {service.rating}</span>
-              </div>
               <p className="text-sm">
                 <span className="text-gray-500">Desde </span>
                 <span className="font-semibold">${service.price} MXN</span>
                 <span className="text-gray-500"> por participante</span>
               </p>
             </div>
-          </div>
+          </Link>
         ))}
       </div>
     </div>
@@ -242,6 +228,7 @@ const ServiceCarousel = ({ title, services, activeCategory }) => {
 
 export default function Services() {
   const [filters, setFilters] = useState({ city: '', check_in: '', check_out: '', guests: 0 });
+  const [searchParams, setSearchParams] = useState({ category: '' });
   const [isDestinationOpen, setIsDestinationOpen] = useState(false);
   const [isDatesOpen, setIsDatesOpen] = useState(false);
   const [isGuestsOpen, setIsGuestsOpen] = useState(false);
@@ -250,9 +237,21 @@ export default function Services() {
 
   const categories = ['Todos', 'Chefs', 'Entrenamiento', 'Masaje', 'Bienestar', 'Belleza'];
 
+  const { data: services, isLoading } = useQuery({
+    queryKey: ['services', searchParams],
+    queryFn: async () => {
+      const res = await api.get('/services', { params: searchParams });
+      return res.data;
+    },
+  });
+
   const handleSelectCity = (city) => { setFilters(prev => ({ ...prev, city })); setIsDestinationOpen(false); };
   const handleSelectDates = useCallback((newDates) => { setFilters(prev => ({ ...prev, ...newDates })); }, []);
   const handleSelectGuests = useCallback((guestData) => { setFilters(prev => ({ ...prev, ...guestData })); }, []);
+
+  useEffect(() => {
+    setSearchParams({ category: activeCategory !== 'Todos' ? activeCategory : '' });
+  }, [activeCategory]);
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -282,43 +281,18 @@ export default function Services() {
 
   const guestsDisplay = filters.guests > 0 ? `${filters.guests} huésped${filters.guests > 1 ? 'es' : ''}` : '¿Cuántos?';
 
-  const chefServices = [
-    { id: 1, image: 'https://images.unsplash.com/photo-1556909212-d5b604d0c90d?w=400', category: 'Chefs', title: 'Cocina hiperlocal con ingredientes silvestres', price: 1822, rating: 5.0, location: 'Ciudad de México' },
-    { id: 2, image: 'https://images.unsplash.com/photo-1556910103-1c02745aae4d?w=400', category: 'Chefs', title: 'Comida romana auténtica con el chef Marco', price: 1993, rating: 4.97, location: 'Ciudad de México' },
-    { id: 3, image: 'https://images.unsplash.com/photo-1466637574441-749b8f19452f?w=400', category: 'Chefs', title: 'Sabores de fusión coreano-mexicana', price: 1300, rating: 5.0, location: 'Guadalajara' },
-    { id: 4, image: 'https://images.unsplash.com/photo-1547592180-85f173990554?w=400', category: 'Chefs', title: 'Cocina de autor con Cristina', price: 869, rating: 4.96, location: 'Monterrey' },
-    { id: 5, image: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400', category: 'Chefs', title: 'Cena privada de lujo con el chef Matsuhisa', price: 3027, rating: 4.50, location: 'Cancún' },
-    { id: 6, image: 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=400', category: 'Chefs', title: 'Menú mediterráneo de temporada', price: 3129, rating: 4.98, location: 'Ciudad de México' },
-  ];
-
-  const trainingServices = [
-    { id: 7, image: 'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=400', category: 'Entrenamiento', title: 'Entrenamiento personal con Deyten', price: 184, rating: 4.71, location: 'Guadalajara' },
-    { id: 8, image: 'https://images.unsplash.com/photo-1518611012118-696072aa579a?w=400', category: 'Entrenamiento', title: 'Entrenamiento corporal total con Peter', price: 893, rating: 5.0, location: 'Ciudad de México' },
-    { id: 9, image: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=400', category: 'Bienestar', title: 'Yoga y meditación con Julia', price: 460, rating: 4.94, location: 'Virtual' },
-    { id: 10, image: 'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=400', category: 'Entrenamiento', title: 'Fitness en grupo y personal', price: 1534, rating: 5.0, location: 'Monterrey' },
-    { id: 11, image: 'https://images.unsplash.com/photo-1601422407692-ec4eeec1d9b3?w=400', category: 'Entrenamiento', title: 'Entrenamientos intensos con Vicky', price: 2946, rating: 4.92, location: 'Cancún' },
-    { id: 12, image: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=400', category: 'Bienestar', title: 'Entrenamiento reparador con Tayler', price: 820, rating: 4.86, location: 'Mazatlán' },
-  ];
-
-  const massageServices = [
-    { id: 13, image: 'https://images.unsplash.com/photo-1600334129128-685c5582fd35?w=400', category: 'Masaje', title: 'Relajación y masaje de tejido profundo', price: 950, rating: 5.0, location: 'Ciudad de México' },
-    { id: 14, image: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=400', category: 'Masaje', title: 'Masaje de aromaterapia con Jenna', price: 3313, rating: 4.89, location: 'Cancún' },
-    { id: 15, image: 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=400', category: 'Masaje', title: 'Masaje japonés de té matcha', price: 2701, rating: 4.95, location: 'Ciudad de México' },
-    { id: 16, image: 'https://images.unsplash.com/photo-1519823551278-64ac92734fb1?w=400', category: 'Masaje', title: 'Masaje de tejidos profundos por Olga', price: 1850, rating: 5.0, location: 'Guadalajara' },
-    { id: 17, image: 'https://images.unsplash.com/photo-1591343395902-bae4ffe06925?w=400', category: 'Bienestar', title: 'Recuperación y relajación con Daisy', price: 3102, rating: 4.33, location: 'Mazatlán' },
-    { id: 18, image: 'https://images.unsplash.com/photo-1519823551278-64ac92734fb1?w=400', category: 'Belleza', title: 'Spa completo con tratamiento facial', price: 2500, rating: 4.88, location: 'Cancún' },
-  ];
+  const getServicesByCategory = (category) => {
+    if (!services) return [];
+    return services.filter(s => s.category === category);
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
 
       {/* Banner Hero */}
       <div className="relative h-96 overflow-hidden">
-        <img
-          src="https://images.unsplash.com/photo-1556909212-d5b604d0c90d?w=1400"
-          alt="Servicios"
-          className="w-full h-full object-cover"
-        />
+        <img src="https://images.unsplash.com/photo-1556909212-d5b604d0c90d?w=1400" alt="Servicios"
+          className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-black bg-opacity-40 flex flex-col items-center justify-center text-white text-center px-4">
           <h1 className="text-5xl font-bold mb-4">Servicios</h1>
           <p className="text-xl max-w-2xl">Profesionales expertos para hacer tu estancia perfecta</p>
@@ -364,15 +338,10 @@ export default function Services() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-4 py-4 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
             {categories.map(cat => (
-              <button
-                key={cat}
-                onClick={() => setActiveCategory(cat)}
+              <button key={cat} onClick={() => setActiveCategory(cat)}
                 className={`flex-shrink-0 px-5 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
-                  activeCategory === cat
-                    ? 'bg-gray-900 text-white'
-                    : 'bg-white border border-gray-300 text-gray-700 hover:border-gray-900'
-                }`}
-              >
+                  activeCategory === cat ? 'bg-gray-900 text-white' : 'bg-white border border-gray-300 text-gray-700 hover:border-gray-900'
+                }`}>
                 {cat}
               </button>
             ))}
@@ -382,9 +351,27 @@ export default function Services() {
 
       {/* Carruseles de Servicios */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <ServiceCarousel title="Chefs privados" services={chefServices} activeCategory={activeCategory} />
-        <ServiceCarousel title="Entrenamiento y bienestar" services={trainingServices} activeCategory={activeCategory} />
-        <ServiceCarousel title="Masajes y relajación" services={massageServices} activeCategory={activeCategory} />
+        {isLoading ? (
+          <div className="flex justify-center items-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#FF385C]"></div>
+          </div>
+        ) : !services || services.length === 0 ? (
+          <div className="text-center py-12">
+            <div className="text-6xl mb-4">🔍</div>
+            <p className="text-gray-500 text-lg">No se encontraron servicios</p>
+            <button onClick={() => { setActiveCategory('Todos'); setSearchParams({ category: '' }); }}
+              className="mt-4 text-[#FF385C] hover:underline">
+              Limpiar filtros
+            </button>
+          </div>
+        ) : (
+          <>
+            <ServiceCarousel title="Chefs privados" services={services} activeCategory={activeCategory} />
+            <ServiceCarousel title="Entrenamiento y bienestar" services={services} activeCategory={activeCategory} />
+            <ServiceCarousel title="Masajes y relajación" services={services} activeCategory={activeCategory} />
+            <ServiceCarousel title="Servicios de belleza" services={services} activeCategory={activeCategory} />
+          </>
+        )}
       </div>
     </div>
   );

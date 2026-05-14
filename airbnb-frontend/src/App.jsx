@@ -20,6 +20,8 @@ import CreateExperience from './pages/CreateExperience.jsx';
 import CreateService from './pages/CreateService.jsx';
 import Favorites from './pages/Favorites.jsx';
 import NotFound from './pages/NotFound.jsx';
+import ExperienceDetails from './pages/ExperienceDetails.jsx';
+import ServiceDetails from './pages/ServiceDetails.jsx';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -56,6 +58,8 @@ function AppLayout() {
           <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
           <Route path="/favorites" element={<ProtectedRoute><Favorites /></ProtectedRoute>} />
           <Route path="*" element={<NotFound />} />
+          <Route path="/experiences/:id" element={<ExperienceDetails />} />
+          <Route path="/services/:id" element={<ServiceDetails />} />
         </Routes>
       </main>
 

@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Experience extends Model
+class Service extends Model
 {
     protected $fillable = [
         'user_id',
@@ -12,9 +12,7 @@ class Experience extends Model
         'description',
         'category',
         'location',
-        'city',
         'price',
-        'duration',
         'image',
         'rating',
         'is_active',

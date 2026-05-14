@@ -8,6 +8,8 @@ use App\Http\Controllers\BookingController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\FavoriteController;
+use App\Http\Controllers\ExperienceController;
+use App\Http\Controllers\ServiceController;
 
 // Rutas públicas
 Route::post('/login', [AuthController::class, 'login']);
@@ -15,6 +17,10 @@ Route::post('/register', [AuthController::class, 'register']);
 Route::get('/properties', [PropertyController::class, 'index']);
 Route::get('/properties/{id}', [PropertyController::class, 'show']);
 Route::get('/properties/{id}/reviews', [ReviewController::class, 'index']);
+Route::get('/experiences', [ExperienceController::class, 'index']);
+Route::get('/experiences/{id}', [ExperienceController::class, 'show']);
+Route::get('/services', [ServiceController::class, 'index']);
+Route::get('/services/{id}', [ServiceController::class, 'show']);
 
 // Rutas protegidas
 Route::middleware('auth:sanctum')->group(function () {
@@ -46,4 +52,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/favorites', [FavoriteController::class, 'index']);
     Route::post('/favorites/{propertyId}', [FavoriteController::class, 'toggle']);
     Route::get('/favorites/{propertyId}/check', [FavoriteController::class, 'check']);
+
+    // Experiencias
+    Route::post('/experiences', [ExperienceController::class, 'store']);
+    Route::delete('/experiences/{id}', [ExperienceController::class, 'destroy']);
+
+    // Servicios
+    Route::post('/services', [ServiceController::class, 'store']);
+    Route::delete('/services/{id}', [ServiceController::class, 'destroy']);
 });

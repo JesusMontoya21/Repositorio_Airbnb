@@ -8,16 +8,14 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('experiences', function (Blueprint $table) {
+        Schema::create('services', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->nullable()->constrained()->onDelete('set null');
             $table->string('title');
             $table->text('description')->nullable();
             $table->string('category');
             $table->string('location');
-            $table->string('city');
             $table->decimal('price', 10, 2);
-            $table->string('duration')->nullable();
             $table->string('image')->nullable();
             $table->decimal('rating', 3, 2)->default(0);
             $table->boolean('is_active')->default(true);
@@ -27,6 +25,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('experiences');
+        Schema::dropIfExists('services');
     }
 };

@@ -1,19 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-
-const getMonthDetails = (date) => {
-  const year = date.getFullYear();
-  const month = date.getMonth();
-  const firstDay = new Date(year, month, 1).getDay();
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const monthName = date.toLocaleDateString('es-ES', { month: 'long' });
-  return { year, month, firstDay, daysInMonth, monthName };
-};
-
-const formatDateDisplayShort = (dateString) => {
-  if (!dateString) return null;
-  const date = new Date(dateString);
-  return date.toLocaleDateString('es-MX', { weekday: 'short', day: 'numeric', month: 'short' }).replace(/\.$/g, '');
-};
+import { useQuery } from '@tanstack/react-query';
+import { Link } from 'react-router-dom';
+import api from '../api/axios';
 
 const Day = ({ day, monthDate, checkInDate, checkOutDate, handleDayClick }) => {
   const today = new Date();
@@ -43,7 +31,11 @@ const Day = ({ day, monthDate, checkInDate, checkOutDate, handleDayClick }) => {
 };
 
 const Month = ({ monthDate, checkInDate, checkOutDate, handleDayClick }) => {
-  const { year, firstDay, daysInMonth, monthName } = getMonthDetails(monthDate);
+  const year = monthDate.getFullYear();
+  const month = monthDate.getMonth();
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const monthName = monthDate.toLocaleDateString('es-ES', { month: 'long' });
   const daysOfWeek = ['D', 'L', 'M', 'J', 'V', 'S'];
   const calendarDays = [];
   for (let i = 0; i < firstDay; i++) calendarDays.push(<div key={`empty-${i}`} className="w-10 h-10"></div>);
@@ -178,19 +170,13 @@ const GuestsSelector = ({ onSelectGuests }) => {
   );
 };
 
-const ExperienceCarousel = ({ title, experiences, activeCategory }) => {
+const ExperienceCarousel = ({ title, experiences }) => {
   const scrollContainerRef = useRef(null);
-
   const scroll = (direction) => {
     const container = scrollContainerRef.current;
     if (container) container.scrollBy({ left: direction === 'left' ? -400 : 400, behavior: 'smooth' });
   };
-
-  const filtered = activeCategory === 'Todos'
-    ? experiences
-    : experiences.filter(e => e.category === activeCategory);
-
-  if (filtered.length === 0) return null;
+  if (!experiences || experiences.length === 0) return null;
 
   return (
     <div className="mb-12">
@@ -206,15 +192,16 @@ const ExperienceCarousel = ({ title, experiences, activeCategory }) => {
         </div>
       </div>
       <div ref={scrollContainerRef} className="flex overflow-x-auto space-x-4 pb-4" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
-        {filtered.map((exp, index) => (
-          <div key={index} className="flex-none w-72 group cursor-pointer">
+        {experiences.map((exp) => (
+          <Link to={`/experiences/${exp.id}`} key={exp.id} className="flex-none w-72 group cursor-pointer">
             <div className="relative h-72 rounded-xl overflow-hidden mb-3">
-              <img src={exp.image} alt={exp.title} className="w-full h-full object-cover group-hover:scale-105 transition duration-300" />
+              <img src={exp.image} alt={exp.title} className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+                onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=400'; }} />
               <div className="absolute top-3 left-3 bg-white px-3 py-1 rounded-full text-xs font-semibold">{exp.category}</div>
-              {exp.rating && (
+              {exp.rating > 0 && (
                 <div className="absolute top-3 right-3 bg-white px-2 py-1 rounded-lg shadow-md flex items-center space-x-1">
                   <span className="text-yellow-500 text-sm">⭐</span>
-                  <span className="text-sm font-semibold">{exp.rating}</span>
+                  <span className="text-sm font-semibold">{Number(exp.rating).toFixed(2)}</span>
                 </div>
               )}
             </div>
@@ -224,7 +211,7 @@ const ExperienceCarousel = ({ title, experiences, activeCategory }) => {
               <p className="text-sm text-gray-500 mb-2">{exp.duration}</p>
               <p className="text-sm"><span className="font-semibold">Desde ${exp.price}</span><span className="text-gray-500"> por persona</span></p>
             </div>
-          </div>
+          </Link>
         ))}
       </div>
     </div>
@@ -233,6 +220,7 @@ const ExperienceCarousel = ({ title, experiences, activeCategory }) => {
 
 export default function Experiences() {
   const [filters, setFilters] = useState({ city: '', check_in: '', check_out: '', guests: 0 });
+  const [searchParams, setSearchParams] = useState({ city: '', category: '' });
   const [isDestinationOpen, setIsDestinationOpen] = useState(false);
   const [isDatesOpen, setIsDatesOpen] = useState(false);
   const [isGuestsOpen, setIsGuestsOpen] = useState(false);
@@ -240,10 +228,28 @@ export default function Experiences() {
   const searchRef = useRef(null);
 
   const categories = ['Todos', 'Alimentos', 'Recorridos', 'Bienestar', 'Arte', 'Deportes', 'Original'];
+  const cities = ['Ciudad de México', 'Guadalajara', 'Cancún', 'Mazatlán'];
+
+  const { data: experiences, isLoading } = useQuery({
+    queryKey: ['experiences', searchParams],
+    queryFn: async () => {
+      const res = await api.get('/experiences', { params: searchParams });
+      return res.data;
+    },
+  });
 
   const handleSelectCity = (city) => { setFilters(prev => ({ ...prev, city })); setIsDestinationOpen(false); };
   const handleSelectDates = useCallback((newDates) => { setFilters(prev => ({ ...prev, ...newDates })); }, []);
   const handleSelectGuests = useCallback((guestData) => { setFilters(prev => ({ ...prev, ...guestData })); }, []);
+
+  const handleSearch = () => {
+    setSearchParams({ city: filters.city, category: activeCategory !== 'Todos' ? activeCategory : '' });
+    setIsDestinationOpen(false); setIsDatesOpen(false); setIsGuestsOpen(false);
+  };
+
+  useEffect(() => {
+    setSearchParams(prev => ({ ...prev, category: activeCategory !== 'Todos' ? activeCategory : '' }));
+  }, [activeCategory]);
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -273,56 +279,18 @@ export default function Experiences() {
 
   const guestsDisplay = filters.guests > 0 ? `${filters.guests} huésped${filters.guests > 1 ? 'es' : ''}` : '¿Cuántos?';
 
-  const experienciasOriginales = [
-    { image: 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=400', category: 'Original', title: 'Tour de Mezcalería con cóctel', location: 'Ciudad de México', duration: '2 horas', rating: '4.95', price: '1,200' },
-    { image: 'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=400', category: 'Original', title: 'Taller con un estudio de danza especializado', location: 'Ciudad de México', duration: '3 horas', rating: '4.92', price: '850' },
-    { image: 'https://images.unsplash.com/photo-1518611012118-696072aa579a?w=400', category: 'Arte', title: 'Sesión de pintura budista sagrada', location: 'Ciudad de México', duration: '2 horas', rating: '4.88', price: '950' },
-    { image: 'https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=400', category: 'Bienestar', title: 'Clase de tequila artesanal', location: 'Ciudad de México', duration: '1.5 horas', rating: '4.90', price: '780' },
-    { image: 'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=400', category: 'Original', title: 'Ceremonia de arte colorido', location: 'Ciudad de México', duration: '3 horas', rating: '4.87', price: '1,100' },
-  ];
-
-  const experienciasCiudadMexico = [
-    { image: 'https://images.unsplash.com/photo-1519331379826-f10be5486c6f?w=400', category: 'Alimentos', title: 'Clase de cocina con degustación de mezcal', location: 'Ciudad de México', duration: '3 horas', rating: '4.92', price: '1,500' },
-    { image: 'https://images.unsplash.com/photo-1464219789935-c2d9d9aba644?w=400', category: 'Recorridos', title: 'Tour a Teotihuacán', location: 'Teotihuacán', duration: '8 horas', rating: '4.85', price: '2,300' },
-    { image: 'https://images.unsplash.com/photo-1551632811-561732d1e306?w=400', category: 'Original', title: 'Clase de mezcal y cochinita', location: 'Ciudad de México', duration: '2.5 horas', rating: '4.91', price: '1,200' },
-    { image: 'https://images.unsplash.com/photo-1473492201326-7c01dd2e596b?w=400', category: 'Recorridos', title: 'Descubre la magia de Xochimilco', location: 'Xochimilco', duration: '4 horas', rating: '4.88', price: '980' },
-    { image: 'https://images.unsplash.com/photo-1577495508048-b635879837f1?w=400', category: 'Bienestar', title: 'Temazcal tradicional mexicano', location: 'Ciudad de México', duration: '2 horas', rating: '4.93', price: '850' },
-  ];
-
-  const experienciasGuadalajara = [
-    { image: 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=400', category: 'Alimentos', title: 'Tour a los Tequilas y Cantaritos', location: 'Tlaquepaque, Guadalajara', duration: '4 horas', rating: '4.93', price: '1,800' },
-    { image: 'https://images.unsplash.com/photo-1551218808-94e220e084d2?w=400', category: 'Recorridos', title: 'Ruta del tequila desde Guadalajara', location: 'Tequila, Jalisco', duration: '7 horas', rating: '4.87', price: '2,500' },
-    { image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400', category: 'Recorridos', title: 'Villa del tequila con mariachis', location: 'Tequila, Jalisco', duration: '6 horas', rating: '4.90', price: '2,200' },
-    { image: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400', category: 'Bienestar', title: 'Descubre tu Tequila y los mariachis', location: 'Guadalajara', duration: '3 horas', rating: '4.86', price: '1,400' },
-    { image: 'https://images.unsplash.com/photo-1533777857889-4be7c70b33f7?w=400', category: 'Original', title: 'Pub Crawl: Tour de bares Guadalajara', location: 'Guadalajara', duration: '4 horas', rating: '4.89', price: '750' },
-  ];
-
-  const experienciasCancun = [
-    { image: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=400', category: 'Deportes', title: 'Snorkel en el arrecife de coral', location: 'Cancún', duration: '3 horas', rating: '4.95', price: '1,200' },
-    { image: 'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=400', category: 'Recorridos', title: 'Tour a Chichén Itzá', location: 'Yucatán', duration: '10 horas', rating: '4.91', price: '3,200' },
-    { image: 'https://images.unsplash.com/photo-1559827291-72ee739d0d9a?w=400', category: 'Bienestar', title: 'Yoga al amanecer en la playa', location: 'Cancún', duration: '1.5 horas', rating: '4.88', price: '650' },
-    { image: 'https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=400', category: 'Alimentos', title: 'Cena romántica en la playa', location: 'Cancún', duration: '2 horas', rating: '4.93', price: '2,800' },
-    { image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400', category: 'Deportes', title: 'Kitesurf para principiantes', location: 'Cancún', duration: '4 horas', rating: '4.86', price: '1,800' },
-  ];
-
-  const experienciasMazatlan = [
-    { image: 'https://images.unsplash.com/photo-1506953823976-52e1fdc0149a?w=400', category: 'Deportes', title: 'Pesca deportiva en alta mar', location: 'Mazatlán', duration: '6 horas', rating: '4.90', price: '2,500' },
-    { image: 'https://images.unsplash.com/photo-1414609245224-aea7079fdc0b?w=400', category: 'Recorridos', title: 'Tour por el centro histórico', location: 'Mazatlán', duration: '3 horas', rating: '4.85', price: '450' },
-    { image: 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=400', category: 'Alimentos', title: 'Mariscos frescos con el pescador', location: 'Mazatlán', duration: '2 horas', rating: '4.92', price: '980' },
-    { image: 'https://images.unsplash.com/photo-1559827291-72ee739d0d9a?w=400', category: 'Bienestar', title: 'Masaje en la playa al atardecer', location: 'Mazatlán', duration: '1 hora', rating: '4.94', price: '750' },
-    { image: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=400', category: 'Deportes', title: 'Surf para principiantes', location: 'Mazatlán', duration: '2 horas', rating: '4.87', price: '850' },
-  ];
+  const getExperiencesByCity = (city) => {
+    if (!experiences) return [];
+    return experiences.filter(e => e.city === city);
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
 
       {/* Banner Hero */}
       <div className="relative h-96 overflow-hidden">
-        <img
-          src="https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=1400"
-          alt="Experiencias"
-          className="w-full h-full object-cover"
-        />
+        <img src="https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=1400" alt="Experiencias"
+          className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-black bg-opacity-40 flex flex-col items-center justify-center text-white text-center px-4">
           <h1 className="text-5xl font-bold mb-4">Experiencias</h1>
           <p className="text-xl max-w-2xl">Actividades únicas dirigidas por anfitriones locales expertos</p>
@@ -338,6 +306,7 @@ export default function Experiences() {
                 <label className="block text-xs font-semibold text-gray-900 mb-0.5">Destino</label>
                 <input type="text" name="city" placeholder="Buscar destinos" value={filters.city}
                   onChange={(e) => setFilters({ ...filters, city: e.target.value })}
+                  onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
                   className="w-full text-sm text-gray-500 placeholder-gray-400 focus:outline-none bg-transparent" />
                 {isDestinationOpen && <DestinationSuggestions onSelectCity={handleSelectCity} />}
               </div>
@@ -350,7 +319,8 @@ export default function Experiences() {
                   <label className="block text-xs font-semibold text-gray-900 mb-0.5">Huéspedes</label>
                   <div className="text-sm text-gray-500">{guestsDisplay}</div>
                 </div>
-                <button className="bg-[#FF385C] hover:bg-[#E0314F] text-white rounded-full p-3.5 ml-4 transition-colors duration-200 flex items-center justify-center">
+                <button onClick={handleSearch}
+                  className="bg-[#FF385C] hover:bg-[#E0314F] text-white rounded-full p-3.5 ml-4 transition-colors duration-200 flex items-center justify-center">
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                   </svg>
@@ -368,15 +338,10 @@ export default function Experiences() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-4 py-4 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
             {categories.map(cat => (
-              <button
-                key={cat}
-                onClick={() => setActiveCategory(cat)}
+              <button key={cat} onClick={() => setActiveCategory(cat)}
                 className={`flex-shrink-0 px-5 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
-                  activeCategory === cat
-                    ? 'bg-gray-900 text-white'
-                    : 'bg-white border border-gray-300 text-gray-700 hover:border-gray-900'
-                }`}
-              >
+                  activeCategory === cat ? 'bg-gray-900 text-white' : 'bg-white border border-gray-300 text-gray-700 hover:border-gray-900'
+                }`}>
                 {cat}
               </button>
             ))}
@@ -384,13 +349,30 @@ export default function Experiences() {
         </div>
       </div>
 
-      {/* Carruseles de Experiencias */}
+      {/* Carruseles */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <ExperienceCarousel title="Airbnb Originales" experiences={experienciasOriginales} activeCategory={activeCategory} />
-        <ExperienceCarousel title="Popular en Ciudad de México" experiences={experienciasCiudadMexico} activeCategory={activeCategory} />
-        <ExperienceCarousel title="Experiencias en Guadalajara" experiences={experienciasGuadalajara} activeCategory={activeCategory} />
-        <ExperienceCarousel title="Experiencias en Cancún" experiences={experienciasCancun} activeCategory={activeCategory} />
-        <ExperienceCarousel title="Experiencias en Mazatlán" experiences={experienciasMazatlan} activeCategory={activeCategory} />
+        {isLoading ? (
+          <div className="flex justify-center items-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#FF385C]"></div>
+          </div>
+        ) : experiences && experiences.length === 0 ? (
+          <div className="text-center py-12">
+            <div className="text-6xl mb-4">🔍</div>
+            <p className="text-gray-500 text-lg">No se encontraron experiencias</p>
+            <button onClick={() => { setActiveCategory('Todos'); setSearchParams({ city: '', category: '' }); setFilters(prev => ({ ...prev, city: '' })); }}
+              className="mt-4 text-[#FF385C] hover:underline">
+              Limpiar filtros
+            </button>
+          </div>
+        ) : (
+          cities.map(city => (
+            <ExperienceCarousel
+              key={city}
+              title={`Experiencias en ${city}`}
+              experiences={getExperiencesByCity(city)}
+            />
+          ))
+        )}
       </div>
     </div>
   );
