@@ -10,6 +10,8 @@ use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\ExperienceController;
 use App\Http\Controllers\ServiceController;
+use App\Http\Controllers\ExperienceBookingController;
+use App\Http\Controllers\ServiceBookingController;
 
 // Rutas públicas
 Route::post('/login', [AuthController::class, 'login']);
@@ -39,7 +41,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/properties/{id}', [PropertyController::class, 'destroy']);
     Route::get('/my-properties', [PropertyController::class, 'myProperties']);
 
-    // Reservas
+    // Reservas de hospedaje
     Route::post('/bookings', [BookingController::class, 'store']);
     Route::get('/my-bookings', [BookingController::class, 'myBookings']);
     Route::put('/bookings/{id}/cancel', [BookingController::class, 'cancel']);
@@ -57,7 +59,17 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/experiences', [ExperienceController::class, 'store']);
     Route::delete('/experiences/{id}', [ExperienceController::class, 'destroy']);
 
+    // Reservas de experiencias
+    Route::post('/experience-bookings', [ExperienceBookingController::class, 'store']);
+    Route::get('/my-experience-bookings', [ExperienceBookingController::class, 'myBookings']);
+    Route::put('/experience-bookings/{id}/cancel', [ExperienceBookingController::class, 'cancel']);
+
     // Servicios
     Route::post('/services', [ServiceController::class, 'store']);
     Route::delete('/services/{id}', [ServiceController::class, 'destroy']);
+
+    // Reservas de servicios
+    Route::post('/service-bookings', [ServiceBookingController::class, 'store']);
+    Route::get('/my-service-bookings', [ServiceBookingController::class, 'myBookings']);
+    Route::put('/service-bookings/{id}/cancel', [ServiceBookingController::class, 'cancel']);
 });

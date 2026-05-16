@@ -1,10 +1,17 @@
+import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import api from '../api/axios';
+import { useAuth } from '../context/AuthContext';
 
 export default function ExperienceDetails() {
   const { id } = useParams();
+  const { user } = useAuth();
   const navigate = useNavigate();
+  const [date, setDate] = useState('');
+  const [guests, setGuests] = useState(1);
+  const [bookingLoading, setBookingLoading] = useState(false);
+  const [bookingError, setBookingError] = useState('');
 
   const { data: experience, isLoading } = useQuery({
     queryKey: ['experience', id],
@@ -13,6 +20,28 @@ export default function ExperienceDetails() {
       return res.data;
     },
   });
+
+  const handleBooking = async (e) => {
+    e.preventDefault();
+    setBookingError('');
+    if (!user) { navigate('/login'); return; }
+    if (!date) { setBookingError('Selecciona una fecha'); return; }
+    setBookingLoading(true);
+    try {
+      await api.post('/experience-bookings', {
+        experience_id: experience.id,
+        date,
+        guests,
+        total_price: experience.price * guests,
+      });
+      alert('¡Reservación creada exitosamente! Revisa tu correo para la confirmación.');
+      navigate('/my-bookings');
+    } catch (error) {
+      setBookingError(error.response?.data?.message || 'Error al crear la reservación');
+    } finally {
+      setBookingLoading(false);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -36,7 +65,6 @@ export default function ExperienceDetails() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      {/* Botón volver */}
       <button onClick={() => navigate('/experiences')} className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6 transition">
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -44,7 +72,6 @@ export default function ExperienceDetails() {
         Volver a Experiencias
       </button>
 
-      {/* Imagen principal */}
       <div className="relative h-96 rounded-2xl overflow-hidden mb-8">
         <img src={experience.image} alt={experience.title}
           className="w-full h-full object-cover"
@@ -61,7 +88,6 @@ export default function ExperienceDetails() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Info principal */}
         <div className="lg:col-span-2">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">{experience.title}</h1>
           <p className="text-gray-600 mb-6">{experience.location} · {experience.city}</p>
@@ -89,7 +115,6 @@ export default function ExperienceDetails() {
           </div>
         </div>
 
-        {/* Card de reserva */}
         <div className="lg:col-span-1">
           <div className="border rounded-2xl shadow-lg p-6 sticky top-20">
             <div className="mb-4">
@@ -97,16 +122,49 @@ export default function ExperienceDetails() {
               <span className="text-gray-600 text-sm block">por persona</span>
             </div>
 
-            {experience.rating > 0 && (
-              <div className="flex items-center gap-2 mb-4">
-                <span className="text-yellow-500">⭐</span>
-                <span className="font-semibold">{Number(experience.rating).toFixed(2)}</span>
+            {bookingError && (
+              <div className="bg-red-100 border border-red-400 text-red-700 px-3 py-2 rounded mb-4 text-sm">
+                {bookingError}
               </div>
             )}
 
-            <button className="w-full bg-gradient-to-r from-[#E61E4D] to-[#E31C5F] text-white py-3 rounded-xl font-semibold hover:opacity-90 transition">
-              Reservar experiencia
-            </button>
+            <form onSubmit={handleBooking} className="space-y-4">
+              <div className="border rounded-xl overflow-hidden">
+                <div className="p-3">
+                  <label className="block text-xs font-semibold mb-1">FECHA</label>
+                  <input type="date" value={date} onChange={(e) => setDate(e.target.value)}
+                    min={new Date().toISOString().split('T')[0]}
+                    className="w-full text-sm focus:outline-none" required />
+                </div>
+                <div className="border-t p-3">
+                  <label className="block text-xs font-semibold mb-1">PERSONAS</label>
+                  <select value={guests} onChange={(e) => setGuests(Number(e.target.value))}
+                    className="w-full text-sm focus:outline-none">
+                    {[1,2,3,4,5,6,7,8,9,10].map(n => (
+                      <option key={n} value={n}>{n} {n === 1 ? 'persona' : 'personas'}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <button type="submit" disabled={bookingLoading}
+                className="w-full bg-gradient-to-r from-[#E61E4D] to-[#E31C5F] text-white py-3 rounded-xl font-semibold hover:opacity-90 transition disabled:opacity-50">
+                {bookingLoading ? 'Reservando...' : 'Reservar experiencia'}
+              </button>
+            </form>
+
+            {date && (
+              <div className="mt-4 pt-4 border-t space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span>${experience.price} x {guests} {guests === 1 ? 'persona' : 'personas'}</span>
+                  <span>${experience.price * guests} MXN</span>
+                </div>
+                <div className="flex justify-between font-semibold">
+                  <span>Total</span>
+                  <span>${experience.price * guests} MXN</span>
+                </div>
+              </div>
+            )}
 
             <p className="text-center text-sm text-gray-500 mt-3">No se hará ningún cargo por ahora</p>
           </div>
