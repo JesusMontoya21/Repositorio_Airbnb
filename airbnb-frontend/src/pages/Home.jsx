@@ -7,56 +7,18 @@ import { useAuth } from '../context/AuthContext';
 import { useQueryClient } from '@tanstack/react-query';
 
 const mockProperties = [
-  {
-    id: 1, city: 'Mazatlán', country: 'México', title: 'Departamento frente al mar',
-    price_per_night: 850, guests: 4, bedrooms: 2, average_rating: 4.91,
-    images: [{ url: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=400' }]
-  },
-  {
-    id: 2, city: 'Mazatlán', country: 'México', title: 'Casa con alberca privada',
-    price_per_night: 1200, guests: 6, bedrooms: 3, average_rating: 4.85,
-    images: [{ url: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=400' }]
-  },
-  {
-    id: 3, city: 'Mazatlán', country: 'México', title: 'Habitación en zona dorada',
-    price_per_night: 550, guests: 2, bedrooms: 1, average_rating: 4.78,
-    images: [{ url: 'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=400' }]
-  },
-  {
-    id: 4, city: 'Mazatlán', country: 'México', title: 'Penthouse con vista al océano',
-    price_per_night: 2100, guests: 8, bedrooms: 4, average_rating: 4.96,
-    images: [{ url: 'https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=400' }]
-  },
-  {
-    id: 5, city: 'Guadalajara', country: 'México', title: 'Loft en Providencia',
-    price_per_night: 780, guests: 2, bedrooms: 1, average_rating: 4.88,
-    images: [{ url: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=400' }]
-  },
-  {
-    id: 6, city: 'Guadalajara', country: 'México', title: 'Casa en Zapopan con jardín',
-    price_per_night: 950, guests: 5, bedrooms: 3, average_rating: 4.82,
-    images: [{ url: 'https://images.unsplash.com/photo-1583608205776-bfd35f0d9f83?w=400' }]
-  },
-  {
-    id: 7, city: 'Cancún', country: 'México', title: 'Villa en zona hotelera',
-    price_per_night: 3200, guests: 10, bedrooms: 5, average_rating: 4.95,
-    images: [{ url: 'https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=400' }]
-  },
-  {
-    id: 8, city: 'Cancún', country: 'México', title: 'Departamento frente al mar',
-    price_per_night: 1800, guests: 4, bedrooms: 2, average_rating: 4.87,
-    images: [{ url: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400' }]
-  },
-  {
-    id: 9, city: 'Ciudad de México', country: 'México', title: 'Apartamento en Condesa',
-    price_per_night: 980, guests: 3, bedrooms: 2, average_rating: 4.93,
-    images: [{ url: 'https://images.unsplash.com/photo-1484154218962-a197022b5858?w=400' }]
-  },
-  {
-    id: 10, city: 'Ciudad de México', country: 'México', title: 'Loft en Roma Norte',
-    price_per_night: 750, guests: 2, bedrooms: 1, average_rating: 4.86,
-    images: [{ url: 'https://images.unsplash.com/photo-1536376072261-38c75010e6c9?w=400' }]
-  },
+  { id: 1, city: 'Mazatlán', country: 'México', title: 'Departamento frente al mar', price_per_night: 850, guests: 4, bedrooms: 2, average_rating: 4.91, images: [{ url: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=400' }] },
+  { id: 2, city: 'Mazatlán', country: 'México', title: 'Casa con alberca privada', price_per_night: 1200, guests: 6, bedrooms: 3, average_rating: 4.85, images: [{ url: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=400' }] },
+  { id: 3, city: 'Mazatlán', country: 'México', title: 'Habitación en zona dorada', price_per_night: 550, guests: 2, bedrooms: 1, average_rating: 4.78, images: [{ url: 'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=400' }] },
+  { id: 4, city: 'Mazatlán', country: 'México', title: 'Penthouse con vista al océano', price_per_night: 2100, guests: 8, bedrooms: 4, average_rating: 4.96, images: [{ url: 'https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=400' }] },
+  { id: 5, city: 'Guadalajara', country: 'México', title: 'Loft en Providencia', price_per_night: 780, guests: 2, bedrooms: 1, average_rating: 4.88, images: [{ url: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=400' }] },
+  { id: 6, city: 'Guadalajara', country: 'México', title: 'Casa en Zapopan con jardín', price_per_night: 950, guests: 5, bedrooms: 3, average_rating: 4.82, images: [{ url: 'https://images.unsplash.com/photo-1583608205776-bfd35f0d9f83?w=400' }] },
+  { id: 7, city: 'Cancún', country: 'México', title: 'Villa en zona hotelera', price_per_night: 3200, guests: 10, bedrooms: 5, average_rating: 4.95, images: [{ url: 'https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=400' }] },
+  { id: 8, city: 'Cancún', country: 'México', title: 'Departamento frente al mar', price_per_night: 1800, guests: 4, bedrooms: 2, average_rating: 4.87, images: [{ url: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400' }] },
+  { id: 9, city: 'Ciudad de México', country: 'México', title: 'Apartamento en Condesa', price_per_night: 980, guests: 3, bedrooms: 2, average_rating: 4.93, images: [{ url: 'https://images.unsplash.com/photo-1484154218962-a197022b5858?w=400' }] },
+  { id: 10, city: 'Ciudad de México', country: 'México', title: 'Loft en Roma Norte', price_per_night: 750, guests: 2, bedrooms: 1, average_rating: 4.86, images: [{ url: 'https://images.unsplash.com/photo-1536376072261-38c75010e6c9?w=400' }] },
+  { id: 11, city: 'Culiacán', country: 'México', title: 'Casa moderna en Culiacán', price_per_night: 650, guests: 4, bedrooms: 2, average_rating: 4.80, images: [{ url: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=400' }] },
+  { id: 12, city: 'Los Mochis', country: 'México', title: 'Departamento céntrico en Los Mochis', price_per_night: 580, guests: 3, bedrooms: 1, average_rating: 4.75, images: [{ url: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=400' }] },
 ];
 
 const PropertyCard = ({ property }) => {
@@ -78,22 +40,11 @@ const PropertyCard = ({ property }) => {
   return (
     <Link to={`/property/${property.id}`} className="group cursor-pointer flex-shrink-0 w-64">
       <div className="relative h-48 rounded-xl overflow-hidden mb-3">
-        <img
-          src={property.images?.[0]?.url || 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=400'}
-          alt={property.title}
-          className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
-        />
-        <button
-          className="absolute top-3 right-3 hover:scale-110 transition-all"
-          onClick={toggleFavorite}
-        >
-          <svg
-            className={`w-6 h-6 transition-all duration-300 ${isAnimating ? 'scale-150' : 'scale-100'}`}
-            fill={isFavorited ? '#FF385C' : 'none'}
-            stroke={isFavorited ? '#FF385C' : 'white'}
-            strokeWidth="2"
-            viewBox="0 0 24 24"
-          >
+        <img src={property.images?.[0]?.url || 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=400'}
+          alt={property.title} className="w-full h-full object-cover group-hover:scale-105 transition duration-300" />
+        <button className="absolute top-3 right-3 hover:scale-110 transition-all" onClick={toggleFavorite}>
+          <svg className={`w-6 h-6 transition-all duration-300 ${isAnimating ? 'scale-150' : 'scale-100'}`}
+            fill={isFavorited ? '#FF385C' : 'none'} stroke={isFavorited ? '#FF385C' : 'white'} strokeWidth="2" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
           </svg>
         </button>
@@ -153,8 +104,8 @@ const SearchResults = ({ properties, searchCity }) => (
   <div className="mb-12">
     <h2 className="text-2xl font-semibold text-gray-900 mb-4">
       {properties.length > 0
-        ? `${properties.length} alojamientos en "${searchCity}"`
-        : `No se encontraron alojamientos en "${searchCity}"`}
+        ? `${properties.length} alojamientos encontrados para "${searchCity}"`
+        : `No se encontraron alojamientos para "${searchCity}"`}
     </h2>
     {properties.length > 0 ? (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -183,8 +134,8 @@ const SearchResults = ({ properties, searchCity }) => (
     ) : (
       <div className="text-center py-12">
         <div className="text-6xl mb-4">🔍</div>
-        <p className="text-gray-500">Intenta con otra ciudad o ajusta tus filtros</p>
-        </div>
+        <p className="text-gray-500">Intenta con otra ciudad o nombre de propiedad</p>
+      </div>
     )}
   </div>
 );
@@ -305,6 +256,7 @@ const DestinationSuggestions = ({ onSelectCity }) => {
     { name: 'Ciudad de México', icon: '🏙️', color: 'text-gray-500 bg-gray-100' },
     { name: 'Cancún, Quintana Roo', icon: '🌴', color: 'text-green-500 bg-green-50' },
     { name: 'Culiacán, Sinaloa', icon: '💎', color: 'text-pink-400 bg-pink-100' },
+    { name: 'Los Mochis, Sinaloa', icon: '✨', color: 'text-fuchsia-500 bg-fuchsia-50' },
   ];
   return (
     <div className="absolute top-full left-0 mt-4 p-4 w-[450px] bg-white rounded-3xl shadow-2xl z-20 border border-gray-100">
@@ -364,6 +316,8 @@ export default function Home() {
   const [isGuestsOpen, setIsGuestsOpen] = useState(false);
   const searchRef = useRef(null);
 
+  const cities = ['Mazatlán', 'Guadalajara', 'Cancún', 'Ciudad de México', 'Culiacán', 'Los Mochis'];
+
   const { data: apiProperties, isLoading } = useQuery({
     queryKey: ['properties', searchParams],
     queryFn: async () => {
@@ -422,10 +376,11 @@ export default function Home() {
 
   const isSearching = searchParams.city !== '';
 
-  const availableCities = [...new Set(allProperties.map(p => p.city))];
-
   const filteredProperties = isSearching
-    ? allProperties.filter(p => p.city.toLowerCase().includes(searchParams.city.toLowerCase()))
+    ? allProperties.filter(p =>
+        p.city.toLowerCase().includes(searchParams.city.toLowerCase()) ||
+        p.title.toLowerCase().includes(searchParams.city.toLowerCase())
+      )
     : [];
 
   return (
@@ -436,7 +391,7 @@ export default function Home() {
             <div className="flex items-center divide-x divide-gray-200">
               <div className={`relative flex-1 py-2.5 pl-8 pr-6 cursor-pointer rounded-full transition-all duration-200 ${isDestinationOpen ? 'bg-gray-100' : 'hover:bg-gray-50'}`} onClick={() => handleSearchClick('destination')}>
                 <label className="block text-xs font-semibold text-gray-900 mb-0.5">Destino</label>
-                <input type="text" name="city" placeholder="Buscar destinos" value={filters.city}
+                <input type="text" name="city" placeholder="Buscar por ciudad o nombre" value={filters.city}
                   onChange={(e) => setFilters({ ...filters, city: e.target.value })}
                   onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
                   className="w-full text-sm text-gray-500 placeholder-gray-400 focus:outline-none bg-transparent" />
@@ -451,8 +406,7 @@ export default function Home() {
                   <label className="block text-xs font-semibold text-gray-900 mb-0.5">Huéspedes</label>
                   <div className="text-sm text-gray-500">{guestsDisplay}</div>
                 </div>
-                <button
-                  onClick={handleSearch}
+                <button onClick={handleSearch}
                   className="bg-[#FF385C] hover:bg-[#E0314F] text-white rounded-full p-3.5 ml-4 transition-colors duration-200 flex items-center justify-center">
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -464,11 +418,9 @@ export default function Home() {
             {isDatesOpen && <DateRangePicker checkIn={filters.check_in} checkOut={filters.check_out} onSelectDate={handleSelectDates} />}
           </div>
 
-          {/* Botón limpiar búsqueda */}
           {isSearching && (
             <div className="flex justify-center mt-3">
-              <button
-                onClick={() => { setFilters({ city: '', check_in: '', check_out: '', guests: 0 }); setSearchParams({ city: '', guests: 0 }); }}
+              <button onClick={() => { setFilters({ city: '', check_in: '', check_out: '', guests: 0 }); setSearchParams({ city: '', guests: 0 }); }}
                 className="text-sm text-gray-600 hover:text-gray-900 underline">
                 ✕ Limpiar búsqueda
               </button>
@@ -485,7 +437,7 @@ export default function Home() {
         ) : isSearching ? (
           <SearchResults properties={filteredProperties} searchCity={searchParams.city} />
         ) : (
-          availableCities.map(city => (
+          cities.map(city => (
             <CityCarousel key={city} city={city} properties={allProperties} />
           ))
         )}

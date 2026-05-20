@@ -13,7 +13,10 @@ class PropertyController extends Controller
         $query = Property::with('images')->where('is_active', true);
 
         if ($request->city) {
-            $query->where('city', 'like', '%' . $request->city . '%');
+    $query->where(function($q) use ($request) {
+        $q->where('city', 'like', '%' . $request->city . '%')
+          ->orWhere('title', 'like', '%' . $request->city . '%');
+            });
         }
 
         if ($request->guests) {
