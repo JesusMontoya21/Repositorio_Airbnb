@@ -24,8 +24,8 @@ class Property extends Model
 
     protected $casts = [
         'price_per_night' => 'decimal:2',
-        'average_rating' => 'decimal:2',
-        'is_active' => 'boolean',
+        'average_rating'  => 'decimal:2',
+        'is_active'       => 'boolean',
     ];
 
     public function user()
@@ -36,5 +36,15 @@ class Property extends Model
     public function images()
     {
         return $this->hasMany(PropertyImage::class);
+    }
+
+    public function bookings()
+    {
+        return $this->hasMany(\App\Models\Booking::class);
+    }
+
+    public function reviews()
+    {
+        return $this->hasMany(\App\Models\Review::class);
     }
 }

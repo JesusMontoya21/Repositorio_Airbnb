@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Property;
 use App\Models\PropertyImage;
+use App\Models\Booking;
 
 class PropertyController extends Controller
 {
@@ -13,9 +14,9 @@ class PropertyController extends Controller
         $query = Property::with('images')->where('is_active', true);
 
         if ($request->city) {
-    $query->where(function($q) use ($request) {
-        $q->where('city', 'like', '%' . $request->city . '%')
-          ->orWhere('title', 'like', '%' . $request->city . '%');
+            $query->where(function($q) use ($request) {
+                $q->where('city', 'like', '%' . $request->city . '%')
+                  ->orWhere('title', 'like', '%' . $request->city . '%');
             });
         }
 
@@ -122,5 +123,43 @@ class PropertyController extends Controller
             ->get();
 
         return response()->json($properties);
+    }
+
+    public function dashboard(Request $request)
+    {
+        $userId = $request->user()->id;
+
+        $properties = Property::with(['images', 'bookings'])
+            ->where('user_id', $userId)
+            ->get();
+
+        $totalProperties = $properties->count();
+
+        $totalBookings = $properties->sum(function($property) {
+            return $property->bookings->count();
+        });
+
+        $totalRevenue = $properties->sum(function($property) {
+            return $property->bookings
+                ->where('status', '!=', 'cancelled')
+                ->sum('total_price');
+        });
+
+        $averageRating = $properties->avg('average_rating') ?? 0;
+
+        $recentBookings = Booking::with('property')
+            ->whereIn('property_id', $properties->pluck('id'))
+            ->latest()
+            ->take(5)
+            ->get();
+
+        return response()->json([
+            'total_properties' => $totalProperties,
+            'total_bookings'   => $totalBookings,
+            'total_revenue'    => round($totalRevenue, 2),
+            'average_rating'   => round($averageRating, 2),
+            'properties'       => $properties,
+            'recent_bookings'  => $recentBookings,
+        ]);
     }
 }

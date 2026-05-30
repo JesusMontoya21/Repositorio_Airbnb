@@ -23,6 +23,7 @@ Route::get('/experiences', [ExperienceController::class, 'index']);
 Route::get('/experiences/{id}', [ExperienceController::class, 'show']);
 Route::get('/services', [ServiceController::class, 'index']);
 Route::get('/services/{id}', [ServiceController::class, 'show']);
+Route::get('/host/dashboard', [PropertyController::class, 'dashboard']);
 
 // Rutas protegidas
 Route::middleware('auth:sanctum')->group(function () {

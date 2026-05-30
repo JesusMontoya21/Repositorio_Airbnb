@@ -118,6 +118,9 @@ export default function Navbar() {
                       <Link to="/favorites" className="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-100">
                         Mis favoritos
                       </Link>
+                      <Link to="/host-dashboard" className="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-100">
+                        Panel de anfitrión
+                      </Link>
                       <button onClick={handleOpenHost}
                         className="block w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 lg:hidden">
                         Publicar propiedad

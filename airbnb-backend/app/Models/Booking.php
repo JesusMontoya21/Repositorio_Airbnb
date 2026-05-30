@@ -31,4 +31,8 @@ class Booking extends Model
     {
         return $this->belongsTo(Property::class)->with('images');
     }
+    public function bookings()
+{
+    return $this->hasMany(Booking::class);
+}
 }

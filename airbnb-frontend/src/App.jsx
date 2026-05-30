@@ -22,6 +22,7 @@ import Favorites from './pages/Favorites.jsx';
 import NotFound from './pages/NotFound.jsx';
 import ExperienceDetails from './pages/ExperienceDetails.jsx';
 import ServiceDetails from './pages/ServiceDetails.jsx';
+import HostDashboard from './pages/HostDashboard.jsx';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -60,6 +61,7 @@ function AppLayout() {
           <Route path="*" element={<NotFound />} />
           <Route path="/experiences/:id" element={<ExperienceDetails />} />
           <Route path="/services/:id" element={<ServiceDetails />} />
+          <Route path="/host-dashboard" element={<ProtectedRoute><HostDashboard /></ProtectedRoute>} />
         </Routes>
       </main>
 
