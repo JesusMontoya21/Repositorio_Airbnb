@@ -1,20 +1,38 @@
-FROM php:8.2-cli
+FROM php:8.2-fpm
 
-WORKDIR /var/www
-
+# Instalar extensiones necesarias
 RUN apt-get update && apt-get install -y \
-    git curl zip unzip libpq-dev \
-    && docker-php-ext-install pdo pdo_pgsql
+    git \
+    unzip \
+    libpq-dev \
+    libzip-dev \
+    zip \
+    && docker-php-ext-install pdo pdo_pgsql \
+    && docker-php-ext-configure zip \
+    && docker-php-ext-install zip
 
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+# Instalar Composer
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
+# Directorio de trabajo
+WORKDIR /var/www/html
+
+# Copiar el proyecto
 COPY . .
 
-RUN composer install --no-dev --optimize-autoloader
+# Instalar dependencias
+RUN composer install --optimize-autoloader --no-interaction
 
-RUN php artisan config:cache || true
-RUN php artisan route:cache || true
+# Crear carpetas necesarias para Laravel y asignar permisos
+RUN mkdir -p storage/framework/views \
+    && mkdir -p storage/framework/sessions \
+    && mkdir -p storage/framework/cache \
+    && mkdir -p bootstrap/cache \
+    && chown -R www-data:www-data storage bootstrap/cache \
+    && chmod -R 775 storage bootstrap/cache
 
-EXPOSE 8000
+# Exponer puerto
+EXPOSE 9000
 
-CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]
+# Iniciar PHP-FPM
+CMD ["php-fpm"]
