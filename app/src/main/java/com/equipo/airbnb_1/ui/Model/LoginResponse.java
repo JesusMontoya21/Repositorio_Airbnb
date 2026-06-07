@@ -1,10 +1,23 @@
 package com.equipo.airbnb_1.ui.Model;
 
-public class LoginResponse {
-    private String access_token;
-    private String token_type;
-    private String message; // Por si hay error
+import com.google.gson.annotations.SerializedName;
 
-    public String getAccessToken() { return access_token; }
-    public String getMessage() { return message; }
+public class LoginResponse {
+
+    @SerializedName("message")
+    private String message;
+
+    @SerializedName("token")
+    private String accessToken;
+
+    @SerializedName("user")
+    private Object user;
+
+    public String getAccessToken() {
+        return accessToken;
+    }
+
+    public String getMessage() {
+        return message;
+    }
 }

@@ -7,7 +7,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -21,6 +20,7 @@ import com.equipo.airbnb_1.ui.Model.LoginRequest;
 import com.equipo.airbnb_1.ui.Model.LoginResponse;
 import com.equipo.airbnb_1.ui.Network.ApiService;
 import com.equipo.airbnb_1.ui.Network.RetrofitClient;
+import com.google.android.material.button.MaterialButton;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -29,7 +29,7 @@ import retrofit2.Response;
 public class LoginFragment extends Fragment {
 
     private EditText etEmail, etPassword;
-    private Button btnContinuar;
+    private MaterialButton btnContinuar, btnIrARegistro;
 
     @Nullable
     @Override
@@ -39,6 +39,7 @@ public class LoginFragment extends Fragment {
         etEmail = view.findViewById(R.id.etEmail);
         etPassword = view.findViewById(R.id.etPassword);
         btnContinuar = view.findViewById(R.id.btnContinuar);
+        btnIrARegistro = view.findViewById(R.id.btnIrARegistro);
 
         btnContinuar.setOnClickListener(v -> {
             String email = etEmail.getText().toString().trim();
@@ -47,6 +48,10 @@ public class LoginFragment extends Fragment {
             if (validarCampos(email, password)) {
                 realizarLogin(email, password, v);
             }
+        });
+
+        btnIrARegistro.setOnClickListener(v -> {
+            Navigation.findNavController(v).navigate(R.id.action_login_to_registro);
         });
 
         return view;
@@ -61,18 +66,20 @@ public class LoginFragment extends Fragment {
     }
 
     private void realizarLogin(String email, String password, View v) {
-        ApiService apiService = RetrofitClient.getApiService();
+        // CORREGIDO: Ahora se envía requireContext() para cumplir con la firma del RetrofitClient
+        ApiService apiService = RetrofitClient.getApiService(requireContext());
         LoginRequest loginRequest = new LoginRequest(email, password);
 
         apiService.login(loginRequest).enqueue(new Callback<LoginResponse>() {
             @Override
-            public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
+            public void onResponse(@NonNull Call<LoginResponse> call, @NonNull Response<LoginResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     String token = response.body().getAccessToken();
                     SharedPreferences preferences = requireActivity().getSharedPreferences("user_session", Context.MODE_PRIVATE);
                     SharedPreferences.Editor editor = preferences.edit();
                     editor.putString("auth_token", token);
                     editor.apply();
+
                     Log.d("SESION_CHECK", "Token guardado correctamente: " + token);
                     Toast.makeText(getContext(), "¡Bienvenido!", Toast.LENGTH_SHORT).show();
                     Navigation.findNavController(v).navigate(R.id.action_login_to_home);
@@ -82,7 +89,7 @@ public class LoginFragment extends Fragment {
             }
 
             @Override
-            public void onFailure(Call<LoginResponse> call, Throwable t) {
+            public void onFailure(@NonNull Call<LoginResponse> call, @NonNull Throwable t) {
                 Toast.makeText(getContext(), "Error de red: " + t.getMessage(), Toast.LENGTH_LONG).show();
             }
         });

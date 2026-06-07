@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#FFFFFF"
@@ -20,7 +21,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/tvTitulo"
-        android:layout_centerInParent="true"
+        android:layout_centerVertical="true"
         android:orientation="vertical"
         android:visibility="visible">
 
@@ -41,15 +42,16 @@
             android:textSize="14sp"
             android:layout_marginBottom="24dp"/>
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnIrALogin"
             android:layout_width="wrap_content"
             android:layout_height="55dp"
             android:paddingHorizontal="32dp"
-            android:text="Iniciar sesión o registrate"
+            android:text="Iniciar sesión o regístrate"
             android:backgroundTint="#FF385C"
             android:textAllCaps="false"
-            android:textStyle="bold"/>
+            android:textStyle="bold"
+            app:cornerRadius="8dp"/>
     </LinearLayout>
 
     <LinearLayout
@@ -57,7 +59,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/tvTitulo"
-        android:layout_centerInParent="true"
+        android:layout_centerVertical="true"
         android:orientation="vertical"
         android:visibility="gone">
 

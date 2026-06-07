@@ -8,11 +8,11 @@
     android:padding="24dp">
 
     <TextView
-        android:id="@+id/tvTitulo"
+        android:id="@+id/tvTituloRegistro"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="40dp"
-        android:text="Inicia sesión"
+        android:text="Regístrate"
         android:textColor="#222222"
         android:textSize="22sp"
         android:textStyle="bold" />
@@ -25,7 +25,23 @@
         android:orientation="vertical">
 
         <EditText
-            android:id="@+id/etEmail"
+            android:id="@+id/etNombre"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:background="@android:color/transparent"
+            android:hint="Nombre completo"
+            android:inputType="textPersonName"
+            android:paddingHorizontal="16dp"
+            android:textSize="16sp"
+            android:importantForAutofill="no" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#DDDDDD" />
+
+        <EditText
+            android:id="@+id/etEmailRegistro"
             android:layout_width="match_parent"
             android:layout_height="60dp"
             android:background="@android:color/transparent"
@@ -41,7 +57,7 @@
             android:background="#DDDDDD" />
 
         <EditText
-            android:id="@+id/etPassword"
+            android:id="@+id/etPasswordRegistro"
             android:layout_width="match_parent"
             android:layout_height="60dp"
             android:background="@android:color/transparent"
@@ -50,43 +66,35 @@
             android:paddingHorizontal="16dp"
             android:textSize="16sp"
             android:importantForAutofill="no" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#DDDDDD" />
+
+        <EditText
+            android:id="@+id/etConfirmPassword"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:background="@android:color/transparent"
+            android:hint="Verificar contraseña"
+            android:inputType="textPassword"
+            android:paddingHorizontal="16dp"
+            android:textSize="16sp"
+            android:importantForAutofill="no" />
     </LinearLayout>
 
-    <!-- Botón Principal (Iniciar Sesión) -->
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnContinuar"
+        android:id="@+id/btnRegistrar"
         android:layout_width="match_parent"
         android:layout_height="56dp"
         android:layout_marginTop="24dp"
         android:backgroundTint="#FF385C"
-        android:text="Continúa"
+        android:text="Registrarse"
         android:textAllCaps="false"
         android:textColor="@color/white"
         android:textSize="16sp"
         android:textStyle="bold"
         app:cornerRadius="8dp" />
-
-    <!-- Línea divisoria sutil para separar las opciones -->
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="#EEEEEE"
-        android:layout_marginTop="24dp"
-        android:layout_marginBottom="24dp"/>
-
-    <!-- BOTÓN DE REGISTRO (Estilo Outlined, elegante y limpio) -->
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnIrARegistro"
-        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-        android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:text="¿No tienes cuenta? Regístrate"
-        android:textColor="#000000"
-        android:textAllCaps="false"
-        android:textSize="15sp"
-        android:textStyle="bold"
-        app:strokeColor="#DDDDDD"
-        app:strokeWidth="1dp"
-        app:cornerRadius="8dp"/>
 
 </LinearLayout>

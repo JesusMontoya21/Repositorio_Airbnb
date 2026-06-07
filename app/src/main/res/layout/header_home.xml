@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:background="#FFFFFF">
 
     <LinearLayout
         android:id="@+id/searchContainer"
@@ -10,26 +12,26 @@
         android:layout_height="45dp"
         android:layout_margin="8dp"
         android:orientation="horizontal"
-        android:gravity="center"
+        android:gravity="center_vertical"
         android:background="@drawable/bg_searchbar"
         android:paddingHorizontal="16dp"
         android:elevation="4dp">
 
         <ImageView
             android:id="@+id/iconSearch"
-            android:layout_width="25dp"
-            android:layout_height="25dp"
+            android:layout_width="22dp"
+            android:layout_height="22dp"
             android:src="@drawable/ic_search"
-            android:textColor="@color/muted_gray"
-            android:layout_marginEnd="8dp" />
+            android:tint="#888888"
+            android:layout_marginEnd="12dp" />
 
         <TextView
             android:id="@+id/tvSearchHint"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="¿A dónde vas?"
-            android:textColor="@color/muted_gray"
-            android:textSize="17sp"
+            android:textColor="#888888"
+            android:textSize="15sp"
             android:textStyle="bold"/>
     </LinearLayout>
 
@@ -37,41 +39,43 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:scrollbars="none"
-        android:layout_marginTop="10dp"
-        android:paddingHorizontal="12dp">
+        android:layout_marginTop="8dp"
+        android:paddingHorizontal="12dp"
+        android:clipToPadding="false">
 
         <LinearLayout
             android:id="@+id/bannerSelector"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:gravity="center_vertical">
+            android:gravity="center_vertical"
+            android:paddingBottom="8dp">
 
             <TextView
                 android:id="@+id/btnAlojamientos"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="38dp"
                 android:gravity="center"
                 android:text="Alojamientos"
-                android:textColor="@color/airbnb_red"
+                android:textColor="#000000"
                 android:textStyle="bold"
-                android:textSize="15sp"
+                android:textSize="14sp"
                 android:paddingHorizontal="20dp"
                 android:background="@drawable/bg_chip_active"
                 android:layout_marginEnd="8dp"
-                android:elevation="3dp"
+                android:elevation="2dp"
                 android:clickable="true"
                 android:focusable="true" />
 
             <TextView
                 android:id="@+id/btnExperiencias"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="38dp"
                 android:gravity="center"
                 android:text="Experiencias"
-                android:textColor="@color/muted_gray"
+                android:textColor="#888888"
                 android:textStyle="bold"
-                android:textSize="15sp"
+                android:textSize="14sp"
                 android:paddingHorizontal="20dp"
                 android:background="@drawable/bg_chip_inactive"
                 android:layout_marginEnd="8dp"
@@ -80,13 +84,13 @@
 
             <TextView
                 android:id="@+id/btnServicios"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="38dp"
                 android:gravity="center"
                 android:text="Servicios"
-                android:textColor="@color/muted_gray"
+                android:textColor="#888888"
                 android:textStyle="bold"
-                android:textSize="15sp"
+                android:textSize="14sp"
                 android:paddingHorizontal="20dp"
                 android:background="@drawable/bg_chip_inactive"
                 android:clickable="true"

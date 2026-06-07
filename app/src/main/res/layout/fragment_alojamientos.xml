@@ -15,9 +15,12 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerCarrusel"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="200dp"
         android:layout_below="@id/header_home"
-        android:padding="10dp"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp"
         android:clipToPadding="false"
         android:scrollbars="horizontal"/>
 

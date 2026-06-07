@@ -4,42 +4,80 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#FFFFFF"
-    android:padding="20dp">
-
-    <LinearLayout
-        android:id="@+id/content_layout"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_above="@id/bottom_navigation"
-        android:orientation="vertical"
-        android:gravity="center">
+    android:padding="24dp">
 
     <TextView
-        android:layout_width="300dp"
-        android:layout_height="42dp"
+        android:id="@+id/tvTitulo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:text="Viajes"
         android:textColor="#000000"
-        android:textSize="22dp"
-        android:textStyle="bold" />
+        android:textSize="30sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="32dp"/>
 
-    <TextView
-        android:layout_width="300dp"
-        android:layout_height="36dp"
-        android:text="No tienes viajes aún"
-        android:textColor="#000000"
-        android:textSize="18sp"
-        android:textStyle="bold" />
+    <LinearLayout
+        android:id="@+id/layout_invitado_viajes"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tvTitulo"
+        android:layout_centerVertical="true"
+        android:orientation="vertical"
+        android:visibility="visible">
 
-    <TextView
-        android:layout_width="300dp"
-        android:layout_height="472dp"
-        android:layout_marginTop="8dp"
-        android:gravity="center"
-        android:paddingHorizontal="16dp"
-        android:text="Aquí verás tus próximos viajes ✈️."
-        android:textColor="#666666"
-        android:textSize="14sp" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Inicia sesión para ver tus viajes"
+            android:textColor="#000000"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp"/>
 
-</LinearLayout>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Inicia sesión para planificar, consultar tus reservaciones activas y revisar tus itinerarios anteriores."
+            android:textColor="#666666"
+            android:textSize="14sp"
+            android:layout_marginBottom="24dp"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnIrALoginViajes"
+            android:layout_width="wrap_content"
+            android:layout_height="55dp"
+            android:paddingHorizontal="32dp"
+            android:text="Iniciar sesión o Registrate"
+            android:backgroundTint="#FF385C"
+            android:textAllCaps="false"
+            android:textStyle="bold"
+            app:cornerRadius="8dp"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/layout_usuario_viajes"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tvTitulo"
+        android:layout_centerVertical="true"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Aún no tienes ningún viaje programado"
+            android:textColor="#000000"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="¡Es hora de desempolvar las maletas! Empieza a buscar tu próximo alojamiento en la pestaña Explorar."
+            android:textColor="#666666"
+            android:textSize="14sp"/>
+    </LinearLayout>
 
 </RelativeLayout>

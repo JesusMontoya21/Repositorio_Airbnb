@@ -1,4 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
@@ -9,6 +11,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Perfil"
+        android:textColor="#000000"
         android:textSize="30sp"
         android:textStyle="bold"
         android:layout_marginBottom="32dp"/>
@@ -17,7 +20,8 @@
         android:id="@+id/layout_invitado"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:visibility="visible">
 
         <TextView
             android:layout_width="wrap_content"
@@ -27,14 +31,17 @@
             android:textColor="#717171"
             android:layout_marginBottom="24dp"/>
 
-        <Button
+
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnIrALogin"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="55dp"
-            android:text="inicia sesion o registrate"
-            android:backgroundTint="#FF5A5F"
+            android:paddingHorizontal="32dp"
+            android:text="Iniciar sesión o regístrate"
+            android:backgroundTint="#FF385C"
             android:textAllCaps="false"
-            android:textStyle="bold"/>
+            android:textStyle="bold"
+            app:cornerRadius="8dp"/>
     </LinearLayout>
 
     <LinearLayout
@@ -49,19 +56,24 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="¡Hola, Jesus!"
+            android:textColor="#000000"
             android:textSize="20sp"
             android:textStyle="bold"
             android:layout_marginBottom="16dp"/>
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnCerrarSesion"
             android:layout_width="match_parent"
             android:layout_height="50dp"
             android:text="Cerrar sesión"
-            android:backgroundTint="#F5F5F5"
+            android:backgroundTint="#FFFFFF"
             android:textColor="#000000"
             android:textAllCaps="false"
-            android:layout_marginTop="20dp"/>
+            android:layout_marginTop="20dp"
+            app:strokeColor="#DDDDDD"
+            app:strokeWidth="1dp"
+            app:cornerRadius="8dp"
+            android:textStyle="bold"/>
     </LinearLayout>
 
 </LinearLayout>

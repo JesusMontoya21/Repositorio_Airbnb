@@ -28,7 +28,6 @@ public class ExperienciasFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.activity_home, container, false);
-
         View header = view.findViewById(R.id.header_home);
 
         btnAlojamientos = header.findViewById(R.id.btnAlojamientos);
@@ -39,9 +38,11 @@ public class ExperienciasFragment extends Fragment {
         seleccionarSeccion("Experiencias");
 
         btnExperiencias.setOnClickListener(v -> seleccionarSeccion("Experiencias"));
+
         btnAlojamientos.setOnClickListener(v -> {
             Navigation.findNavController(v).navigate(R.id.nav_navegacion);
         });
+
         btnServicios.setOnClickListener(v -> {
             Navigation.findNavController(v).navigate(R.id.btnServicios);
         });
@@ -50,35 +51,42 @@ public class ExperienciasFragment extends Fragment {
     }
 
     private void seleccionarSeccion(String seccion) {
-        int colorNaranja = Color.parseColor("#FF6F61");
-        int colorBlanco = Color.WHITE;
+        int colorRosa = Color.parseColor("#FF385C");
+        int colorGrisMutado = Color.parseColor("#888888");
 
-        btnAlojamientos.setBackgroundColor(colorBlanco);
-        btnAlojamientos.setTextColor(colorNaranja);
-        btnExperiencias.setBackgroundColor(colorBlanco);
-        btnExperiencias.setTextColor(colorNaranja);
-        btnServicios.setBackgroundColor(colorBlanco);
-        btnServicios.setTextColor(colorNaranja);
+        btnAlojamientos.setBackgroundResource(R.drawable.bg_chip_inactive);
+        btnAlojamientos.setTextColor(colorGrisMutado);
+
+        btnExperiencias.setBackgroundResource(R.drawable.bg_chip_inactive);
+        btnExperiencias.setTextColor(colorGrisMutado);
+
+        btnServicios.setBackgroundResource(R.drawable.bg_chip_inactive);
+        btnServicios.setTextColor(colorGrisMutado);
 
         switch (seccion) {
             case "Alojamientos":
-                btnAlojamientos.setBackgroundColor(colorNaranja);
-                btnAlojamientos.setTextColor(colorBlanco);
+                btnAlojamientos.setBackgroundResource(R.drawable.bg_chip_active);
+                btnAlojamientos.setTextColor(colorRosa);
                 break;
             case "Experiencias":
-                btnExperiencias.setBackgroundColor(colorNaranja);
-                btnExperiencias.setTextColor(colorBlanco);
+                btnExperiencias.setBackgroundResource(R.drawable.bg_chip_active);
+                btnExperiencias.setTextColor(colorRosa);
                 break;
             case "Servicios":
-                btnServicios.setBackgroundColor(colorNaranja);
-                btnServicios.setTextColor(colorBlanco);
+                btnServicios.setBackgroundResource(R.drawable.bg_chip_active);
+                btnServicios.setTextColor(colorRosa);
                 break;
         }
 
-        ArrayList<Integer> imagenes = new ArrayList<>();
-        imagenes.add(R.drawable.casa1);
-        imagenes.add(R.drawable.casa3);
+        // CORREGIDO: Cambiado de Integer a String para jalar URLs reales
+        ArrayList<String> imagenes = new ArrayList<>();
 
+        // Imágenes de prueba enfocadas a tours, caminatas y experiencias de viaje
+        imagenes.add("https://images.unsplash.com/photo-1501555088652-021faa106b9b?w=700");
+        imagenes.add("https://images.unsplash.com/photo-1527631746610-bca00a040d60?w=700");
+        imagenes.add("https://images.unsplash.com/photo-1530521954074-e64f6810b32d?w=700");
+
+        // El adaptador ahora recibe los textos de manera fluida y limpia
         CarruselAdapter adapter = new CarruselAdapter(imagenes, getContext());
         recyclerCarrusel.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
         recyclerCarrusel.setAdapter(adapter);

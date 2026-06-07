@@ -6,11 +6,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.navigation.Navigation; // IMPORTANTE: Para navegar entre fragmentos
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -21,68 +22,71 @@ import java.util.ArrayList;
 
 public class AlojamientosFragment extends Fragment {
 
-    TextView btnAlojamientos, btnExperiencias, btnServicios;
-    RecyclerView recyclerCarrusel;
+    private TextView btnAlojamientos, btnExperiencias, btnServicios;
+    private RecyclerView recyclerCarrusel;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-
         View view = inflater.inflate(R.layout.activity_home, container, false);
         View header = view.findViewById(R.id.header_home);
 
-        btnAlojamientos = header.findViewById(R.id.btnAlojamientos);
-        btnExperiencias = header.findViewById(R.id.btnExperiencias);
-        btnServicios = header.findViewById(R.id.btnServicios);
+        if (header != null) {
+            btnAlojamientos = header.findViewById(R.id.btnAlojamientos);
+            btnExperiencias = header.findViewById(R.id.btnExperiencias);
+            btnServicios = header.findViewById(R.id.btnServicios);
+        }
+
         recyclerCarrusel = view.findViewById(R.id.recyclerCarrusel);
+        recyclerCarrusel.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
 
         seleccionarSeccion("Alojamientos");
 
         btnAlojamientos.setOnClickListener(v -> seleccionarSeccion("Alojamientos"));
-        btnExperiencias.setOnClickListener(v -> {
-            Navigation.findNavController(v).navigate(R.id.btnExperiencias);
-        });
-        btnServicios.setOnClickListener(v -> {
-            Navigation.findNavController(v).navigate(R.id.btnServicios);
-        });
+        btnExperiencias.setOnClickListener(v -> Navigation.findNavController(v).navigate(R.id.btnExperiencias));
+        btnServicios.setOnClickListener(v -> Navigation.findNavController(v).navigate(R.id.btnServicios));
 
         return view;
     }
 
     private void seleccionarSeccion(String seccion) {
-        int colorNaranja = Color.parseColor("#FF6F61");
-        int colorBlanco = Color.WHITE;
+        int colorRosa = Color.parseColor("#FF385C");
+        int colorGrisMutado = Color.parseColor("#888888");
 
-        btnAlojamientos.setBackgroundColor(colorBlanco);
-        btnAlojamientos.setTextColor(colorNaranja);
-        btnExperiencias.setBackgroundColor(colorBlanco);
-        btnExperiencias.setTextColor(colorNaranja);
-        btnServicios.setBackgroundColor(colorBlanco);
-        btnServicios.setTextColor(colorNaranja);
+        btnAlojamientos.setBackgroundResource(R.drawable.bg_chip_inactive);
+        btnAlojamientos.setTextColor(colorGrisMutado);
+        btnExperiencias.setBackgroundResource(R.drawable.bg_chip_inactive);
+        btnExperiencias.setTextColor(colorGrisMutado);
+        btnServicios.setBackgroundResource(R.drawable.bg_chip_inactive);
+        btnServicios.setTextColor(colorGrisMutado);
 
         switch (seccion) {
             case "Alojamientos":
-                btnAlojamientos.setBackgroundColor(colorNaranja);
-                btnAlojamientos.setTextColor(colorBlanco);
+                btnAlojamientos.setBackgroundResource(R.drawable.bg_chip_active);
+                btnAlojamientos.setTextColor(colorRosa);
                 break;
             case "Experiencias":
-                btnExperiencias.setBackgroundColor(colorNaranja);
-                btnExperiencias.setTextColor(colorBlanco);
+                btnExperiencias.setBackgroundResource(R.drawable.bg_chip_active);
+                btnExperiencias.setTextColor(colorRosa);
                 break;
             case "Servicios":
-                btnServicios.setBackgroundColor(colorNaranja);
-                btnServicios.setTextColor(colorBlanco);
+                btnServicios.setBackgroundResource(R.drawable.bg_chip_active);
+                btnServicios.setTextColor(colorRosa);
                 break;
         }
 
-        ArrayList<Integer> imagenes = new ArrayList<>();
-        imagenes.add(R.drawable.casa1);
-        imagenes.add(R.drawable.casa2);
-        imagenes.add(R.drawable.casa3);
+        ArrayList<String> imagenesUrls = new ArrayList<>();
 
-        CarruselAdapter adapter = new CarruselAdapter(imagenes, getContext());
-        LinearLayoutManager layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
-        recyclerCarrusel.setLayoutManager(layoutManager);
+        imagenesUrls.add("https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=700");
+        imagenesUrls.add("https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=700");
+        imagenesUrls.add("https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=700");
+
+        if (imagenesUrls.isEmpty()) {
+            Toast.makeText(getContext(), "No hay alojamientos disponibles", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        CarruselAdapter adapter = new CarruselAdapter(imagenesUrls, getContext());
         recyclerCarrusel.setAdapter(adapter);
     }
 }

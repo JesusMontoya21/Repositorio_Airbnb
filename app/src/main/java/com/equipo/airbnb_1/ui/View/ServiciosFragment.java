@@ -9,7 +9,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment; // Cambio clave: de Activity a Fragment
+import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -28,7 +28,6 @@ public class ServiciosFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.activity_home, container, false);
-
         View header = view.findViewById(R.id.header_home);
 
         if (header != null) {
@@ -42,9 +41,11 @@ public class ServiciosFragment extends Fragment {
         seleccionarSeccion("Servicios");
 
         btnServicios.setOnClickListener(v -> seleccionarSeccion("Servicios"));
+
         btnExperiencias.setOnClickListener(v -> {
             Navigation.findNavController(v).navigate(R.id.btnExperiencias);
         });
+
         btnAlojamientos.setOnClickListener(v -> {
             Navigation.findNavController(v).navigate(R.id.nav_navegacion);
         });
@@ -53,24 +54,40 @@ public class ServiciosFragment extends Fragment {
     }
 
     private void seleccionarSeccion(String seccion) {
-        int colorNaranja = Color.parseColor("#FF6F61");
-        int colorBlanco = Color.WHITE;
+        int colorRosa = Color.parseColor("#FF385C");
+        int colorGrisMutado = Color.parseColor("#888888");
 
-        btnAlojamientos.setBackgroundColor(colorBlanco);
-        btnAlojamientos.setTextColor(colorNaranja);
-        btnExperiencias.setBackgroundColor(colorBlanco);
-        btnExperiencias.setTextColor(colorNaranja);
-        btnServicios.setBackgroundColor(colorBlanco);
-        btnServicios.setTextColor(colorNaranja);
+        btnAlojamientos.setBackgroundResource(R.drawable.bg_chip_inactive);
+        btnAlojamientos.setTextColor(colorGrisMutado);
 
-        if (seccion.equals("Servicios")) {
-            btnServicios.setBackgroundColor(colorNaranja);
-            btnServicios.setTextColor(colorBlanco);
+        btnExperiencias.setBackgroundResource(R.drawable.bg_chip_inactive);
+        btnExperiencias.setTextColor(colorGrisMutado);
+
+        btnServicios.setBackgroundResource(R.drawable.bg_chip_inactive);
+        btnServicios.setTextColor(colorGrisMutado);
+
+        switch (seccion) {
+            case "Alojamientos":
+                btnAlojamientos.setBackgroundResource(R.drawable.bg_chip_active);
+                btnAlojamientos.setTextColor(colorRosa);
+                break;
+            case "Experiencias":
+                btnExperiencias.setBackgroundResource(R.drawable.bg_chip_active);
+                btnExperiencias.setTextColor(colorRosa);
+                break;
+            case "Servicios":
+                btnServicios.setBackgroundResource(R.drawable.bg_chip_active);
+                btnServicios.setTextColor(colorRosa);
+                break;
         }
 
-        ArrayList<Integer> imagenes = new ArrayList<>();
-        imagenes.add(R.drawable.casa1);
-        imagenes.add(R.drawable.casa2);
+        // CORREGIDO: Cambiado de Integer a String para jalar URLs reales
+        ArrayList<String> imagenes = new ArrayList<>();
+
+        // Imágenes de prueba enfocadas a servicios, albercas, spas y atención premium
+        imagenes.add("https://images.unsplash.com/photo-1566073771259-6a8506099945?w=700");
+        imagenes.add("https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=700");
+        imagenes.add("https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=700");
 
         CarruselAdapter adapter = new CarruselAdapter(imagenes, getContext());
         recyclerCarrusel.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));

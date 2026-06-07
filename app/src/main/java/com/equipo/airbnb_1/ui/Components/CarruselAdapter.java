@@ -13,10 +13,10 @@ import java.util.ArrayList;
 
 public class CarruselAdapter extends RecyclerView.Adapter<CarruselAdapter.ViewHolder> {
 
-    private final ArrayList<Integer> imagenes;
+    private final ArrayList<String> imagenes;
     private final Context context;
 
-    public CarruselAdapter(ArrayList<Integer> imagenes, Context context) {
+    public CarruselAdapter(ArrayList<String> imagenes, Context context) {
         this.imagenes = imagenes;
         this.context = context;
     }
@@ -33,6 +33,8 @@ public class CarruselAdapter extends RecyclerView.Adapter<CarruselAdapter.ViewHo
         Glide.with(context)
                 .load(imagenes.get(position))
                 .centerCrop()
+                .placeholder(R.drawable.casa1)
+                .error(R.drawable.casa1)
                 .into(holder.imageView);
     }
 
@@ -43,10 +45,10 @@ public class CarruselAdapter extends RecyclerView.Adapter<CarruselAdapter.ViewHo
 
     static class ViewHolder extends RecyclerView.ViewHolder {
         ImageView imageView;
+
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             imageView = itemView.findViewById(R.id.imgCarrusel);
         }
     }
 }
-

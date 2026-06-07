@@ -1,6 +1,7 @@
 package com.equipo.airbnb_1.ui.View;
 
 import android.os.Bundle;
+import android.view.View;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
@@ -26,8 +27,16 @@ public class MainActivity extends AppCompatActivity {
 
         if (navHostFragment != null) {
             NavController navController = navHostFragment.getNavController();
-
             NavigationUI.setupWithNavController(navView, navController);
+
+            navController.addOnDestinationChangedListener((controller, destination, arguments) -> {
+                int id = destination.getId();
+                if (id == R.id.loginFragment || id == R.id.registroFragment) {
+                    navView.setVisibility(View.GONE);
+                } else {
+                    navView.setVisibility(View.VISIBLE);
+                }
+            });
         }
     }
 }
