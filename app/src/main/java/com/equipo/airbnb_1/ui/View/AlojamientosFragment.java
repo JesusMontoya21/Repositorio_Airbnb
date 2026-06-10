@@ -16,9 +16,15 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.equipo.airbnb_1.R;
-import com.equipo.airbnb_1.ui.Components.CarruselAdapter;
+import com.equipo.airbnb_1.ui.Components.AlojamientoAdapter;
+import com.equipo.airbnb_1.ui.Model.Alojamiento;
+import com.equipo.airbnb_1.ui.Network.ApiService;
+import com.equipo.airbnb_1.ui.Network.RetrofitClient;
 
-import java.util.ArrayList;
+import java.util.List;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class AlojamientosFragment extends Fragment {
 
@@ -64,29 +70,46 @@ public class AlojamientosFragment extends Fragment {
             case "Alojamientos":
                 btnAlojamientos.setBackgroundResource(R.drawable.bg_chip_active);
                 btnAlojamientos.setTextColor(colorRosa);
+                cargarAlojamientosDesdeServidor();
                 break;
+
             case "Experiencias":
                 btnExperiencias.setBackgroundResource(R.drawable.bg_chip_active);
                 btnExperiencias.setTextColor(colorRosa);
                 break;
+
             case "Servicios":
                 btnServicios.setBackgroundResource(R.drawable.bg_chip_active);
                 btnServicios.setTextColor(colorRosa);
                 break;
         }
+    }
 
-        ArrayList<String> imagenesUrls = new ArrayList<>();
+    private void cargarAlojamientosDesdeServidor() {
+        ApiService apiService = RetrofitClient.getApiService(requireContext());
 
-        imagenesUrls.add("https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=700");
-        imagenesUrls.add("https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=700");
-        imagenesUrls.add("https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=700");
+        apiService.getAlojamientos().enqueue(new Callback<List<Alojamiento>>() {
+            @Override
+            public void onResponse(@NonNull Call<List<Alojamiento>> call, @NonNull Response<List<Alojamiento>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    List<Alojamiento> listaAlojamientos = response.body();
 
-        if (imagenesUrls.isEmpty()) {
-            Toast.makeText(getContext(), "No hay alojamientos disponibles", Toast.LENGTH_SHORT).show();
-            return;
-        }
+                    if (listaAlojamientos.isEmpty()) {
+                        Toast.makeText(getContext(), "No hay alojamientos disponibles", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
 
-        CarruselAdapter adapter = new CarruselAdapter(imagenesUrls, getContext());
-        recyclerCarrusel.setAdapter(adapter);
+                    AlojamientoAdapter adapter = new AlojamientoAdapter(listaAlojamientos);
+                    recyclerCarrusel.setAdapter(adapter);
+                } else {
+                    Toast.makeText(getContext(), "Error al obtener datos del servidor", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<List<Alojamiento>> call, @NonNull Throwable t) {
+                Toast.makeText(getContext(), "Error de conexión: " + t.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        });
     }
 }

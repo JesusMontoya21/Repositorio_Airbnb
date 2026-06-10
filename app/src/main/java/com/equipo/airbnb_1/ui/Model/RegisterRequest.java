@@ -13,11 +13,9 @@ public class RegisterRequest {
     @SerializedName("password")
     private String password;
 
-    // Usamos @SerializedName para mapear el formato snake_case exigido por Laravel
     @SerializedName("password_confirmation")
     private String passwordConfirmation;
 
-    // Constructor completo actualizado
     public RegisterRequest(String name, String email, String password, String passwordConfirmation) {
         this.name = name;
         this.email = email;
@@ -34,7 +32,4 @@ public class RegisterRequest {
 
     public String getPassword() { return password; }
     public void setPassword(String password) { this.password = password; }
-
-    public String getPasswordConfirmation() { return passwordConfirmation; }
-    public void setPasswordConfirmation(String passwordConfirmation) { this.passwordConfirmation = passwordConfirmation; }
 }
