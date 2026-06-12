@@ -1,31 +1,32 @@
 package com.equipo.airbnb_1.ui.Model;
 
 import com.google.gson.annotations.SerializedName;
+import java.util.List;
 
 public class Alojamiento {
 
     @SerializedName("id")
     private int id;
 
-    @SerializedName("titulo")
+    @SerializedName(value = "title", alternate = {"titulo", "name"})
     private String titulo;
 
-    @SerializedName("precio")
+    @SerializedName(value = "precio", alternate = {"price", "total_price"})
     private double precio;
 
-    @SerializedName("imagen_url")
-    private String imagenUrl;
+    @SerializedName(value = "images", alternate = {"imagenes"})
+    private List<ImagenAlojamiento> images;
 
-    public Alojamiento(int id, String titulo, double precio, String imagenUrl) {
+    public Alojamiento(int id, String titulo, double precio, List<ImagenAlojamiento> images) {
         this.id = id;
         this.titulo = titulo;
         this.precio = precio;
-        this.imagenUrl = imagenUrl;
+        this.images = images;
     }
 
     // Getters
     public int getId() { return id; }
     public String getTitulo() { return titulo; }
     public double getPrecio() { return precio; }
-    public String getImagenUrl() { return imagenUrl; }
+    public List<ImagenAlojamiento> getImages() { return images; }
 }

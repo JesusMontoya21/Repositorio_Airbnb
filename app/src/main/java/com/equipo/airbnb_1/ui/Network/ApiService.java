@@ -1,7 +1,10 @@
 package com.equipo.airbnb_1.ui.Network;
 
+import com.equipo.airbnb_1.ui.Model.BookingRequest;
+import com.equipo.airbnb_1.ui.Model.BookingResponse;
 import com.equipo.airbnb_1.ui.Model.LoginRequest;
 import com.equipo.airbnb_1.ui.Model.LoginResponse;
+import com.equipo.airbnb_1.ui.Model.PropertyDetalleResponse;
 import com.equipo.airbnb_1.ui.Model.RegisterRequest;
 import com.equipo.airbnb_1.ui.Model.Alojamiento;
 
@@ -9,9 +12,11 @@ import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.http.Body;
+import retrofit2.http.Header;
 import retrofit2.http.Headers;
 import retrofit2.http.POST;
 import retrofit2.http.GET;
+import retrofit2.http.Path;
 
 public interface ApiService {
 
@@ -34,4 +39,25 @@ public interface ApiService {
     })
     @GET("alojamientos")
     Call<List<Alojamiento>> getAlojamientos();
+
+    @GET("properties/{id}")
+    Call<PropertyDetalleResponse> obtenerDetalleAlojamiento(@Path("id") int id);
+
+    @Headers({
+            "Accept: application/json",
+            "Content-Type: application/json"
+    })
+    @POST("bookings")
+    Call<Void> crearReservacion(
+            @Header("Authorization") String token,
+            @Body BookingRequest request
+    );
+
+    @Headers({
+            "Accept: application/json"
+    })
+    @GET("my-bookings")
+    Call<List<BookingResponse>> obtenerMisViajes(
+            @Header("Authorization") String token
+    );
 }

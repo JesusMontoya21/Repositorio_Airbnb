@@ -49,8 +49,8 @@ public class AlojamientosFragment extends Fragment {
         seleccionarSeccion("Alojamientos");
 
         btnAlojamientos.setOnClickListener(v -> seleccionarSeccion("Alojamientos"));
-        btnExperiencias.setOnClickListener(v -> Navigation.findNavController(v).navigate(R.id.btnExperiencias));
-        btnServicios.setOnClickListener(v -> Navigation.findNavController(v).navigate(R.id.btnServicios));
+        btnExperiencias.setOnClickListener(v -> seleccionarSeccion("Experiencias"));
+        btnServicios.setOnClickListener(v -> seleccionarSeccion("Servicios"));
 
         return view;
     }

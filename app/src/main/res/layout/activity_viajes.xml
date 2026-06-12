@@ -57,27 +57,17 @@
     <LinearLayout
         android:id="@+id/layout_usuario_viajes"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_below="@id/tvTitulo"
-        android:layout_centerVertical="true"
         android:orientation="vertical"
         android:visibility="gone">
 
-        <TextView
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvViajes"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Aún no tienes ningún viaje programado"
-            android:textColor="#000000"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="8dp"/>
+            android:layout_height="match_parent"
+            android:scrollbars="vertical"/>
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="¡Es hora de desempolvar las maletas! Empieza a buscar tu próximo alojamiento en la pestaña Explorar."
-            android:textColor="#666666"
-            android:textSize="14sp"/>
     </LinearLayout>
 
 </RelativeLayout>
