@@ -3,6 +3,8 @@ package com.equipo.airbnb_1.ui.View;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -76,6 +78,13 @@ public class DetalleAlojamientoFragment extends Fragment {
         btnCancelarViaje = view.findViewById(R.id.btnCancelarViaje);
         btnConfirmarViaje = view.findViewById(R.id.btnConfirmarViaje);
 
+        if (btnConfirmarViaje != null) {
+            btnConfirmarViaje.setOnClickListener(v -> mostrarDialogoMetodoPago());
+        }
+        if (btnCancelarViaje != null) {
+            btnCancelarViaje.setOnClickListener(v -> actualizarEstadoViajeEnServidor("cancelado"));
+        }
+
         if (esViaje) {
             btnReservar.setVisibility(View.GONE);
 
@@ -95,10 +104,6 @@ public class DetalleAlojamientoFragment extends Fragment {
         cargarDatosDesdeServidor();
 
         btnReservar.setOnClickListener(v -> abrirCalendarioDeReservas());
-
-        btnConfirmarViaje.setOnClickListener(v -> actualizarEstadoViajeEnServidor("confirmado"));
-
-        btnCancelarViaje.setOnClickListener(v -> actualizarEstadoViajeEnServidor("cancelado"));
 
         return view;
     }
@@ -262,7 +267,13 @@ public class DetalleAlojamientoFragment extends Fragment {
             @Override
             public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
                 if (response.isSuccessful()) {
-                    Toast.makeText(getContext(), "¡Reservación creada!", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getContext(), "¡Reservación creada con éxito!", Toast.LENGTH_LONG).show();
+
+                    if (getActivity() != null && getView() != null) {
+                        androidx.navigation.NavController navController = androidx.navigation.Navigation.findNavController(getView());
+
+                        navController.popBackStack(R.id.nav_navegacion, false);
+                    }
                 } else {
                     Toast.makeText(getContext(), "Error: " + response.code(), Toast.LENGTH_SHORT).show();
                 }
@@ -273,5 +284,127 @@ public class DetalleAlojamientoFragment extends Fragment {
                 Toast.makeText(getContext(), "Fallo: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private void mostrarDialogoMetodoPago() {
+        com.google.android.material.bottomsheet.BottomSheetDialog dialog =
+                new com.google.android.material.bottomsheet.BottomSheetDialog(requireContext());
+
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_metodo_pago, null);
+        dialog.setContentView(dialogView);
+
+        LinearLayout layoutMenu = dialogView.findViewById(R.id.layoutMenuMetodos);
+        LinearLayout layoutTarjeta = dialogView.findViewById(R.id.layoutFormularioTarjeta);
+        LinearLayout layoutPaypal = dialogView.findViewById(R.id.layoutFormularioPaypal);
+        LinearLayout layoutOxxo = dialogView.findViewById(R.id.layoutResultadoOxxo);
+        LinearLayout layoutCargando = dialogView.findViewById(R.id.layoutCargandoPago);
+        TextView tvProgresoPago = dialogView.findViewById(R.id.tvProgresoPago);
+
+        LinearLayout btnTarjeta = dialogView.findViewById(R.id.btnPagoTarjeta);
+        LinearLayout btnPaypal = dialogView.findViewById(R.id.btnPagoPaypal);
+        LinearLayout btnOxxo = dialogView.findViewById(R.id.btnPagoOxxo);
+
+        android.widget.EditText etNoTarjeta = dialogView.findViewById(R.id.etNumeroTarjeta);
+        android.widget.EditText etVence = dialogView.findViewById(R.id.etVencimientoTarjeta);
+        android.widget.EditText etCvv = dialogView.findViewById(R.id.etCvvTarjeta);
+        Button btnFinalizarTarjeta = dialogView.findViewById(R.id.btnFinalizarTarjeta);
+
+        android.widget.EditText etMailPaypal = dialogView.findViewById(R.id.etCorreoPaypal);
+        android.widget.EditText etPassPaypal = dialogView.findViewById(R.id.etPasswordPaypal);
+        Button btnFinalizarPaypal = dialogView.findViewById(R.id.btnFinalizarPaypal);
+
+        TextView tvMontoOxxo = dialogView.findViewById(R.id.tvMontoOxxo);
+        Button btnEntendidoOxxo = dialogView.findViewById(R.id.btnEntendidoOxxo);
+
+        // 🌟 NATIVO: Formateador dinámico para inyectar la diagonal (MM/AA) automáticamente
+        etVence.addTextChangedListener(new TextWatcher() {
+            private boolean estaBorrando = false;
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                estaBorrando = count > after;
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (estaBorrando) return;
+
+                if (s.length() == 2) {
+                    s.append("/");
+                } else if (s.length() == 3 && s.charAt(2) != '/') {
+                    s.insert(2, "/");
+                }
+            }
+        });
+
+        btnTarjeta.setOnClickListener(v -> {
+            layoutMenu.setVisibility(View.GONE);
+            layoutTarjeta.setVisibility(View.VISIBLE);
+        });
+
+        btnFinalizarTarjeta.setOnClickListener(v -> {
+            if(etNoTarjeta.getText().toString().length() < 16 || etCvv.getText().toString().length() < 3 || etVence.getText().toString().length() < 5) {
+                Toast.makeText(getContext(), "Por favor, completa los datos de la tarjeta bancaria", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            layoutTarjeta.setVisibility(View.GONE);
+            tvProgresoPago.setText("Conectando con pasarela bancaria...");
+            layoutCargando.setVisibility(View.VISIBLE);
+            dialog.setCancelable(false);
+
+            new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+                dialog.dismiss();
+                Toast.makeText(getContext(), "¡Pago con Tarjeta autorizado con éxito!", Toast.LENGTH_LONG).show();
+                actualizarEstadoViajeEnServidor("confirmado");
+            }, 2500);
+        });
+
+        btnPaypal.setOnClickListener(v -> {
+            layoutMenu.setVisibility(View.GONE);
+            layoutPaypal.setVisibility(View.VISIBLE);
+        });
+
+        btnFinalizarPaypal.setOnClickListener(v -> {
+            if(!etMailPaypal.getText().toString().contains("@") || etPassPaypal.getText().toString().isEmpty()) {
+                Toast.makeText(getContext(), "Introduce tus credenciales de PayPal válidas", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            layoutPaypal.setVisibility(View.GONE);
+            tvProgresoPago.setText("Solicitando cobro a cuenta de PayPal...");
+            layoutCargando.setVisibility(View.VISIBLE);
+            dialog.setCancelable(false);
+
+            new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+                dialog.dismiss();
+                Toast.makeText(getContext(), "¡Sesión verificada! Fondos de PayPal transferidos.", Toast.LENGTH_LONG).show();
+                actualizarEstadoViajeEnServidor("confirmado");
+            }, 2500);
+        });
+
+        btnOxxo.setOnClickListener(v -> {
+            layoutMenu.setVisibility(View.GONE);
+            tvProgresoPago.setText("Estableciendo orden de cobro en efectivo...");
+            layoutCargando.setVisibility(View.VISIBLE);
+            dialog.setCancelable(false);
+
+            new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+                layoutCargando.setVisibility(View.GONE);
+                tvMontoOxxo.setText("Total a pagar: " + tvDetallePrecio.getText().toString());
+                layoutOxxo.setVisibility(View.VISIBLE);
+                dialog.setCancelable(true);
+            }, 2000);
+        });
+
+        btnEntendidoOxxo.setOnClickListener(v -> {
+            dialog.dismiss();
+            Toast.makeText(getContext(), "Orden de pago guardada. Estado: Pendiente de confirmación.", Toast.LENGTH_LONG).show();
+
+            actualizarEstadoViajeEnServidor("pending");
+        });
+
+        dialog.show();
     }
 }

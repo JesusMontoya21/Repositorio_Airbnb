@@ -66,7 +66,6 @@ public class ViajesAdapter extends RecyclerView.Adapter<ViajesAdapter.ViajeViewH
             holder.layoutAccionesViaje.setVisibility(View.GONE);
         }
 
-        // 🌟 CORREGIDO: Bloque evaluador de caducidad para opacar el historial de viajes pasados
         try {
             if (viaje.getCheckOut() != null && !viaje.getCheckOut().isEmpty()) {
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
@@ -74,12 +73,10 @@ public class ViajesAdapter extends RecyclerView.Adapter<ViajesAdapter.ViajeViewH
                 java.util.Date fechaActual = sdf.parse(sdf.format(new java.util.Date())); // Hoy a medianoche
 
                 if (fechaActual.after(fechaCheckout)) {
-                    // El viaje ya concluyó: Bajamos opacidad y forzamos estatus gris de historial
                     holder.itemView.setAlpha(0.55f);
                     holder.tvViajeStatus.setText("CONCLUIDO");
                     holder.tvViajeStatus.setBackgroundResource(android.R.color.darker_gray);
                 } else {
-                    // El viaje sigue vigente o es a futuro: Opacidad completa
                     holder.itemView.setAlpha(1.0f);
                 }
             } else {
