@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -22,12 +23,14 @@ public class PerfilFragment extends Fragment {
     private LinearLayout layoutInvitado, layoutUsuario;
     private Button btnIrALogin, btnCerrarSesion;
     private SharedPreferences preferences;
+    private TextView tvNombreUsuario;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.activity_perfil, container, false);
 
+        tvNombreUsuario = view.findViewById(R.id.tvNombreUsuario);
         layoutInvitado = view.findViewById(R.id.layout_invitado);
         layoutUsuario = view.findViewById(R.id.layout_usuario);
         btnIrALogin = view.findViewById(R.id.btnIrALogin);
@@ -42,7 +45,10 @@ public class PerfilFragment extends Fragment {
         });
 
         btnCerrarSesion.setOnClickListener(v -> {
-            preferences.edit().remove("auth_token").apply();
+            preferences.edit()
+                    .remove("auth_token")
+                    .remove("user_name")
+                    .apply();
             actualizarInterfazUsuario();
         });
 
@@ -64,6 +70,16 @@ public class PerfilFragment extends Fragment {
         if (token != null) {
             layoutInvitado.setVisibility(View.GONE);
             layoutUsuario.setVisibility(View.VISIBLE);
+
+            String nombreReal = preferences.getString("user_name", "");
+            Log.d("SESION_CHECK", "Nombre recuperado en interfaz: " + nombreReal);
+
+            if (!nombreReal.isEmpty()) {
+                tvNombreUsuario.setText("¡Hola, " + nombreReal + "!");
+            } else {
+                tvNombreUsuario.setText("¡Hola!");
+            }
+
         } else {
             layoutInvitado.setVisibility(View.VISIBLE);
             layoutUsuario.setVisibility(View.GONE);

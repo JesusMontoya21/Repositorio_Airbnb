@@ -18,11 +18,14 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.equipo.airbnb_1.R;
+import com.equipo.airbnb_1.ui.Components.ViajesAdapter;
 import com.equipo.airbnb_1.ui.Model.BookingResponse;
 import com.equipo.airbnb_1.ui.Network.ApiService;
 import com.equipo.airbnb_1.ui.Network.RetrofitClient;
 import com.google.android.material.button.MaterialButton;
 
+import java.text.SimpleDateFormat; // 🌟 IMPORTANTE: Añadido para procesar las fechas
+import java.util.Locale;           // 🌟 IMPORTANTE: Añadido para el idioma local
 import java.util.List;
 
 import retrofit2.Call;
@@ -83,14 +86,16 @@ public class ViajesFragment extends Fragment {
                 Log.d("VIAJES_DEBUG", "Código HTTP del servidor: " + response.code());
 
                 if (response.isSuccessful() && response.body() != null) {
-                    List<BookingResponse> viajes = response.body();
-                    Log.d("VIAJES_DEBUG", "Cantidad de viajes mapeados: " + viajes.size());
+                    List<BookingResponse> viajesRaw = response.body();
+                    Log.d("VIAJES_DEBUG", "Cantidad de viajes mapeados: " + viajesRaw.size());
 
-                    if (viajes.isEmpty()) {
+                    if (viajesRaw.isEmpty()) {
                         Toast.makeText(getContext(), "Aún no tienes reservaciones registradas.", Toast.LENGTH_LONG).show();
                     }
 
-                    adapter = new ViajesAdapter(viajes);
+                    List<BookingResponse> viajesOrdenados = separarYOrdenarViajes(viajesRaw);
+
+                    adapter = new ViajesAdapter(viajesOrdenados);
                     rvViajes.setAdapter(adapter);
                 } else {
                     Toast.makeText(getContext(), "Error del servidor al leer viajes: " + response.code(), Toast.LENGTH_SHORT).show();
@@ -103,5 +108,40 @@ public class ViajesFragment extends Fragment {
                 Toast.makeText(getContext(), "Fallo de conexión: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private List<BookingResponse> separarYOrdenarViajes(List<BookingResponse> listaOriginal) {
+        List<BookingResponse> vigentes = new java.util.ArrayList<>();
+        List<BookingResponse> pasados = new java.util.ArrayList<>();
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        String fechaHoyStr = sdf.format(new java.util.Date());
+
+        try {
+            java.util.Date fechaActual = sdf.parse(fechaHoyStr);
+
+            for (BookingResponse viaje : listaOriginal) {
+                if (viaje.getCheckOut() != null && !viaje.getCheckOut().isEmpty()) {
+                    java.util.Date fechaCheckout = sdf.parse(viaje.getCheckOut());
+
+                    if (fechaActual.after(fechaCheckout)) {
+                        pasados.add(viaje);
+                    } else {
+                        vigentes.add(viaje);
+                    }
+                } else {
+                    vigentes.add(viaje);
+                }
+            }
+        } catch (Exception e) {
+            android.util.Log.e("FILTRO_VIAJES", "Error parseando fechas: " + e.getMessage());
+            return listaOriginal;
+        }
+
+        List<BookingResponse> listaOrdenada = new java.util.ArrayList<>();
+        listaOrdenada.addAll(vigentes);
+        listaOrdenada.addAll(pasados);
+
+        return listaOrdenada;
     }
 }

@@ -13,7 +13,13 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.equipo.airbnb_1.R;
 import com.equipo.airbnb_1.ui.Model.Alojamiento;
+import com.equipo.airbnb_1.ui.Model.PropertyDetalleResponse;
+import com.equipo.airbnb_1.ui.Network.ApiService;
+import com.equipo.airbnb_1.ui.Network.RetrofitClient;
 import java.util.List;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class AlojamientoAdapter extends RecyclerView.Adapter<AlojamientoAdapter.AlojamientoViewHolder> {
 
@@ -37,38 +43,43 @@ public class AlojamientoAdapter extends RecyclerView.Adapter<AlojamientoAdapter.
         holder.tvTitulo.setText(alojamiento.getTitulo());
         holder.tvPrecio.setText("$" + alojamiento.getPrecio() + " MXN por noche");
 
-        String urlImagen = "";
+        // 1. Colocamos el placeholder de carga por defecto
+        holder.imgAlojamiento.setImageResource(android.R.drawable.ic_menu_gallery);
 
-        if (alojamiento.getImages() != null && !alojamiento.getImages().isEmpty()) {
-            String urlReal = alojamiento.getImages().get(0).getUrl();
+        // 2. SOLUCIÓN MAESTRA: Usamos el endpoint del Detalle que SÍ sirve para traer la foto real
+        ApiService apiService = RetrofitClient.getApiService(holder.itemView.getContext());
+        apiService.obtenerDetalleAlojamiento(alojamiento.getId()).enqueue(new Callback<PropertyDetalleResponse>() {
+            @Override
+            public void onResponse(@NonNull Call<PropertyDetalleResponse> call, @NonNull Response<PropertyDetalleResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    PropertyDetalleResponse propiedad = response.body();
 
-            if (urlReal != null && !urlReal.isEmpty()) {
-                if (!urlReal.startsWith("http")) {
-
-                    if (!urlReal.startsWith("storage/") && !urlReal.startsWith("/storage/")) {
-                        urlImagen = "http://192.168.1.26:8000/storage/" + urlReal;
-                    } else {
-                        urlImagen = "http://192.168.1.26:8000/" + urlReal;
+                    String urlImagen = "https://via.placeholder.com/300";
+                    if (propiedad.getImages() != null && !propiedad.getImages().isEmpty()) {
+                        urlImagen = propiedad.getImages().get(0).getUrl();
                     }
 
-                } else {
-                    urlImagen = urlReal;
+                    // Log para auditar la ruta exacta del éxito en el carrusel
+                    Log.d("GLIDE_EXITO", "Cargando foto real recuperada: " + urlImagen);
+
+                    // Pintamos la foto usando exactamente la misma URL limpia que el fragmento de detalles
+                    Glide.with(holder.itemView.getContext())
+                            .load(urlImagen)
+                            .placeholder(android.R.drawable.ic_menu_gallery)
+                            .error(android.R.drawable.ic_dialog_alert)
+                            .into(holder.imgAlojamiento);
                 }
             }
-        }
 
-        Log.d("GLIDE_BASE_DATOS", "Alojamiento: " + alojamiento.getTitulo() + " -> Ruta armada: " + urlImagen);
-
-        Glide.with(holder.itemView.getContext())
-                .load(urlImagen.isEmpty() ? null : urlImagen)
-                .placeholder(android.R.drawable.ic_menu_gallery)
-                .error(android.R.drawable.ic_dialog_alert)
-                .into(holder.imgAlojamiento);
+            @Override
+            public void onFailure(@NonNull Call<PropertyDetalleResponse> call, @NonNull Throwable t) {
+                Log.e("GLIDE_ERROR", "Fallo al recuperar la imagen: " + t.getMessage());
+            }
+        });
 
         holder.itemView.setOnClickListener(v -> {
             Bundle bundle = new Bundle();
             bundle.putInt("alojamiento_id", alojamiento.getId());
-
             Navigation.findNavController(v).navigate(R.id.action_homeFragment_to_detalleAlojamientoFragment, bundle);
         });
     }

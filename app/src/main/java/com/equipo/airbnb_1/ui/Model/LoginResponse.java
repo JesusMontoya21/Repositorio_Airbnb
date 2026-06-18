@@ -2,7 +2,7 @@ package com.equipo.airbnb_1.ui.Model;
 
 import com.google.gson.annotations.SerializedName;
 
-public class LoginResponse {
+public class LoginResponse<User> {
 
     @SerializedName("message")
     private String message;
@@ -11,7 +11,8 @@ public class LoginResponse {
     private String accessToken;
 
     @SerializedName("user")
-    private Object user;
+    private User user;
+    public User getUser() {return user; }
 
     public String getAccessToken() {
         return accessToken;

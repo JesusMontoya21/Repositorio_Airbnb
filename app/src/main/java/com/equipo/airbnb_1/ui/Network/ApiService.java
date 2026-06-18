@@ -12,10 +12,13 @@ import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.http.Body;
+import retrofit2.http.Field;
+import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.Header;
 import retrofit2.http.Headers;
 import retrofit2.http.POST;
 import retrofit2.http.GET;
+import retrofit2.http.PUT;
 import retrofit2.http.Path;
 
 public interface ApiService {
@@ -59,5 +62,31 @@ public interface ApiService {
     @GET("my-bookings")
     Call<List<BookingResponse>> obtenerMisViajes(
             @Header("Authorization") String token
+    );
+
+    @FormUrlEncoded
+    @POST("api/reservaciones/{id}/estado")
+    Call<Void> actualizarEstadoReserva(
+            @Header("Authorization") String token,
+            @Path("id") int reservacionId,
+            @Field("status") String nuevoEstado
+    );
+
+    @Headers({
+            "Accept: application/json"
+    })
+    @PUT("bookings/{id}/cancel")
+    Call<Void> cancelarReserva(
+            @Header("Authorization") String token,
+            @Path("id") int reservacionId
+    );
+
+    @Headers({
+            "Accept: application/json"
+    })
+    @PUT("bookings/{id}/confirm")
+    Call<Void> confirmarReserva(
+            @Header("Authorization") String token,
+            @Path("id") int reservacionId
     );
 }

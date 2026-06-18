@@ -1,11 +1,14 @@
 package com.equipo.airbnb_1.ui.View;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
@@ -19,7 +22,9 @@ import com.equipo.airbnb_1.ui.Model.PropertyDetalleResponse;
 import com.equipo.airbnb_1.ui.Model.BookingRequest;
 import com.google.android.material.datepicker.MaterialDatePicker;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Locale;
 
 import retrofit2.Call;
@@ -31,6 +36,14 @@ public class DetalleAlojamientoFragment extends Fragment {
     private ImageView ivDetalleImagen;
     private TextView tvDetalleTitulo, tvDetallePrecio, tvDetalleCaracteristicas, tvDetalleDescripcion;
     private Button btnReservar;
+
+    private LinearLayout layoutAccionesViaje;
+    private Button btnCancelarViaje, btnConfirmarViaje;
+    private boolean esViaje = false;
+    private int reservaId;
+    private String estadoViaje = "pending";
+    private String fechaFinViaje = "";
+
     private int alojamientoId;
     private double precioPorNoche = 0.0;
 
@@ -40,6 +53,10 @@ public class DetalleAlojamientoFragment extends Fragment {
 
         if (getArguments() != null) {
             alojamientoId = getArguments().getInt("alojamiento_id");
+            esViaje = getArguments().getBoolean("es_viaje", false);
+            reservaId = getArguments().getInt("reserva_id", 0);
+            estadoViaje = getArguments().getString("estado_viaje", "pending");
+            fechaFinViaje = getArguments().getString("fecha_fin", "");
         }
     }
 
@@ -55,13 +72,50 @@ public class DetalleAlojamientoFragment extends Fragment {
         tvDetalleDescripcion = view.findViewById(R.id.tvDetalleDescripcion);
         btnReservar = view.findViewById(R.id.btnReservar);
 
+        layoutAccionesViaje = view.findViewById(R.id.layoutAccionesViaje);
+        btnCancelarViaje = view.findViewById(R.id.btnCancelarViaje);
+        btnConfirmarViaje = view.findViewById(R.id.btnConfirmarViaje);
+
+        if (esViaje) {
+            btnReservar.setVisibility(View.GONE);
+
+            if (esViajePasado(fechaFinViaje)) {
+                layoutAccionesViaje.setVisibility(View.GONE);
+                Toast.makeText(getContext(), "Este viaje ya concluyó (Historial)", Toast.LENGTH_SHORT).show();
+            } else if (estadoViaje.equalsIgnoreCase("confirmado") || estadoViaje.equalsIgnoreCase("approved") || estadoViaje.equalsIgnoreCase("confirmed")) {
+                layoutAccionesViaje.setVisibility(View.GONE);
+            } else {
+                layoutAccionesViaje.setVisibility(View.VISIBLE);
+            }
+        } else {
+            btnReservar.setVisibility(View.VISIBLE);
+            layoutAccionesViaje.setVisibility(View.GONE);
+        }
+
         cargarDatosDesdeServidor();
 
-        btnReservar.setOnClickListener(v -> {
-            abrirCalendarioDeReservas();
-        });
+        btnReservar.setOnClickListener(v -> abrirCalendarioDeReservas());
+
+        btnConfirmarViaje.setOnClickListener(v -> actualizarEstadoViajeEnServidor("confirmado"));
+
+        btnCancelarViaje.setOnClickListener(v -> actualizarEstadoViajeEnServidor("cancelado"));
 
         return view;
+    }
+
+    private boolean esViajePasado(String fechaCheckoutStr) {
+        if (fechaCheckoutStr == null || fechaCheckoutStr.isEmpty()) return false;
+
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+            Date fechaCheckout = sdf.parse(fechaCheckoutStr);
+            Date fechaActual = new Date();
+
+            return fechaActual.after(fechaCheckout);
+        } catch (ParseException e) {
+            android.util.Log.e("FECHA_ERROR", "Error parseando fecha: " + e.getMessage());
+            return false;
+        }
     }
 
     private void cargarDatosDesdeServidor() {
@@ -75,7 +129,6 @@ public class DetalleAlojamientoFragment extends Fragment {
                     PropertyDetalleResponse propiedad = response.body();
 
                     precioPorNoche = propiedad.getPrecioPerNight();
-
                     tvDetalleTitulo.setText(propiedad.getTitulo());
                     tvDetallePrecio.setText("$" + precioPorNoche + " MXN / noche");
 
@@ -94,9 +147,8 @@ public class DetalleAlojamientoFragment extends Fragment {
                             .load(urlImagen)
                             .placeholder(android.R.drawable.ic_menu_gallery)
                             .into(ivDetalleImagen);
-
                 } else {
-                    Toast.makeText(getContext(), "Error al cargar los detalles del alojamiento", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "Error al cargar los detalles", Toast.LENGTH_SHORT).show();
                 }
             }
 
@@ -107,6 +159,70 @@ public class DetalleAlojamientoFragment extends Fragment {
                 }
             }
         });
+    }
+
+    private void actualizarEstadoViajeEnServidor(String nuevoEstado) {
+        android.content.SharedPreferences prefs = requireContext().getSharedPreferences("user_session", android.content.Context.MODE_PRIVATE);
+        String tokenCompleto = "Bearer " + prefs.getString("auth_token", "");
+
+        ApiService apiService = RetrofitClient.getApiService(requireContext());
+
+        if (nuevoEstado.equalsIgnoreCase("cancelado")) {
+            apiService.cancelarReserva(tokenCompleto, reservaId).enqueue(new retrofit2.Callback<Void>() {
+                @Override
+                public void onResponse(@NonNull retrofit2.Call<Void> call, @NonNull retrofit2.Response<Void> response) {
+                    if (response.isSuccessful()) {
+                        Toast.makeText(getContext(), "¡Viaje cancelado correctamente!", Toast.LENGTH_LONG).show();
+                        if (getActivity() != null) getActivity().onBackPressed();
+                    } else {
+                        try {
+                            if (response.errorBody() != null) {
+                                String errorBackend = response.errorBody().string();
+                                android.util.Log.e("ERROR_POSTGRES_CANCEL", errorBackend);
+                                Toast.makeText(getContext(), "Error al cancelar: " + errorBackend, Toast.LENGTH_LONG).show();
+                            } else {
+                                Toast.makeText(getContext(), "Error del servidor: " + response.code(), Toast.LENGTH_SHORT).show();
+                            }
+                        } catch (Exception e) {
+                            Toast.makeText(getContext(), "Error al procesar cancelación", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                }
+
+                @Override
+                public void onFailure(@NonNull retrofit2.Call<Void> call, @NonNull Throwable t) {
+                    Toast.makeText(getContext(), "Fallo de red: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            });
+
+        } else if (nuevoEstado.equalsIgnoreCase("confirmado")) {
+            apiService.confirmarReserva(tokenCompleto, reservaId).enqueue(new retrofit2.Callback<Void>() {
+                @Override
+                public void onResponse(@NonNull retrofit2.Call<Void> call, @NonNull retrofit2.Response<Void> response) {
+                    if (response.isSuccessful()) {
+                        Toast.makeText(getContext(), "¡Viaje confirmado correctamente!", Toast.LENGTH_LONG).show();
+                        if (getActivity() != null) getActivity().onBackPressed();
+                    } else {
+                        try {
+                            if (response.errorBody() != null) {
+                                String errorBackend = response.errorBody().string();
+                                android.util.Log.e("ERROR_POSTGRES_CONFIRM", errorBackend);
+                                Toast.makeText(getContext(), "Error al confirmar: " + errorBackend, Toast.LENGTH_LONG).show();
+                            } else {
+                                Toast.makeText(getContext(), "Error del servidor: " + response.code(), Toast.LENGTH_SHORT).show();
+                            }
+                        } catch (Exception e) {
+                            Toast.makeText(getContext(), "Error al procesar confirmación", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                }
+
+                @Override
+                public void onFailure(@NonNull retrofit2.Call<Void> call, @NonNull Throwable t) {
+                    Toast.makeText(getContext(), "Error de red: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
     }
 
     private void abrirCalendarioDeReservas() {
@@ -129,24 +245,15 @@ public class DetalleAlojamientoFragment extends Fragment {
             if (diasNoches == 0) diasNoches = 1;
 
             double totalPrice = diasNoches * precioPorNoche;
-            int guests = 1;
-
-            Toast.makeText(getContext(), "Procesando " + diasNoches + " noches: $" + totalPrice + " MXN", Toast.LENGTH_SHORT).show();
-
-            enviarReservaAlServidor(checkInStr, checkOutStr, guests, totalPrice);
+            enviarReservaAlServidor(checkInStr, checkOutStr, 1, totalPrice);
         });
 
         datePicker.show(getParentFragmentManager(), "DATE_PICKER_TAG");
     }
 
     private void enviarReservaAlServidor(String checkIn, String checkOut, int guests, double totalPrice) {
-
-        android.content.SharedPreferences prefs = requireContext().getSharedPreferences("user_session", android.content.Context.MODE_PRIVATE);
-        String tokenGuardado = prefs.getString("auth_token", "");
-
-        String tokenCompleto = "Bearer " + tokenGuardado;
-
-        android.util.Log.d("SESION_CHECK", "Token recuperado en Detalle: " + tokenGuardado);
+        SharedPreferences prefs = requireContext().getSharedPreferences("user_session", Context.MODE_PRIVATE);
+        String tokenCompleto = "Bearer " + prefs.getString("auth_token", "");
 
         BookingRequest request = new BookingRequest(alojamientoId, checkIn, checkOut, guests, totalPrice);
         ApiService apiService = RetrofitClient.getApiService(requireContext());
@@ -155,16 +262,15 @@ public class DetalleAlojamientoFragment extends Fragment {
             @Override
             public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
                 if (response.isSuccessful()) {
-                    Toast.makeText(getContext(), "¡Reservación creada! Revisa tu correo", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getContext(), "¡Reservación creada!", Toast.LENGTH_LONG).show();
                 } else {
-
-                    Toast.makeText(getContext(), "Error del servidor: " + response.code(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "Error: " + response.code(), Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
-                Toast.makeText(getContext(), "Fallo de conexión: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), "Fallo: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }

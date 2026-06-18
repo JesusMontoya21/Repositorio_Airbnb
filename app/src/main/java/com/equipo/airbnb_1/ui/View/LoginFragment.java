@@ -66,7 +66,6 @@ public class LoginFragment extends Fragment {
     }
 
     private void realizarLogin(String email, String password, View v) {
-        // CORREGIDO: Ahora se envía requireContext() para cumplir con la firma del RetrofitClient
         ApiService apiService = RetrofitClient.getApiService(requireContext());
         LoginRequest loginRequest = new LoginRequest(email, password);
 
@@ -74,13 +73,38 @@ public class LoginFragment extends Fragment {
             @Override
             public void onResponse(@NonNull Call<LoginResponse> call, @NonNull Response<LoginResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    String token = response.body().getAccessToken();
+                    LoginResponse loginResponse = response.body();
+                    String token = loginResponse.getAccessToken();
+
+                    String nombreUsuario = "";
+
+                    if (loginResponse.getUser() != null) {
+                        try {
+                            com.google.gson.Gson gson = new com.google.gson.Gson();
+                            String jsonUser = gson.toJson(loginResponse.getUser());
+
+                            // 🌟 IMPRIME EL JSON COMPLETO EN EL LOGCAT:
+                            android.util.Log.e("JSON_USUARIO_REAL", "El JSON que manda Laravel es: " + jsonUser);
+
+                            com.google.gson.JsonObject jsonObject = gson.fromJson(jsonUser, com.google.gson.JsonObject.class);
+
+                            // Intento de extracción inicial por el campo "name"
+                            if (jsonObject.has("name") && !jsonObject.get("name").isJsonNull()) {
+                                nombreUsuario = jsonObject.get("name").getAsString();
+                            }
+                        } catch (Exception e) {
+                            android.util.Log.e("SESION_CHECK", "Error al extraer el nombre: " + e.getMessage());
+                        }
+                    }
+
+                    // Guardamos los datos en las SharedPreferences
                     SharedPreferences preferences = requireActivity().getSharedPreferences("user_session", Context.MODE_PRIVATE);
                     SharedPreferences.Editor editor = preferences.edit();
                     editor.putString("auth_token", token);
+                    editor.putString("user_name", nombreUsuario);
                     editor.apply();
 
-                    Log.d("SESION_CHECK", "Token guardado correctamente: " + token);
+                    Log.d("SESION_CHECK", "Datos guardados - Token: " + token + " | Usuario: " + nombreUsuario);
                     Toast.makeText(getContext(), "¡Bienvenido!", Toast.LENGTH_SHORT).show();
                     Navigation.findNavController(v).navigate(R.id.action_login_to_home);
                 } else {
@@ -90,7 +114,9 @@ public class LoginFragment extends Fragment {
 
             @Override
             public void onFailure(@NonNull Call<LoginResponse> call, @NonNull Throwable t) {
-                Toast.makeText(getContext(), "Error de red: " + t.getMessage(), Toast.LENGTH_LONG).show();
+                if (getContext() != null) {
+                    Toast.makeText(getContext(), "Error de red: " + t.getMessage(), Toast.LENGTH_LONG).show();
+                }
             }
         });
     }

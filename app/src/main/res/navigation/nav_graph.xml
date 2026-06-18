@@ -87,4 +87,15 @@
         android:name="com.equipo.airbnb_1.ui.View.ServiciosFragment"
         android:label="Servicios" />
 
+    <fragment
+        android:id="@+id/viajesFragment"
+        android:name="com.equipo.airbnb_1.ui.View.ViajesFragment"
+        android:label="Viajes" >
+
+        <action
+            android:id="@+id/action_viajesFragment_to_detalleAlojamientoFragment"
+            app:destination="@id/detalleAlojamientoFragment" />
+
+    </fragment>
+
 </navigation>
