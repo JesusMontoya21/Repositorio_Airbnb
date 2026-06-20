@@ -22,7 +22,10 @@ class AuthController extends Controller
             return response()->json(['message' => 'Credenciales inválidas'], 401);
         }
 
+        /** @var \App\Models\User $user */
         $user = Auth::user();
+        
+        // ¡Adiós línea roja! VS Code ya sabe que aquí existe createToken()
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([

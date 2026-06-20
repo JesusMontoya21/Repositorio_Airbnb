@@ -9,6 +9,28 @@ use App\Models\Booking;
 
 class PropertyController extends Controller
 {
+    public function alojamientosMovil()
+    {
+        $properties = Property::with('images')
+            ->where('is_active', true)
+            ->latest()
+            ->take(10)
+            ->get();
+
+        $formatted = $properties->map(function ($property) {
+            $primaryImage = $property->images->where('is_primary', true)->first() ?? $property->images->first();
+            
+            return [
+                'id'         => $property->id,
+                'titulo'     => $property->title,
+                'precio'     => (double) $property->price_per_night,
+                'imagen_url' => $primaryImage ? $primaryImage->url : 'https://via.placeholder.com/300'
+            ];
+        });
+
+        return response()->json($formatted, 200);
+    }
+
     public function index(Request $request)
     {
         $query = Property::with('images')->where('is_active', true);

@@ -24,7 +24,7 @@ Route::get('/experiences/{id}', [ExperienceController::class, 'show']);
 Route::get('/services', [ServiceController::class, 'index']);
 Route::get('/services/{id}', [ServiceController::class, 'show']);
 Route::get('/host/dashboard', [PropertyController::class, 'dashboard']);
-
+Route::get('/alojamientos', [PropertyController::class, 'alojamientosMovil']); 
 // Rutas protegidas
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', function (Request $request) {
@@ -46,6 +46,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/bookings', [BookingController::class, 'store']);
     Route::get('/my-bookings', [BookingController::class, 'myBookings']);
     Route::put('/bookings/{id}/cancel', [BookingController::class, 'cancel']);
+    Route::put('/bookings/{id}/confirm', [BookingController::class, 'confirm']);
 
     // Reseñas
     Route::post('/properties/{id}/reviews', [ReviewController::class, 'store']);

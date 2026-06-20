@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Booking;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 use App\Mail\BookingConfirmationMail;
 use App\Mail\BookingCancellationMail;
 
@@ -14,8 +15,8 @@ class BookingController extends Controller
     {
         $data = $request->validate([
             'property_id' => 'required|exists:properties,id',
-            'check_in'    => 'required|date|after_or_equal:today',
-            'check_out'   => 'required|date|after:check_in',
+            'check_in'    => 'required|date',
+            'check_out'   => 'required|date',
             'guests'      => 'required|integer|min:1',
             'total_price' => 'required|numeric|min:1',
         ]);
@@ -43,7 +44,7 @@ class BookingController extends Controller
                 type: 'hospedaje'
             ));
         } catch (\Exception $e) {
-            // Si falla el correo no afecta la reservación
+
         }
 
         return response()->json($booking->load('property'), 201);
@@ -51,8 +52,9 @@ class BookingController extends Controller
 
     public function myBookings(Request $request)
     {
-        $bookings = Booking::with('property')
+        $bookings = Booking::with('property.images') 
             ->where('user_id', $request->user()->id)
+            ->where('status', '!=', 'cancelled')
             ->latest()
             ->get();
 
@@ -75,9 +77,32 @@ class BookingController extends Controller
                 type: 'hospedaje'
             ));
         } catch (\Exception $e) {
-            // Si falla el correo no afecta la cancelación
+
         }
 
         return response()->json($booking);
+    }
+
+    public function confirm(Request $request, $id)
+    {
+        try {
+            $booking = Booking::find($id);
+            
+            if (!$booking) {
+                return response()->json(['message' => 'Reserva no encontrada en la base de datos'], 404);
+            }
+
+            $booking->status = 'confirmed'; 
+            $booking->save();
+
+            return response()->json([
+                'message' => 'Reserva confirmada con éxito',
+                'booking' => $booking
+            ], 200);
+
+        } catch (\Exception $e) {
+            Log::error("Error en confirmación de reserva: " . $e->getMessage());
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 }
