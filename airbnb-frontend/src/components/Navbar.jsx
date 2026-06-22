@@ -99,10 +99,10 @@ export default function Navbar() {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 6h16M4 12h16M4 18h16" />
                       </svg>
                       <div className="w-7 h-7 bg-[#FF385C] rounded-full flex items-center justify-center">
-  <span className="text-white text-xs font-bold">
-    {user?.name?.charAt(0).toUpperCase()}
-  </span>
-</div>
+                        <span className="text-white text-xs font-bold">
+                          {user?.name?.charAt(0).toUpperCase()}
+                        </span>
+                      </div>
                     </button>
 
                     <div className="absolute right-0 mt-2 w-60 bg-white rounded-xl shadow-lg border border-gray-200 py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
