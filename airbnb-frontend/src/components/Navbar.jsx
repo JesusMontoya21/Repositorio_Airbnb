@@ -39,6 +39,7 @@ export default function Navbar() {
   }, []);
 
   const categories = [
+    { label: 'Todos', icon: '🌍', path: '/todos' },
     { label: 'Alojamientos', icon: '🏠', path: '/' },
     { label: 'Experiencias', icon: '🎈', path: '/experiences', isNew: true },
     { label: 'Servicios', icon: '🛎️', path: '/services', isNew: true },

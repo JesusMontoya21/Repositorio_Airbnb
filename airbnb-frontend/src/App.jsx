@@ -14,6 +14,7 @@ import MyBookings from './pages/MyBookings.jsx';
 import Profile from './pages/Profile.jsx';
 import Services from "./pages/Services.jsx"; 
 import Experiences from "./pages/Experiences.jsx"; 
+import Todos from './pages/Todos.jsx';
 import BecomeHostIntro from './pages/BecomeHostIntro.jsx'; 
 import CreateProperty from './pages/CreateProperty.jsx'; 
 import CreateExperience from './pages/CreateExperience.jsx';
@@ -47,6 +48,7 @@ function AppLayout() {
           <Route path="/property/:id" element={<PropertyDetails />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/todos" element={<Todos />} />
           <Route path="/services" element={<Services />} />
           <Route path="/experiences" element={<Experiences />} />
           <Route path="/anuncio-alojamiento" element={<BecomeHostIntro />} />

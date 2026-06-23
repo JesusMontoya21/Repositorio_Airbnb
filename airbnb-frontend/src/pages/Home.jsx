@@ -385,7 +385,7 @@ export default function Home() {
 
   return (
     <div>
-      <div className="bg-white border-b">
+      <div className="sticky top-0 z-40 bg-white border-b shadow-md">
         <div className="max-w-4xl mx-auto px-4 py-6">
           <div className="relative bg-white rounded-full shadow-md border border-gray-200 hover:shadow-lg transition-shadow duration-200" ref={searchRef}>
             <div className="flex items-center divide-x divide-gray-200">
