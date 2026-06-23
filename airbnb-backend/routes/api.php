@@ -23,7 +23,6 @@ Route::get('/experiences', [ExperienceController::class, 'index']);
 Route::get('/experiences/{id}', [ExperienceController::class, 'show']);
 Route::get('/services', [ServiceController::class, 'index']);
 Route::get('/services/{id}', [ServiceController::class, 'show']);
-Route::get('/host/dashboard', [PropertyController::class, 'dashboard']);
 
 // Rutas protegidas
 Route::middleware('auth:sanctum')->group(function () {
@@ -41,6 +40,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/properties/{id}', [PropertyController::class, 'update']);
     Route::delete('/properties/{id}', [PropertyController::class, 'destroy']);
     Route::get('/my-properties', [PropertyController::class, 'myProperties']);
+    Route::get('/host/dashboard', [PropertyController::class, 'dashboard']);
 
     // Reservas de hospedaje
     Route::post('/bookings', [BookingController::class, 'store']);
