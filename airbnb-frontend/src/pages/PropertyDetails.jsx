@@ -36,6 +36,34 @@ export default function PropertyDetails() {
     },
   });
 
+  const { data: availability } = useQuery({
+    queryKey: ['propertyAvailability', id],
+    queryFn: async () => {
+      const res = await api.get(`/properties/${id}/availability`);
+      return res.data;
+    },
+    enabled: !!id,
+  });
+
+  const { data: quote, error: quoteError } = useQuery({
+    queryKey: ['propertyQuote', id, checkIn, checkOut, guests],
+    queryFn: async () => {
+      const res = await api.post(`/properties/${id}/quote`, {
+        check_in: checkIn,
+        check_out: checkOut,
+        guests,
+      });
+      return res.data;
+    },
+    enabled: !!id && !!checkIn && !!checkOut,
+    retry: false,
+  });
+
+  const overlapsBlockedRange = (start, end) => {
+    const blocked = availability?.blocked_ranges || [];
+    return blocked.some((range) => start < range.check_out && end > range.check_in);
+  };
+
   const handleBooking = async (e) => {
     e.preventDefault();
     setBookingError('');
@@ -43,6 +71,14 @@ export default function PropertyDetails() {
     if (!checkIn || !checkOut) { setBookingError('Selecciona las fechas de entrada y salida'); return; }
     const nights = Math.ceil((new Date(checkOut) - new Date(checkIn)) / (1000 * 60 * 60 * 24));
     if (nights <= 0) { setBookingError('La fecha de salida debe ser posterior a la de entrada'); return; }
+    if (overlapsBlockedRange(checkIn, checkOut)) {
+      setBookingError('Las fechas seleccionadas están ocupadas. Elige otras fechas.');
+      return;
+    }
+    if (!quote?.available) {
+      setBookingError('No se pudo confirmar la disponibilidad actual. Intenta con otras fechas.');
+      return;
+    }
     setBookingLoading(true);
     try {
       await api.post('/bookings', {
@@ -50,7 +86,6 @@ export default function PropertyDetails() {
         check_in: checkIn,
         check_out: checkOut,
         guests,
-        total_price: nights * property.price_per_night,
       });
       alert('¡Reserva creada exitosamente!');
       navigate('/my-bookings');
@@ -114,6 +149,8 @@ export default function PropertyDetails() {
   const nights = checkIn && checkOut
     ? Math.ceil((new Date(checkOut) - new Date(checkIn)) / (1000 * 60 * 60 * 24))
     : 0;
+  const blockedRanges = availability?.blocked_ranges || [];
+  const selectedDatesBlocked = checkIn && checkOut ? overlapsBlockedRange(checkIn, checkOut) : false;
 
   const StarRating = ({ value, onChange }) => (
     <div className="flex gap-1">
@@ -356,7 +393,13 @@ export default function PropertyDetails() {
                 <div className="grid grid-cols-2 divide-x">
                   <div className="p-3">
                     <label className="block text-xs font-semibold mb-1">LLEGADA</label>
-                    <input type="date" value={checkIn} onChange={(e) => setCheckIn(e.target.value)}
+                    <input type="date" value={checkIn} onChange={(e) => {
+                      const nextCheckIn = e.target.value;
+                      setCheckIn(nextCheckIn);
+                      if (checkOut && nextCheckIn && nextCheckIn >= checkOut) {
+                        setCheckOut('');
+                      }
+                    }}
                       min={new Date().toISOString().split('T')[0]}
                       className="w-full text-sm focus:outline-none" required />
                   </div>
@@ -378,7 +421,33 @@ export default function PropertyDetails() {
                 </div>
               </div>
 
-              <button type="submit" disabled={bookingLoading}
+              {blockedRanges.length > 0 && (
+                <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+                  <p className="font-semibold mb-1">Fechas ocupadas</p>
+                  <ul className="space-y-1 max-h-28 overflow-auto">
+                    {blockedRanges.slice(0, 6).map((range) => (
+                      <li key={`${range.check_in}-${range.check_out}`}>
+                        {range.check_in} al {range.check_out}
+                      </li>
+                    ))}
+                    {blockedRanges.length > 6 && <li>...y {blockedRanges.length - 6} periodos más</li>}
+                  </ul>
+                </div>
+              )}
+
+              {selectedDatesBlocked && (
+                <p className="text-sm text-red-600">
+                  Las fechas seleccionadas se traslapan con una reserva existente.
+                </p>
+              )}
+
+              {quoteError && !selectedDatesBlocked && (
+                <p className="text-sm text-red-600">
+                  {quoteError.response?.data?.message || 'No se pudo calcular el precio para esas fechas.'}
+                </p>
+              )}
+
+              <button type="submit" disabled={bookingLoading || selectedDatesBlocked || (!!checkIn && !!checkOut && !quote?.available)}
                 className="w-full bg-gradient-to-r from-[#E61E4D] to-[#E31C5F] text-white py-3 rounded-xl font-semibold hover:opacity-90 transition disabled:opacity-50">
                 {bookingLoading ? 'Reservando...' : 'Reservar'}
               </button>
@@ -387,12 +456,19 @@ export default function PropertyDetails() {
             {nights > 0 && (
               <div className="mt-4 pt-4 border-t space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span>${property.price_per_night} x {nights} noches</span>
-                  <span>${property.price_per_night * nights} MXN</span>
+                  <span>
+                    ${quote?.base_price_per_night ?? property.price_per_night} x {nights} noches
+                  </span>
+                  <span>${quote?.subtotal ?? property.price_per_night * nights} MXN</span>
                 </div>
+                {quote?.nightly_breakdown?.some((night) => night.source !== 'base') && (
+                  <div className="text-xs text-gray-600">
+                    Precio dinámico aplicado por temporada en fechas seleccionadas.
+                  </div>
+                )}
                 <div className="flex justify-between font-semibold">
                   <span>Total</span>
-                  <span>${property.price_per_night * nights} MXN</span>
+                  <span>${quote?.total_price ?? property.price_per_night * nights} MXN</span>
                 </div>
               </div>
             )}

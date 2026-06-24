@@ -18,6 +18,8 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']);
 Route::get('/properties', [PropertyController::class, 'index']);
 Route::get('/properties/{id}', [PropertyController::class, 'show']);
+Route::get('/properties/{id}/availability', [BookingController::class, 'availability']);
+Route::post('/properties/{id}/quote', [BookingController::class, 'quote']);
 Route::get('/properties/{id}/reviews', [ReviewController::class, 'index']);
 Route::get('/experiences', [ExperienceController::class, 'index']);
 Route::get('/experiences/{id}', [ExperienceController::class, 'show']);

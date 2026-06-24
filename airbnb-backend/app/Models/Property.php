@@ -47,4 +47,9 @@ class Property extends Model
     {
         return $this->hasMany(\App\Models\Review::class);
     }
+
+    public function seasonalPrices()
+    {
+        return $this->hasMany(\App\Models\SeasonalPrice::class);
+    }
 }
