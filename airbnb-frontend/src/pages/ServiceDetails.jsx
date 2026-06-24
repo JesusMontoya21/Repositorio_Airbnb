@@ -107,6 +107,34 @@ export default function ServiceDetails() {
             <h2 className="text-xl font-semibold mb-3">Descripción</h2>
             <p className="text-gray-700 leading-relaxed">{service.description || 'Sin descripción disponible.'}</p>
           </div>
+
+          <div className="border-t pt-6 mb-6">
+            <h2 className="text-xl font-semibold mb-4">Ubicación del servicio</h2>
+            <div className="bg-gray-50 rounded-2xl p-6 mb-4 border border-gray-200">
+              <p className="text-gray-900 font-semibold mb-1">{service.location}</p>
+              <p className="text-gray-600 text-sm mb-4">Servicio disponible en la zona</p>
+              <div className="overflow-hidden rounded-xl border border-gray-300 shadow-sm">
+                <iframe
+                  title={`Mapa de ${service.title}`}
+                  className="h-96 w-full"
+                  loading="lazy"
+                  allowFullScreen
+                  referrerPolicy="no-referrer-when-downgrade"
+                  src={`https://www.google.com/maps?q=${encodeURIComponent(service.location)}&z=16&output=embed`}
+                />
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <a href={`https://maps.google.com/?q=${encodeURIComponent(service.location)}`} target="_blank" rel="noopener noreferrer"
+                className="flex-1 border border-gray-900 text-gray-900 px-4 py-3 rounded-lg font-semibold hover:bg-gray-50 transition text-center">
+                Abrir en Maps
+              </a>
+              <a href={`https://www.google.com/search?q=${encodeURIComponent(service.location)}`} target="_blank" rel="noopener noreferrer"
+                className="flex-1 bg-gray-900 text-white px-4 py-3 rounded-lg font-semibold hover:bg-black transition text-center">
+                Explorar zona
+              </a>
+            </div>
+          </div>
         </div>
 
         <div className="lg:col-span-1">

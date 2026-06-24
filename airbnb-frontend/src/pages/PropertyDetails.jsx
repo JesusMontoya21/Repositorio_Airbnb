@@ -126,6 +126,32 @@ export default function PropertyDetails() {
     </div>
   );
 
+  const placeOffers = [
+    { icon: '📶', label: 'Wifi' },
+    { icon: '🍳', label: 'Cocina' },
+    { icon: '🧺', label: 'Lavadora' },
+    { icon: '🚗', label: 'Estacionamiento' },
+    { icon: '🛁', label: 'Baño privado' },
+    { icon: '🧼', label: 'Limpieza incluida' },
+  ];
+
+  const spaceHighlights = [
+    {
+      title: 'Habitación',
+      description: `${property.bedrooms} ${property.bedrooms === 1 ? 'habitación privada' : 'habitaciones privadas'} para descansar cómodamente.`
+    },
+    {
+      title: 'Baño',
+      description: `${property.bathrooms} ${property.bathrooms === 1 ? 'baño' : 'baños'} con todos los servicios esenciales.`
+    },
+    {
+      title: 'Zona común',
+      description: 'Espacio pensado para relajarte, trabajar o recibir a tus huéspedes con comodidad.'
+    },
+  ];
+
+  const mapQuery = encodeURIComponent(`${property.address || property.city}, ${property.city}, ${property.country}`);
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <h1 className="text-3xl font-bold mb-2">{property.title}</h1>
@@ -176,9 +202,55 @@ export default function PropertyDetails() {
           </div>
 
           <div className="border-b pb-6 mb-6">
-            <h3 className="text-xl font-semibold mb-3">Ubicación</h3>
-            <p className="text-gray-700">{property.address}</p>
-            <p className="text-gray-500">{property.city}, {property.country}</p>
+            <h3 className="text-xl font-semibold mb-4">Dónde vas a estar</h3>
+            <div className="grid gap-4 md:grid-cols-3">
+              {spaceHighlights.map((item) => (
+                <div key={item.title} className="rounded-2xl border border-gray-200 p-4">
+                  <h4 className="font-semibold text-gray-900 mb-2">{item.title}</h4>
+                  <p className="text-sm text-gray-600">{item.description}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="border-b pb-6 mb-6">
+            <h3 className="text-xl font-semibold mb-4">Lo que ofrece este lugar</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {placeOffers.map((item) => (
+                <div key={item.label} className="flex items-center gap-3 rounded-2xl border border-gray-200 p-3">
+                  <span className="text-xl">{item.icon}</span>
+                  <span className="text-sm font-medium text-gray-700">{item.label}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="border-b pb-6 mb-6">
+            <h3 className="text-xl font-semibold mb-4">Ubicación</h3>
+            <div className="bg-gray-50 rounded-2xl p-6 mb-4 border border-gray-200">
+              <p className="text-gray-900 font-semibold mb-1">{property.address}</p>
+              <p className="text-gray-600 text-sm mb-4">{property.city}, {property.country}</p>
+              <div className="overflow-hidden rounded-xl border border-gray-300 shadow-sm">
+                <iframe
+                  title={`Mapa de ${property.title}`}
+                  className="h-96 w-full"
+                  loading="lazy"
+                  allowFullScreen
+                  referrerPolicy="no-referrer-when-downgrade"
+                  src={`https://www.google.com/maps?q=${mapQuery}&z=16&output=embed`}
+                />
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <a href={`https://maps.google.com/?q=${mapQuery}`} target="_blank" rel="noopener noreferrer"
+                className="flex-1 border border-gray-900 text-gray-900 px-4 py-3 rounded-lg font-semibold hover:bg-gray-50 transition text-center">
+                Abrir en Maps
+              </a>
+              <a href={`https://www.google.com/search?q=${mapQuery}`} target="_blank" rel="noopener noreferrer"
+                className="flex-1 bg-gray-900 text-white px-4 py-3 rounded-lg font-semibold hover:bg-black transition text-center">
+                Buscar en zona
+              </a>
+            </div>
           </div>
 
           {/* Reseñas */}
