@@ -19,6 +19,7 @@ export default function PropertyDetails() {
   const [reviewError, setReviewError] = useState('');
   const [reviewLoading, setReviewLoading] = useState(false);
   const [showReviewForm, setShowReviewForm] = useState(false);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(null);
 
   const { data: property, isLoading } = useQuery({
     queryKey: ['property', id],
@@ -188,6 +189,37 @@ export default function PropertyDetails() {
   ];
 
   const mapQuery = encodeURIComponent(`${property.address || property.city}, ${property.city}, ${property.country}`);
+  const propertyImages = property.images || [];
+  const hasMultipleImages = propertyImages.length > 1;
+
+  const openImageViewer = (index) => {
+    setSelectedImageIndex(index);
+  };
+
+  const closeImageViewer = () => {
+    setSelectedImageIndex(null);
+  };
+
+  const showPreviousImage = () => {
+    setSelectedImageIndex((current) => {
+      if (current === null) return current;
+      return current === 0 ? propertyImages.length - 1 : current - 1;
+    });
+  };
+
+  const showNextImage = () => {
+    setSelectedImageIndex((current) => {
+      if (current === null) return current;
+      return current === propertyImages.length - 1 ? 0 : current + 1;
+    });
+  };
+
+  const handleGalleryKeyDown = (event, index) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      openImageViewer(index);
+    }
+  };
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -205,11 +237,25 @@ export default function PropertyDetails() {
 
       {/* Galería */}
       <div className="grid grid-cols-2 gap-2 mb-8 rounded-2xl overflow-hidden">
-        {property.images?.length > 0 ? (
-          property.images.slice(0, 5).map((img, idx) => (
-            <div key={img.id} className={idx === 0 ? 'col-span-2' : ''}>
+        {propertyImages.length > 0 ? (
+          propertyImages.slice(0, 5).map((img, idx) => (
+            <div
+              key={img.id}
+              role="button"
+              tabIndex={0}
+              onClick={() => openImageViewer(idx)}
+              onKeyDown={(event) => handleGalleryKeyDown(event, idx)}
+              className={`${idx === 0 ? 'col-span-2' : ''} relative w-full overflow-hidden cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#FF385C]`}
+              style={{ height: idx === 0 ? '400px' : '200px' }}
+              aria-label={`Abrir imagen ${idx + 1} de ${property.title}`}
+            >
               <img src={img.url} alt={`${property.title} ${idx + 1}`}
-                className="w-full object-cover" style={{ height: idx === 0 ? '400px' : '200px' }} />
+                className="h-full w-full object-cover transition duration-200 hover:scale-[1.02]" />
+              {idx === 4 && propertyImages.length > 5 && (
+                <div className="absolute inset-0 bg-black/45 flex items-center justify-center text-white text-xl font-semibold">
+                  +{propertyImages.length - 5} fotos
+                </div>
+              )}
             </div>
           ))
         ) : (
@@ -218,6 +264,72 @@ export default function PropertyDetails() {
           </div>
         )}
       </div>
+
+      {selectedImageIndex !== null && propertyImages[selectedImageIndex] && (
+        <div className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-4 sm:p-8" onClick={closeImageViewer}>
+          <button
+            type="button"
+            onClick={closeImageViewer}
+            className="absolute top-4 right-4 sm:top-6 sm:right-6 w-11 h-11 rounded-full bg-white/10 text-white text-2xl hover:bg-white/20 transition"
+          >
+            ×
+          </button>
+
+          {hasMultipleImages && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                showPreviousImage();
+              }}
+              className="absolute left-3 sm:left-6 w-11 h-11 rounded-full bg-white/10 text-white text-2xl hover:bg-white/20 transition"
+            >
+              ‹
+            </button>
+          )}
+
+          <div className="w-full max-w-6xl" onClick={(e) => e.stopPropagation()}>
+            <img
+              src={propertyImages[selectedImageIndex].url}
+              alt={`${property.title} ${selectedImageIndex + 1}`}
+              className="w-full max-h-[78vh] object-contain rounded-2xl"
+            />
+
+            <div className="mt-4 flex items-center justify-between text-white">
+              <p className="text-sm sm:text-base font-medium">
+                Imagen {selectedImageIndex + 1} de {propertyImages.length}
+              </p>
+              {hasMultipleImages && (
+                <div className="flex gap-2 overflow-x-auto pl-4">
+                  {propertyImages.map((img, index) => (
+                    <button
+                      key={img.id}
+                      type="button"
+                      onClick={() => setSelectedImageIndex(index)}
+                      className={`h-16 w-20 overflow-hidden rounded-lg border-2 transition ${index === selectedImageIndex ? 'border-white' : 'border-transparent opacity-70 hover:opacity-100'}`}
+                    >
+                      <img src={img.url} alt={`${property.title} miniatura ${index + 1}`} className="h-full w-full object-cover" />
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {hasMultipleImages && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                showNextImage();
+              }}
+              className="absolute right-3 sm:right-6 w-11 h-11 rounded-full bg-white/10 text-white text-2xl hover:bg-white/20 transition"
+            >
+              ›
+            </button>
+          )}
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Info principal */}

@@ -19,6 +19,7 @@ class PropertyController extends Controller
         if ($request->city) {
             $query->where(function($q) use ($request) {
                 $q->where('city', 'like', '%' . $request->city . '%')
+                  ->orWhere('address', 'like', '%' . $request->city . '%')
                   ->orWhere('title', 'like', '%' . $request->city . '%');
             });
         }
@@ -70,12 +71,14 @@ class PropertyController extends Controller
             'images.*'        => 'url',
         ]);
 
+        $location = $this->resolveLocation($data['address'], $data['city'] ?? null, $data['country'] ?? null);
+
         $property = Property::create([
             'user_id'         => $request->user()->id,
             'title'           => $data['title'],
             'description'     => $data['description'],
-            'city'            => $data['city'],
-            'country'         => $data['country'] ?? 'México',
+            'city'            => $location['city'],
+            'country'         => $location['country'],
             'address'         => $data['address'],
             'price_per_night' => $data['price_per_night'],
             'guests'          => $data['guests'],
@@ -128,6 +131,17 @@ class PropertyController extends Controller
             'images.*'        => 'url',
             'is_active'       => 'sometimes|boolean',
         ]);
+
+        if (array_key_exists('address', $data) || array_key_exists('city', $data) || array_key_exists('country', $data)) {
+            $location = $this->resolveLocation(
+                $data['address'] ?? $property->address,
+                $data['city'] ?? $property->city,
+                $data['country'] ?? $property->country,
+            );
+
+            $data['city'] = $location['city'];
+            $data['country'] = $location['country'];
+        }
 
         DB::transaction(function () use ($property, $data) {
             $property->update(collect($data)->except('images')->toArray());
@@ -274,5 +288,66 @@ class PropertyController extends Controller
         $block->delete();
 
         return response()->json(['message' => 'Bloqueo eliminado correctamente']);
+    }
+
+    private function resolveLocation(string $address, ?string $city, ?string $country): array
+    {
+        $parts = collect(explode(',', $address))
+            ->map(fn (string $part) => trim($part))
+            ->filter(fn (string $part) => $part !== '')
+            ->values()
+            ->all();
+
+        $parts = array_values(array_filter($parts, fn (string $part) => !$this->isPostalSegment($part)));
+
+        $parsedCountry = null;
+        if (!empty($parts) && $this->isCountrySegment(end($parts))) {
+            $parsedCountry = array_pop($parts);
+        }
+
+        if (!empty($parts) && $this->isStateSegment(end($parts))) {
+            array_pop($parts);
+        }
+
+        $parsedCity = !empty($parts) ? end($parts) : null;
+        $resolvedCity = $parsedCity ?: $city ?: 'Sin ciudad';
+
+        if ($city && !$this->looksLikeAddressComponent($city)) {
+            $resolvedCity = $city;
+        }
+
+        return [
+            'city' => trim($resolvedCity),
+            'country' => trim($parsedCountry ?: ($country ?: 'México')),
+        ];
+    }
+
+    private function isPostalSegment(string $segment): bool
+    {
+        return (bool) preg_match('/^(c\.?p\.?\s*\d{4,6}|c[oó]digo postal\s*\d{4,6}|\d{4,6})$/iu', trim($segment));
+    }
+
+    private function isCountrySegment(string $segment): bool
+    {
+        return in_array(mb_strtolower(trim($segment)), ['méxico', 'mexico'], true);
+    }
+
+    private function isStateSegment(string $segment): bool
+    {
+        $states = [
+            'aguascalientes', 'baja california', 'baja california sur', 'campeche', 'chiapas', 'chihuahua',
+            'ciudad de méxico', 'coahuila', 'colima', 'durango', 'estado de méxico', 'guanajuato',
+            'guerrero', 'hidalgo', 'jalisco', 'michoacán', 'michoacan', 'morelos', 'nayarit', 'nuevo león',
+            'nuevo leon', 'oaxaca', 'puebla', 'querétaro', 'queretaro', 'quintana roo', 'san luis potosí',
+            'san luis potosi', 'sinaloa', 'sonora', 'tabasco', 'tamaulipas', 'tlaxcala', 'veracruz',
+            'yucatán', 'yucatan', 'zacatecas'
+        ];
+
+        return in_array(mb_strtolower(trim($segment)), $states, true);
+    }
+
+    private function looksLikeAddressComponent(string $value): bool
+    {
+        return (bool) preg_match('/\d|calle|avenida|\bav\b|boulevard|\bblvd\b|km\b|colonia|residencial|fracc|fraccionamiento|lote|manzana|fase|c\.?p\.?|c[oó]digo postal/iu', trim($value));
     }
 }

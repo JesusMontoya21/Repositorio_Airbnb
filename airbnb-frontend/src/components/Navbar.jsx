@@ -4,6 +4,17 @@ import { useAuth } from '../context/AuthContext';
 import LoginModal from './LoginModal';
 import LanguageModal from './LanguageModal';
 
+function BrandMark() {
+  return (
+    <svg viewBox="0 0 32 32" aria-hidden="true" className="h-8 w-8 text-[#FF385C]">
+      <path
+        d="M16 4.7c1.9 0 3.55 1 4.7 2.84.66 1.03 1.28 2.31 2.04 3.95l3.64 7.9c.69 1.55 1.03 2.9 1.03 4.05 0 2.18-1.43 3.85-3.58 3.85-1.73 0-3.37-.94-5.18-2.97L16 21.25l-2.65 3.07c-1.8 2.03-3.45 2.97-5.18 2.97-2.15 0-3.58-1.67-3.58-3.85 0-1.15.34-2.5 1.03-4.05l3.64-7.9c.76-1.64 1.38-2.92 2.04-3.95C12.45 5.7 14.1 4.7 16 4.7Zm0 4.09c-.7 0-1.33.37-1.94 1.32-.47.75-1.01 1.85-1.74 3.43l-3.3 7.18c-.48 1.08-.72 1.89-.72 2.42 0 .75.43 1.12 1.1 1.12.78 0 1.79-.68 3.11-2.15l3.9-4.48 3.9 4.48c1.32 1.47 2.33 2.15 3.11 2.15.67 0 1.1-.37 1.1-1.12 0-.53-.24-1.34-.72-2.42l-3.3-7.18c-.73-1.58-1.27-2.68-1.74-3.43-.61-.95-1.24-1.32-1.94-1.32Zm0 3.26c1.74 0 3.16 1.47 3.16 3.29 0 .76-.26 1.58-.79 2.47-.46.78-1.08 1.56-1.89 2.41-.81-.85-1.43-1.63-1.89-2.41-.53-.89-.79-1.71-.79-2.47 0-1.82 1.42-3.29 3.16-3.29Z"
+        fill="currentColor"
+      />
+    </svg>
+  );
+}
+
 export default function Navbar() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
@@ -41,8 +52,8 @@ export default function Navbar() {
   const categories = [
     { label: 'Todos', icon: '🌍', path: '/todos' },
     { label: 'Alojamientos', icon: '🏠', path: '/' },
-    { label: 'Experiencias', icon: '🎈', path: '/experiences', isNew: true },
-    { label: 'Servicios', icon: '🛎️', path: '/services', isNew: true },
+    { label: 'Experiencias', icon: '🎈', path: '/experiences' },
+    { label: 'Servicios', icon: '🛎️', path: '/services' },
   ];
 
   return (
@@ -52,12 +63,18 @@ export default function Navbar() {
           <div className="flex justify-between items-center h-20">
 
             {/* Logo */}
-            <Link to="/" className="flex items-center flex-shrink-0">
-              <span className="text-xl font-bold text-[#FF385C]">airbnb</span>
+            <Link to="/" className="flex items-center gap-2.5 flex-shrink-0 group">
+              <BrandMark />
+              <span
+                className="text-[1.7rem] font-semibold tracking-[-0.045em] text-[#FF385C] lowercase leading-none transition-opacity group-hover:opacity-90"
+                style={{ fontFamily: 'Avenir Next, Circular Std, Nunito Sans, Segoe UI, sans-serif' }}
+              >
+                airbnb
+              </span>
             </Link>
 
             {/* Categorías centrales */}
-            <div className="flex items-end gap-8 absolute left-1/2 -translate-x-1/2">
+            <div className="flex items-end gap-9 absolute left-1/2 -translate-x-1/2">
               {categories.map((cat) => {
                 const isActive = location.pathname === cat.path;
                 return (
@@ -65,13 +82,8 @@ export default function Navbar() {
                     className={`relative flex flex-col items-center gap-1 pb-2 border-b-2 transition-all duration-200 ${
                       isActive ? 'border-gray-900 text-gray-900' : 'border-transparent text-gray-500 hover:text-gray-900 hover:border-gray-300'
                     }`}>
-                    {cat.isNew && (
-                      <span className="absolute -top-3 -right-5 bg-black text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full">
-                        NUEVO
-                      </span>
-                    )}
-                    <span className="text-2xl">{cat.icon}</span>
-                    <span className="text-xs font-medium whitespace-nowrap">{cat.label}</span>
+                    <span className="text-[1.85rem] leading-none">{cat.icon}</span>
+                    <span className="text-[0.95rem] font-medium whitespace-nowrap tracking-[-0.01em]">{cat.label}</span>
                   </Link>
                 );
               })}

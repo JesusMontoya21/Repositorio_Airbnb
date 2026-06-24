@@ -1,12 +1,15 @@
 import { Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '../api/axios';
+import { useAuth } from '../context/AuthContext';
 
 export default function MyProperties() {
   const queryClient = useQueryClient();
+  const { user } = useAuth();
 
-  const { data: properties, isLoading } = useQuery({
-    queryKey: ['my-properties'],
+  const { data: properties, isLoading, isError, error, refetch } = useQuery({
+    queryKey: ['my-properties', user?.id],
+    enabled: !!user,
     queryFn: async () => {
       const res = await api.get('/my-properties');
       return res.data;
@@ -38,10 +41,32 @@ export default function MyProperties() {
     );
   }
 
+  if (isError) {
+    return (
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="bg-white rounded-lg shadow-md p-6 text-center">
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">No se pudieron cargar tus propiedades</h2>
+          <p className="text-gray-600 mb-4">{error?.response?.data?.message || 'Revisa tu sesión e inténtalo de nuevo.'}</p>
+          <button
+            onClick={() => refetch()}
+            className="bg-[#FF385C] text-white px-6 py-3 rounded-lg hover:bg-[#E0314F] transition"
+          >
+            Reintentar
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Mis propiedades</h1>
+        <div>
+          <h1 className="text-3xl font-bold">Mis propiedades</h1>
+          <p className="text-sm text-gray-500 mt-1">
+            Cuenta activa: {user?.email || 'sin sesión'}
+          </p>
+        </div>
         <Link to="/create-property" className="bg-[#FF385C] text-white px-6 py-3 rounded-lg hover:bg-[#E0314F] transition">
           + Nueva propiedad
         </Link>
