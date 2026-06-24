@@ -12,6 +12,7 @@ use App\Http\Controllers\ExperienceController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\ExperienceBookingController;
 use App\Http\Controllers\ServiceBookingController;
+use App\Http\Controllers\ConversationController;
 
 // Rutas públicas
 Route::post('/login', [AuthController::class, 'login']);
@@ -52,6 +53,18 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/bookings', [BookingController::class, 'store']);
     Route::get('/my-bookings', [BookingController::class, 'myBookings']);
     Route::put('/bookings/{id}/cancel', [BookingController::class, 'cancel']);
+
+    // Mensajería y notificaciones
+    Route::get('/conversations', [ConversationController::class, 'index']);
+    Route::post('/conversations/from-booking/{bookingId}', [ConversationController::class, 'startFromBooking']);
+    Route::get('/conversations/{id}/messages', [ConversationController::class, 'messages']);
+    Route::post('/conversations/{id}/messages', [ConversationController::class, 'sendMessage']);
+    Route::post('/conversations/{id}/mark-read', [ConversationController::class, 'markAsRead']);
+    Route::get('/messages/attachments/{attachmentId}/download', [ConversationController::class, 'downloadAttachment']);
+
+    Route::get('/notifications', [ConversationController::class, 'notifications']);
+    Route::get('/notifications/unread-count', [ConversationController::class, 'unreadCount']);
+    Route::post('/notifications/{id}/read', [ConversationController::class, 'markNotificationAsRead']);
 
     // Reseñas
     Route::post('/properties/{id}/reviews', [ReviewController::class, 'store']);

@@ -4,8 +4,11 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Booking;
+use App\Models\Conversation;
+use App\Models\Message;
 use App\Models\Property;
 use App\Models\PropertyAvailabilityBlock;
+use App\Services\UserNotificationService;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
 use Illuminate\Support\Facades\DB;
@@ -45,7 +48,7 @@ class BookingController extends Controller
 
             $quote = $this->buildQuote($property, $data['check_in'], $data['check_out'], $data['guests']);
 
-            return Booking::create([
+            $booking = Booking::create([
                 'user_id'     => $request->user()->id,
                 'property_id' => $property->id,
                 'check_in'    => $data['check_in'],
@@ -54,6 +57,39 @@ class BookingController extends Controller
                 'total_price' => $quote['total_price'],
                 'status'      => 'pending',
             ]);
+
+            $conversation = $this->ensureConversationForBooking($booking, $property->user_id);
+            $this->createTemplateMessage(
+                $conversation,
+                'booking_confirmation',
+                "Reserva confirmada para {$property->title}. Fechas: {$data['check_in']} a {$data['check_out']} para {$data['guests']} huésped(es)."
+            );
+
+            app(UserNotificationService::class)->notify(
+                userId: $property->user_id,
+                type: 'booking_created',
+                title: 'Nueva reservación recibida',
+                body: "Tienes una nueva reserva en {$property->title}",
+                data: [
+                    'booking_id' => $booking->id,
+                    'property_id' => $property->id,
+                    'conversation_id' => $conversation->id,
+                ]
+            );
+
+            app(UserNotificationService::class)->notify(
+                userId: $request->user()->id,
+                type: 'booking_created',
+                title: 'Reserva creada',
+                body: "Tu reserva en {$property->title} se creó correctamente.",
+                data: [
+                    'booking_id' => $booking->id,
+                    'property_id' => $property->id,
+                    'conversation_id' => $conversation->id,
+                ]
+            );
+
+            return $booking;
         });
 
         $booking->load('property');
@@ -167,8 +203,43 @@ class BookingController extends Controller
     public function cancel(Request $request, $id)
     {
         $booking = Booking::where('user_id', $request->user()->id)->findOrFail($id);
+        if ($booking->status === 'cancelled') {
+            return response()->json($booking);
+        }
+
         $booking->load('property');
         $booking->update(['status' => 'cancelled']);
+
+        $conversation = $this->ensureConversationForBooking($booking, $booking->property->user_id);
+        $this->createTemplateMessage(
+            $conversation,
+            'booking_cancellation',
+            "La reserva para {$booking->property->title} fue cancelada."
+        );
+
+        app(UserNotificationService::class)->notify(
+            userId: $booking->property->user_id,
+            type: 'booking_cancelled',
+            title: 'Reservación cancelada',
+            body: "Se canceló una reserva en {$booking->property->title}.",
+            data: [
+                'booking_id' => $booking->id,
+                'property_id' => $booking->property->id,
+                'conversation_id' => $conversation->id,
+            ]
+        );
+
+        app(UserNotificationService::class)->notify(
+            userId: $request->user()->id,
+            type: 'booking_cancelled',
+            title: 'Cancelaste tu reservación',
+            body: "Tu reserva en {$booking->property->title} fue cancelada.",
+            data: [
+                'booking_id' => $booking->id,
+                'property_id' => $booking->property->id,
+                'conversation_id' => $conversation->id,
+            ]
+        );
 
         try {
             Mail::to($request->user()->email)->send(new BookingCancellationMail(
@@ -184,6 +255,34 @@ class BookingController extends Controller
         }
 
         return response()->json($booking);
+    }
+
+    private function ensureConversationForBooking(Booking $booking, int $hostUserId): Conversation
+    {
+        return Conversation::query()->firstOrCreate(
+            ['booking_id' => $booking->id],
+            [
+                'property_id' => $booking->property_id,
+                'guest_user_id' => $booking->user_id,
+                'host_user_id' => $hostUserId,
+                'last_message_at' => now(),
+            ]
+        );
+    }
+
+    private function createTemplateMessage(Conversation $conversation, string $templateKey, string $body): Message
+    {
+        $message = Message::query()->create([
+            'conversation_id' => $conversation->id,
+            'sender_id' => null,
+            'type' => 'template',
+            'template_key' => $templateKey,
+            'body' => $body,
+        ]);
+
+        $conversation->update(['last_message_at' => now()]);
+
+        return $message;
     }
 
     private function hasOverlap(int $propertyId, string $checkIn, string $checkOut): bool

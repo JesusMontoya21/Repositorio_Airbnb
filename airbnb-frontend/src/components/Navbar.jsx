@@ -1,6 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '../context/AuthContext';
+import api from '../api/axios';
 import LoginModal from './LoginModal';
 import LanguageModal from './LanguageModal';
 
@@ -23,6 +25,18 @@ export default function Navbar() {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showLanguageModal, setShowLanguageModal] = useState(false);
   const menuRef = useRef(null);
+
+  const { data: unreadInfo } = useQuery({
+    queryKey: ['notifications-unread'],
+    queryFn: async () => {
+      const res = await api.get('/notifications/unread-count');
+      return res.data;
+    },
+    enabled: !!user,
+    refetchInterval: 10000,
+  });
+
+  const unreadCount = unreadInfo?.unread_count || 0;
 
   const handleLogout = async () => {
     await logout();
@@ -117,6 +131,11 @@ export default function Navbar() {
                         </svg>
                       </div>
                     </button>
+                    {unreadCount > 0 && (
+                      <span className="absolute -top-1 -right-1 bg-[#FF385C] text-white text-[10px] px-1.5 py-0.5 rounded-full min-w-5 text-center">
+                        {unreadCount > 99 ? '99+' : unreadCount}
+                      </span>
+                    )}
 
                     <div className="absolute right-0 mt-2 w-60 bg-white rounded-xl shadow-lg border border-gray-200 py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
                       <Link to="/profile" className="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-100">
@@ -127,6 +146,9 @@ export default function Navbar() {
                       </Link>
                       <Link to="/my-bookings" className="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-100">
                         Mis reservas
+                      </Link>
+                      <Link to="/messages" className="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-100">
+                        Mensajes {unreadCount > 0 ? `(${unreadCount})` : ''}
                       </Link>
                       <Link to="/favorites" className="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-100">
                         Mis favoritos
