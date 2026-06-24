@@ -81,6 +81,10 @@ export default function MyProperties() {
                     className="flex-1 text-center border border-[#FF385C] text-[#FF385C] px-4 py-2 rounded-lg hover:bg-[#FF385C] hover:text-white transition">
                     Ver
                   </Link>
+                  <Link to={`/host/properties/${property.id}/edit`}
+                    className="flex-1 text-center border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-100 transition">
+                    Editar
+                  </Link>
                   <button onClick={() => handleDelete(property.id, property.title)}
                     disabled={deleteMutation.isPending}
                     className="flex-1 bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition disabled:opacity-50">

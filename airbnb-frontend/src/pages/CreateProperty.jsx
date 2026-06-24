@@ -64,6 +64,11 @@ export default function CreateProperty() {
         bedrooms: propertyData.basics.bedrooms,
         bathrooms: propertyData.basics.bathrooms,
         type: propertyData.propertyType || 'apartment',
+        amenities: propertyData.amenities,
+        house_rules: [],
+        cancellation_policy: propertyData.discounts.includes('monthly') ? 'strict' : 'moderate',
+        booking_preference: propertyData.bookingPreference,
+        guest_preference: propertyData.guestPreference,
         images: propertyData.images,
       });
       alert('¡Felicidades! Tu propiedad ha sido creada exitosamente.');

@@ -6,6 +6,9 @@ use Illuminate\Http\Request;
 use App\Models\Property;
 use App\Models\PropertyImage;
 use App\Models\Booking;
+use App\Models\PropertyAvailabilityBlock;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class PropertyController extends Controller
 {
@@ -56,6 +59,13 @@ class PropertyController extends Controller
             'bedrooms'        => 'required|integer|min:0',
             'bathrooms'       => 'required|numeric|min:0.5',
             'type'            => 'sometimes|string',
+            'amenities'       => 'sometimes|array',
+            'amenities.*'     => 'string|max:100',
+            'house_rules'     => 'sometimes|array',
+            'house_rules.*'   => 'string|max:255',
+            'cancellation_policy' => 'sometimes|in:flexible,moderate,strict',
+            'booking_preference' => 'sometimes|in:approve_first,instant_book',
+            'guest_preference' => 'sometimes|in:any_guest,experienced_guest',
             'images'          => 'sometimes|array',
             'images.*'        => 'url',
         ]);
@@ -72,6 +82,11 @@ class PropertyController extends Controller
             'bedrooms'        => $data['bedrooms'],
             'bathrooms'       => $data['bathrooms'],
             'type'            => $data['type'] ?? 'apartment',
+            'amenities'       => $data['amenities'] ?? [],
+            'house_rules'     => $data['house_rules'] ?? [],
+            'cancellation_policy' => $data['cancellation_policy'] ?? 'flexible',
+            'booking_preference' => $data['booking_preference'] ?? 'approve_first',
+            'guest_preference' => $data['guest_preference'] ?? 'any_guest',
         ]);
 
         if (!empty($data['images'])) {
@@ -100,10 +115,35 @@ class PropertyController extends Controller
             'guests'          => 'sometimes|integer|min:1',
             'bedrooms'        => 'sometimes|integer|min:0',
             'bathrooms'       => 'sometimes|numeric|min:0.5',
+            'type'            => 'sometimes|string',
+            'country'         => 'sometimes|string|max:120',
+            'amenities'       => 'sometimes|array',
+            'amenities.*'     => 'string|max:100',
+            'house_rules'     => 'sometimes|array',
+            'house_rules.*'   => 'string|max:255',
+            'cancellation_policy' => 'sometimes|in:flexible,moderate,strict',
+            'booking_preference' => 'sometimes|in:approve_first,instant_book',
+            'guest_preference' => 'sometimes|in:any_guest,experienced_guest',
+            'images'          => 'sometimes|array',
+            'images.*'        => 'url',
             'is_active'       => 'sometimes|boolean',
         ]);
 
-        $property->update($data);
+        DB::transaction(function () use ($property, $data) {
+            $property->update(collect($data)->except('images')->toArray());
+
+            if (array_key_exists('images', $data)) {
+                $property->images()->delete();
+
+                foreach ($data['images'] as $index => $url) {
+                    PropertyImage::create([
+                        'property_id' => $property->id,
+                        'url' => $url,
+                        'is_primary' => $index === 0,
+                    ]);
+                }
+            }
+        });
 
         return response()->json($property->load('images'));
     }
@@ -161,5 +201,78 @@ class PropertyController extends Controller
             'properties'       => $properties,
             'recent_bookings'  => $recentBookings,
         ]);
+    }
+
+    public function hostShow(Request $request, int $id)
+    {
+        $property = Property::with(['images', 'availabilityBlocks', 'seasonalPrices'])
+            ->where('user_id', $request->user()->id)
+            ->findOrFail($id);
+
+        return response()->json($property);
+    }
+
+    public function hostAvailability(Request $request, int $id)
+    {
+        $property = Property::where('user_id', $request->user()->id)->findOrFail($id);
+
+        $blocks = $property->availabilityBlocks()
+            ->orderBy('start_date')
+            ->get()
+            ->map(fn (PropertyAvailabilityBlock $block) => [
+                'id' => $block->id,
+                'start_date' => Carbon::parse($block->start_date)->toDateString(),
+                'end_date' => Carbon::parse($block->end_date)->toDateString(),
+                'reason' => $block->reason,
+            ]);
+
+        $bookings = Booking::query()
+            ->where('property_id', $property->id)
+            ->whereIn('status', ['pending', 'confirmed'])
+            ->orderBy('check_in')
+            ->get(['id', 'check_in', 'check_out', 'status'])
+            ->map(fn (Booking $booking) => [
+                'id' => $booking->id,
+                'start_date' => Carbon::parse($booking->check_in)->toDateString(),
+                'end_date' => Carbon::parse($booking->check_out)->toDateString(),
+                'status' => $booking->status,
+                'source' => 'booking',
+            ]);
+
+        return response()->json([
+            'property_id' => $property->id,
+            'manual_blocks' => $blocks,
+            'booked_ranges' => $bookings,
+        ]);
+    }
+
+    public function addAvailabilityBlock(Request $request, int $id)
+    {
+        $property = Property::where('user_id', $request->user()->id)->findOrFail($id);
+
+        $data = $request->validate([
+            'start_date' => 'required|date',
+            'end_date' => 'required|date|after_or_equal:start_date',
+            'reason' => 'nullable|string|max:255',
+        ]);
+
+        $block = PropertyAvailabilityBlock::create([
+            'property_id' => $property->id,
+            'start_date' => $data['start_date'],
+            'end_date' => $data['end_date'],
+            'reason' => $data['reason'] ?? null,
+        ]);
+
+        return response()->json($block, 201);
+    }
+
+    public function removeAvailabilityBlock(Request $request, int $id, int $blockId)
+    {
+        $property = Property::where('user_id', $request->user()->id)->findOrFail($id);
+
+        $block = $property->availabilityBlocks()->findOrFail($blockId);
+        $block->delete();
+
+        return response()->json(['message' => 'Bloqueo eliminado correctamente']);
     }
 }

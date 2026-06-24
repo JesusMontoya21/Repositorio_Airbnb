@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Booking;
 use App\Models\Property;
+use App\Models\PropertyAvailabilityBlock;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
 use Illuminate\Support\Facades\DB;
@@ -105,11 +106,22 @@ class BookingController extends Controller
             ])
             ->values();
 
+        $manualBlocks = $property->availabilityBlocks()
+            ->where('start_date', '<', $windowEnd->toDateString())
+            ->where('end_date', '>', $windowStart->toDateString())
+            ->orderBy('start_date')
+            ->get(['start_date', 'end_date'])
+            ->map(fn ($block) => [
+                'check_in' => Carbon::parse($block->start_date)->toDateString(),
+                'check_out' => Carbon::parse($block->end_date)->addDay()->toDateString(),
+            ])
+            ->values();
+
         return response()->json([
             'property_id' => $property->id,
             'window_start' => $windowStart->toDateString(),
             'window_end' => $windowEnd->toDateString(),
-            'blocked_ranges' => $blockedRanges,
+            'blocked_ranges' => $blockedRanges->merge($manualBlocks)->sortBy('check_in')->values(),
         ]);
     }
 
@@ -176,11 +188,21 @@ class BookingController extends Controller
 
     private function hasOverlap(int $propertyId, string $checkIn, string $checkOut): bool
     {
-        return Booking::query()
+        $bookingOverlap = Booking::query()
             ->where('property_id', $propertyId)
             ->whereIn('status', ['pending', 'confirmed'])
             ->where('check_in', '<', $checkOut)
             ->where('check_out', '>', $checkIn)
+            ->exists();
+
+        if ($bookingOverlap) {
+            return true;
+        }
+
+        return PropertyAvailabilityBlock::query()
+            ->where('property_id', $propertyId)
+            ->where('start_date', '<', $checkOut)
+            ->whereRaw("(end_date + interval '1 day') > ?", [$checkIn])
             ->exists();
     }
 

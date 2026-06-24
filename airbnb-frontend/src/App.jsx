@@ -19,6 +19,7 @@ import BecomeHostIntro from './pages/BecomeHostIntro.jsx';
 import CreateProperty from './pages/CreateProperty.jsx'; 
 import CreateExperience from './pages/CreateExperience.jsx';
 import CreateService from './pages/CreateService.jsx';
+import EditProperty from './pages/EditProperty.jsx';
 import Favorites from './pages/Favorites.jsx';
 import NotFound from './pages/NotFound.jsx';
 import ExperienceDetails from './pages/ExperienceDetails.jsx';
@@ -53,6 +54,7 @@ function AppLayout() {
           <Route path="/experiences" element={<Experiences />} />
           <Route path="/anuncio-alojamiento" element={<BecomeHostIntro />} />
           <Route path="/create-property" element={<CreateProperty />} />
+          <Route path="/host/properties/:id/edit" element={<ProtectedRoute><EditProperty /></ProtectedRoute>} />
           <Route path="/create-experience" element={<CreateExperience />} />
           <Route path="/create-service" element={<CreateService />} />
 

@@ -21,6 +21,24 @@ const mockProperties = [
   { id: 12, city: 'Los Mochis', country: 'México', title: 'Departamento céntrico en Los Mochis', price_per_night: 580, guests: 3, bedrooms: 1, average_rating: 4.75, images: [{ url: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=400' }] },
 ];
 
+const getDisplayCity = (property) => {
+  const rawCity = String(property?.city || '').trim();
+
+  if (rawCity && !/[#0-9]/.test(rawCity)) {
+    return rawCity;
+  }
+
+  const address = String(property?.address || '').trim();
+  if (!address) {
+    return rawCity || 'Sin ciudad';
+  }
+
+  const parts = address.split(',').map((part) => part.trim()).filter(Boolean);
+  const fallback = [...parts].reverse().find((part) => !/[#0-9]/.test(part));
+
+  return fallback || rawCity || 'Sin ciudad';
+};
+
 const PropertyCard = ({ property }) => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -77,7 +95,7 @@ const CityCarousel = ({ city, properties }) => {
   const scroll = (direction) => {
     if (scrollRef.current) scrollRef.current.scrollBy({ left: direction * 280, behavior: 'smooth' });
   };
-  const cityProperties = properties.filter(p => p.city === city);
+  const cityProperties = properties.filter((p) => getDisplayCity(p) === city);
   if (cityProperties.length === 0) return null;
 
   return (
@@ -316,8 +334,6 @@ export default function Home() {
   const [isGuestsOpen, setIsGuestsOpen] = useState(false);
   const searchRef = useRef(null);
 
-  const cities = ['Mazatlán', 'Guadalajara', 'Cancún', 'Ciudad de México', 'Culiacán', 'Los Mochis'];
-
   const { data: apiProperties, isLoading } = useQuery({
     queryKey: ['properties', searchParams],
     queryFn: async () => {
@@ -331,6 +347,12 @@ export default function Home() {
   });
 
   const allProperties = (apiProperties && apiProperties.length > 0) ? apiProperties : mockProperties;
+
+  const cities = Array.from(new Set(
+    allProperties
+      .map((property) => getDisplayCity(property))
+      .filter((city) => typeof city === 'string' && city.trim().length > 0)
+  )).sort((a, b) => a.localeCompare(b, 'es'));
 
   const handleSelectCity = (city) => {
     setFilters(prev => ({ ...prev, city }));

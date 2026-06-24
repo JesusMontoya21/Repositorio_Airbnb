@@ -43,6 +43,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/properties/{id}', [PropertyController::class, 'update']);
     Route::delete('/properties/{id}', [PropertyController::class, 'destroy']);
     Route::get('/my-properties', [PropertyController::class, 'myProperties']);
+    Route::get('/host/properties/{id}', [PropertyController::class, 'hostShow']);
+    Route::get('/host/properties/{id}/availability', [PropertyController::class, 'hostAvailability']);
+    Route::post('/host/properties/{id}/availability-blocks', [PropertyController::class, 'addAvailabilityBlock']);
+    Route::delete('/host/properties/{id}/availability-blocks/{blockId}', [PropertyController::class, 'removeAvailabilityBlock']);
 
     // Reservas de hospedaje
     Route::post('/bookings', [BookingController::class, 'store']);

@@ -18,6 +18,11 @@ class Property extends Model
         'bedrooms',
         'bathrooms',
         'type',
+        'amenities',
+        'house_rules',
+        'cancellation_policy',
+        'booking_preference',
+        'guest_preference',
         'average_rating',
         'is_active',
     ];
@@ -26,6 +31,8 @@ class Property extends Model
         'price_per_night' => 'decimal:2',
         'average_rating'  => 'decimal:2',
         'is_active'       => 'boolean',
+        'amenities'       => 'array',
+        'house_rules'     => 'array',
     ];
 
     public function user()
@@ -51,5 +58,10 @@ class Property extends Model
     public function seasonalPrices()
     {
         return $this->hasMany(\App\Models\SeasonalPrice::class);
+    }
+
+    public function availabilityBlocks()
+    {
+        return $this->hasMany(\App\Models\PropertyAvailabilityBlock::class);
     }
 }
