@@ -19,6 +19,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.equipo.airbnb_1.R;
 import com.equipo.airbnb_1.ui.Components.AlojamientoAdapter;
 import com.equipo.airbnb_1.ui.Model.Alojamiento;
+import com.equipo.airbnb_1.ui.Model.PaginatedResponse;
 import com.equipo.airbnb_1.ui.Network.ApiService;
 import com.equipo.airbnb_1.ui.Network.RetrofitClient;
 
@@ -107,14 +108,19 @@ public class AlojamientosFragment extends Fragment {
 
         ApiService apiService = RetrofitClient.getApiService(requireContext());
 
-        apiService.getAlojamientos().enqueue(new Callback<List<Alojamiento>>() {
+        apiService.getAlojamientos().enqueue(new Callback<PaginatedResponse<Alojamiento>>() {
             @Override
-            public void onResponse(@NonNull Call<List<Alojamiento>> call, @NonNull Response<List<Alojamiento>> response) {
+            public void onResponse(@NonNull Call<PaginatedResponse<Alojamiento>> call, @NonNull Response<PaginatedResponse<Alojamiento>> response) {
                 if (progressCargaAlojamientos != null) progressCargaAlojamientos.setVisibility(View.GONE);
                 if (recyclerCarrusel != null) recyclerCarrusel.setVisibility(View.VISIBLE);
 
                 if (response.isSuccessful() && response.body() != null) {
-                    List<Alojamiento> listaAlojamientos = response.body();
+                    List<Alojamiento> listaAlojamientos = response.body().getData();
+
+                    if (listaAlojamientos == null) {
+                        Toast.makeText(getContext(), "Respuesta del servidor incompleta", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
 
                     if (listaAlojamientos.isEmpty()) {
                         Toast.makeText(getContext(), "No hay alojamientos disponibles", Toast.LENGTH_SHORT).show();
@@ -129,7 +135,7 @@ public class AlojamientosFragment extends Fragment {
             }
 
             @Override
-            public void onFailure(@NonNull Call<List<Alojamiento>> call, @NonNull Throwable t) {
+            public void onFailure(@NonNull Call<PaginatedResponse<Alojamiento>> call, @NonNull Throwable t) {
                 if (progressCargaAlojamientos != null) progressCargaAlojamientos.setVisibility(View.GONE);
                 if (recyclerCarrusel != null) recyclerCarrusel.setVisibility(View.VISIBLE);
 
