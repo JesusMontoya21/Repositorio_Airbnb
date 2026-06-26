@@ -21,7 +21,7 @@ import com.equipo.airbnb_1.R;
 public class PerfilFragment extends Fragment {
 
     private LinearLayout layoutInvitado, layoutUsuario;
-    private Button btnIrALogin, btnCerrarSesion;
+    private Button btnIrALogin, btnCerrarSesion, btnModoAnfitrion;
     private SharedPreferences preferences;
     private TextView tvNombreUsuario;
 
@@ -35,6 +35,7 @@ public class PerfilFragment extends Fragment {
         layoutUsuario = view.findViewById(R.id.layout_usuario);
         btnIrALogin = view.findViewById(R.id.btnIrALogin);
         btnCerrarSesion = view.findViewById(R.id.btnCerrarSesion);
+        btnModoAnfitrion = view.findViewById(R.id.btnModoAnfitrion);
 
         preferences = requireActivity().getSharedPreferences("user_session", Context.MODE_PRIVATE);
 
@@ -50,6 +51,10 @@ public class PerfilFragment extends Fragment {
                     .remove("user_name")
                     .apply();
             actualizarInterfazUsuario();
+        });
+
+        btnModoAnfitrion.setOnClickListener(v -> {
+            Navigation.findNavController(v).navigate(R.id.action_nav_perfil_to_hostDashboardFragment);
         });
 
         return view;

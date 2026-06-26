@@ -75,7 +75,25 @@
     <fragment
         android:id="@+id/nav_perfil"
         android:name="com.equipo.airbnb_1.ui.View.PerfilFragment"
-        android:label="Perfil" />
+        android:label="Perfil" >
+        <action
+            android:id="@+id/action_nav_perfil_to_hostDashboardFragment"
+            app:destination="@id/hostDashboardFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/hostDashboardFragment"
+        android:name="com.equipo.airbnb_1.ui.View.HostDashboardFragment"
+        android:label="Modo anfitrión" >
+        <action
+            android:id="@+id/action_hostDashboardFragment_to_hostCreatePropertyFragment"
+            app:destination="@id/hostCreatePropertyFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/hostCreatePropertyFragment"
+        android:name="com.equipo.airbnb_1.ui.View.HostCreatePropertyFragment"
+        android:label="Crear propiedad" />
 
     <fragment
         android:id="@+id/btnExperiencias"

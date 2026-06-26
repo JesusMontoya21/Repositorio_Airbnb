@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="host_property_types">
+        <item>house</item>
+        <item>apartment</item>
+        <item>cabin</item>
+        <item>hotel</item>
+        <item>tiny_home</item>
+    </string-array>
+</resources>
