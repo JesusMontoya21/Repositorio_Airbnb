@@ -8,18 +8,35 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let isActive = true;
     const token = localStorage.getItem("token");
+
     if (token) {
       api.get("/user")
-        .then((res) => setUser(res.data))
-        .catch(() => {
-          localStorage.removeItem("token");
-          setUser(null);
+        .then((res) => {
+          // Prevent stale bootstrap requests from overriding a newer login token.
+          if (isActive && localStorage.getItem("token") === token) {
+            setUser(res.data);
+          }
         })
-        .finally(() => setLoading(false));
+        .catch(() => {
+          if (isActive && localStorage.getItem("token") === token) {
+            localStorage.removeItem("token");
+            setUser(null);
+          }
+        })
+        .finally(() => {
+          if (isActive) {
+            setLoading(false);
+          }
+        });
     } else {
       setLoading(false);
     }
+
+    return () => {
+      isActive = false;
+    };
   }, []);
 
   const login = async (email, password) => {
@@ -50,7 +67,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, register, loading }}>
+    <AuthContext.Provider value={{ user, loading, login, logout, register }}>
       {children}
     </AuthContext.Provider>
   );

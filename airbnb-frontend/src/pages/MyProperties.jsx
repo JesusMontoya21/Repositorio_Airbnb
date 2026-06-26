@@ -1,12 +1,15 @@
 import { Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '../api/axios';
+import { useAuth } from '../context/AuthContext';
 
 export default function MyProperties() {
   const queryClient = useQueryClient();
+  const { user } = useAuth();
 
-  const { data: properties, isLoading } = useQuery({
-    queryKey: ['my-properties'],
+  const { data: properties, isLoading, isError, error, refetch } = useQuery({
+    queryKey: ['my-properties', user?.id],
+    enabled: !!user,
     queryFn: async () => {
       const res = await api.get('/my-properties');
       return res.data;
@@ -38,10 +41,32 @@ export default function MyProperties() {
     );
   }
 
+  if (isError) {
+    return (
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="bg-white rounded-lg shadow-md p-6 text-center">
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">No se pudieron cargar tus propiedades</h2>
+          <p className="text-gray-600 mb-4">{error?.response?.data?.message || 'Revisa tu sesión e inténtalo de nuevo.'}</p>
+          <button
+            onClick={() => refetch()}
+            className="bg-[#FF385C] text-white px-6 py-3 rounded-lg hover:bg-[#E0314F] transition"
+          >
+            Reintentar
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Mis propiedades</h1>
+        <div>
+          <h1 className="text-3xl font-bold">Mis propiedades</h1>
+          <p className="text-sm text-gray-500 mt-1">
+            Cuenta activa: {user?.email || 'sin sesión'}
+          </p>
+        </div>
         <Link to="/create-property" className="bg-[#FF385C] text-white px-6 py-3 rounded-lg hover:bg-[#E0314F] transition">
           + Nueva propiedad
         </Link>
@@ -80,6 +105,10 @@ export default function MyProperties() {
                   <Link to={`/property/${property.id}`}
                     className="flex-1 text-center border border-[#FF385C] text-[#FF385C] px-4 py-2 rounded-lg hover:bg-[#FF385C] hover:text-white transition">
                     Ver
+                  </Link>
+                  <Link to={`/host/properties/${property.id}/edit`}
+                    className="flex-1 text-center border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-100 transition">
+                    Editar
                   </Link>
                   <button onClick={() => handleDelete(property.id, property.title)}
                     disabled={deleteMutation.isPending}

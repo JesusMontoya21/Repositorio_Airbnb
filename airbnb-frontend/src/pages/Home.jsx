@@ -22,6 +22,61 @@ const mockProperties = [
   { id: 12, city: 'Los Mochis', country: 'México', title: 'Departamento céntrico en Los Mochis', price_per_night: 580, guests: 3, bedrooms: 1, average_rating: 4.75, images: [{ url: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=400' }] },
 ];
 
+const mexicanStates = new Set([
+  'aguascalientes', 'baja california', 'baja california sur', 'campeche', 'chiapas', 'chihuahua',
+  'ciudad de méxico', 'coahuila', 'colima', 'durango', 'estado de méxico', 'guanajuato',
+  'guerrero', 'hidalgo', 'jalisco', 'michoacán', 'michoacan', 'morelos', 'nayarit', 'nuevo león',
+  'nuevo leon', 'oaxaca', 'puebla', 'querétaro', 'queretaro', 'quintana roo', 'san luis potosí',
+  'san luis potosi', 'sinaloa', 'sonora', 'tabasco', 'tamaulipas', 'tlaxcala', 'veracruz',
+  'yucatán', 'yucatan', 'zacatecas'
+]);
+
+const isPostalSegment = (segment) => /^(c\.?p\.?\s*\d{4,6}|c[oó]digo postal\s*\d{4,6}|\d{4,6})$/iu.test(segment.trim());
+const isCountrySegment = (segment) => ['méxico', 'mexico'].includes(segment.trim().toLowerCase());
+const isStateSegment = (segment) => mexicanStates.has(segment.trim().toLowerCase());
+const looksLikeAddressComponent = (value) => /\d|calle|avenida|\bav\b|boulevard|\bblvd\b|km\b|colonia|residencial|fracc|fraccionamiento|lote|manzana|fase|c\.?p\.?|c[oó]digo postal/iu.test(String(value).trim());
+
+const getLocationFromAddress = (address) => {
+  const parts = String(address || '')
+    .split(',')
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .filter((part) => !isPostalSegment(part));
+
+  if (parts.length === 0) {
+    return null;
+  }
+
+  if (isCountrySegment(parts[parts.length - 1])) {
+    parts.pop();
+  }
+
+  if (parts.length > 0 && isStateSegment(parts[parts.length - 1])) {
+    parts.pop();
+  }
+
+  return parts.length > 0 ? parts[parts.length - 1] : null;
+};
+
+const getDisplayCity = (property) => {
+  const rawCity = String(property?.city || '').trim();
+  const addressCity = getLocationFromAddress(property?.address);
+
+  if (addressCity && (!rawCity || looksLikeAddressComponent(rawCity))) {
+    return addressCity;
+  }
+
+  if (rawCity && !looksLikeAddressComponent(rawCity)) {
+    return rawCity;
+  }
+
+  if (!property?.address) {
+    return rawCity || 'Sin ciudad';
+  }
+
+  return addressCity || rawCity || 'Sin ciudad';
+};
+
 const PropertyCard = ({ property }) => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -78,7 +133,7 @@ const CityCarousel = ({ city, properties }) => {
   const scroll = (direction) => {
     if (scrollRef.current) scrollRef.current.scrollBy({ left: direction * 280, behavior: 'smooth' });
   };
-  const cityProperties = properties.filter(p => p.city === city);
+  const cityProperties = properties.filter((p) => getDisplayCity(p) === city);
   if (cityProperties.length === 0) return null;
 
   return (
@@ -123,7 +178,7 @@ const SearchResults = ({ properties, searchCity }) => (
             </div>
             <div className="px-1">
               <h3 className="font-semibold text-gray-900 text-sm line-clamp-1">{property.title}</h3>
-              <p className="text-gray-500 text-xs mt-0.5">{property.city}, {property.country}</p>
+              <p className="text-gray-500 text-xs mt-0.5">{getDisplayCity(property)}, {property.country}</p>
               <p className="text-sm mt-1">
                 <span className="font-semibold">${property.price_per_night} MXN</span>
                 <span className="text-gray-500"> noche</span>
@@ -317,8 +372,6 @@ export default function Home() {
   const [isGuestsOpen, setIsGuestsOpen] = useState(false);
   const searchRef = useRef(null);
 
-  const cities = ['Mazatlán', 'Guadalajara', 'Cancún', 'Ciudad de México', 'Culiacán', 'Los Mochis'];
-
   const { data: apiProperties, isLoading } = useQuery({
     queryKey: ['properties', searchParams],
     queryFn: async () => {
@@ -332,6 +385,12 @@ export default function Home() {
   });
 
   const allProperties = (apiProperties && apiProperties.length > 0) ? apiProperties : mockProperties;
+
+  const cities = Array.from(new Set(
+    allProperties
+      .map((property) => getDisplayCity(property))
+      .filter((city) => typeof city === 'string' && city.trim().length > 0)
+  )).sort((a, b) => a.localeCompare(b, 'es'));
 
   const handleSelectCity = (city) => {
     setFilters(prev => ({ ...prev, city }));
@@ -386,7 +445,7 @@ export default function Home() {
 
   return (
     <div>
-      <div className="bg-white border-b">
+      <div className="sticky top-0 z-40 bg-white border-b shadow-md">
         <div className="max-w-4xl mx-auto px-4 py-6">
           <div className="relative bg-white rounded-full shadow-md border border-gray-200 hover:shadow-lg transition-shadow duration-200" ref={searchRef}>
             <div className="flex items-center divide-x divide-gray-200">

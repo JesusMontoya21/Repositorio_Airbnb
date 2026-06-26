@@ -1,9 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import api from '../api/axios';
 
 export default function MyBookings() {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
   const { data: bookings, isLoading: loadingBookings } = useQuery({
     queryKey: ['my-bookings'],
@@ -50,6 +51,16 @@ export default function MyBookings() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['my-service-bookings'] });
       alert('Reserva de servicio cancelada exitosamente');
+    },
+  });
+
+  const openConversationMutation = useMutation({
+    mutationFn: async (bookingId) => {
+      const res = await api.post(`/conversations/from-booking/${bookingId}`);
+      return res.data;
+    },
+    onSuccess: (data) => {
+      navigate(`/messages?conversation=${data.conversation_id}`);
     },
   });
 
@@ -156,6 +167,12 @@ export default function MyBookings() {
                             Cancelar reserva
                           </button>
                         )}
+                        <button
+                          onClick={() => openConversationMutation.mutate(booking.id)}
+                          className="mt-2 text-[#FF385C] hover:underline text-sm"
+                        >
+                          Abrir chat con anfitrión
+                        </button>
                       </div>
                     </div>
                   </div>
