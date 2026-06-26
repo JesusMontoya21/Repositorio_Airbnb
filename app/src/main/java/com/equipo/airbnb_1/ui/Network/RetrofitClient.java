@@ -11,7 +11,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class RetrofitClient {
 
     private static Retrofit retrofit = null;
-    private static final String BASE_URL = "http://192.168.1.26:8001/api/";
+    private static final String BASE_URL = "http://192.168.1.6/api/";
 
     public static ApiService getApiService(Context context) {
         if (retrofit == null) {
@@ -22,9 +22,15 @@ public class RetrofitClient {
                     .addInterceptor(chain -> {
                         SharedPreferences preferences = context.getSharedPreferences("user_session", Context.MODE_PRIVATE);
                         String token = preferences.getString("auth_token", null);
+                        if (token != null) {
+                            token = token.trim();
+                            if (token.toLowerCase().startsWith("bearer ")) {
+                                token = token.substring(7).trim();
+                            }
+                        }
 
                         Request.Builder requestBuilder = chain.request().newBuilder();
-                        if (token != null) {
+                        if (token != null && !token.isEmpty() && chain.request().header("Authorization") == null) {
                             requestBuilder.addHeader("Authorization", "Bearer " + token);
                         }
                         return chain.proceed(requestBuilder.build());

@@ -10,7 +10,6 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -66,14 +65,14 @@ public class PerfilFragment extends Fragment {
             });
         }
 
-        if (btnModoAnfitrion != null) {
-            btnModoAnfitrion.setOnClickListener(v -> {
-                Toast.makeText(getContext(), "El Modo Anfitrión estará disponible en la próxima actualización de la plataforma.", Toast.LENGTH_LONG).show();
-            });
-        }
-
         if (btnTerminosCondiciones != null) {
             btnTerminosCondiciones.setOnClickListener(v -> mostrarTerminosYCondiciones());
+        }
+
+        if (btnModoAnfitrion != null) {
+            btnModoAnfitrion.setOnClickListener(v -> {
+                Navigation.findNavController(v).navigate(R.id.action_nav_perfil_to_hostDashboardFragment);
+            });
         }
 
         return view;

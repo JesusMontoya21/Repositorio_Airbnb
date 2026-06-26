@@ -94,7 +94,7 @@ public class ViajesAdapter extends RecyclerView.Adapter<ViajesAdapter.ViajeViewH
         }
 
         if (urlFoto != null && !urlFoto.isEmpty() && !urlFoto.startsWith("http")) {
-            urlFoto = "http://192.168.1.26:8001/storage/" + urlFoto;
+            urlFoto = "http://192.168.1.6/storage/" + urlFoto;
         }
 
         Glide.with(holder.itemView.getContext())
