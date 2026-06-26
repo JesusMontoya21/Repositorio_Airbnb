@@ -11,10 +11,12 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.Fragment;
 import com.bumptech.glide.Glide;
 import com.equipo.airbnb_1.R;
@@ -49,6 +51,9 @@ public class DetalleAlojamientoFragment extends Fragment {
     private int alojamientoId;
     private double precioPorNoche = 0.0;
 
+    private NestedScrollView scrollDetalleContenido;
+    private ProgressBar progressCargaDetalle;
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -66,6 +71,9 @@ public class DetalleAlojamientoFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_detalle_alojamiento, container, false);
+
+        scrollDetalleContenido = view.findViewById(R.id.scrollDetalleContenido);
+        progressCargaDetalle = view.findViewById(R.id.progressCargaDetalle);
 
         ivDetalleImagen = view.findViewById(R.id.ivDetalleImagen);
         tvDetalleTitulo = view.findViewById(R.id.tvDetalleTitulo);
@@ -124,11 +132,17 @@ public class DetalleAlojamientoFragment extends Fragment {
     }
 
     private void cargarDatosDesdeServidor() {
+        if (progressCargaDetalle != null) progressCargaDetalle.setVisibility(View.VISIBLE);
+        if (scrollDetalleContenido != null) scrollDetalleContenido.setVisibility(View.GONE);
+
         ApiService apiService = RetrofitClient.getApiService(requireContext());
         apiService.obtenerDetalleAlojamiento(alojamientoId).enqueue(new Callback<PropertyDetalleResponse>() {
             @Override
             public void onResponse(@NonNull Call<PropertyDetalleResponse> call, @NonNull Response<PropertyDetalleResponse> response) {
                 if (getActivity() == null || getView() == null) return;
+
+                if (progressCargaDetalle != null) progressCargaDetalle.setVisibility(View.GONE);
+                if (scrollDetalleContenido != null) scrollDetalleContenido.setVisibility(View.VISIBLE);
 
                 if (response.isSuccessful() && response.body() != null) {
                     PropertyDetalleResponse propiedad = response.body();
@@ -159,6 +173,9 @@ public class DetalleAlojamientoFragment extends Fragment {
 
             @Override
             public void onFailure(@NonNull Call<PropertyDetalleResponse> call, @NonNull Throwable t) {
+                if (progressCargaDetalle != null) progressCargaDetalle.setVisibility(View.GONE);
+                if (scrollDetalleContenido != null) scrollDetalleContenido.setVisibility(View.VISIBLE);
+
                 if (getContext() != null) {
                     Toast.makeText(getContext(), "Error de red: " + t.getMessage(), Toast.LENGTH_SHORT).show();
                 }
@@ -271,7 +288,6 @@ public class DetalleAlojamientoFragment extends Fragment {
 
                     if (getActivity() != null && getView() != null) {
                         androidx.navigation.NavController navController = androidx.navigation.Navigation.findNavController(getView());
-
                         navController.popBackStack(R.id.nav_navegacion, false);
                     }
                 } else {
@@ -316,7 +332,36 @@ public class DetalleAlojamientoFragment extends Fragment {
         TextView tvMontoOxxo = dialogView.findViewById(R.id.tvMontoOxxo);
         Button btnEntendidoOxxo = dialogView.findViewById(R.id.btnEntendidoOxxo);
 
-        // 🌟 NATIVO: Formateador dinámico para inyectar la diagonal (MM/AA) automáticamente
+        // Referencias del plástico azul superior
+        TextView tvNumeroSimulado = dialogView.findViewById(R.id.tvNumeroSimulado);
+        TextView tvFechaSimulada = dialogView.findViewById(R.id.tvFechaSimulada);
+
+        // 🌟 EFECTO ESPEJO: Número de tarjeta
+        etNoTarjeta.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (s.length() == 0) {
+                    tvNumeroSimulado.setText("••••  ••••  ••••  ••••");
+                } else {
+                    StringBuilder formateado = new StringBuilder();
+                    for (int i = 0; i < s.length(); i++) {
+                        if (i > 0 && i % 4 == 0) {
+                            formateado.append("  ");
+                        }
+                        formateado.append(s.charAt(i));
+                    }
+                    tvNumeroSimulado.setText(formateado.toString());
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {}
+        });
+
+        // 🌟 EFECTO ESPEJO: Vencimiento + Formateador diagonal automática
         etVence.addTextChangedListener(new TextWatcher() {
             private boolean estaBorrando = false;
 
@@ -326,7 +371,13 @@ public class DetalleAlojamientoFragment extends Fragment {
             }
 
             @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (s.length() == 0) {
+                    tvFechaSimulada.setText("MM/AA");
+                } else {
+                    tvFechaSimulada.setText(s.toString());
+                }
+            }
 
             @Override
             public void afterTextChanged(Editable s) {
@@ -346,10 +397,47 @@ public class DetalleAlojamientoFragment extends Fragment {
         });
 
         btnFinalizarTarjeta.setOnClickListener(v -> {
-            if(etNoTarjeta.getText().toString().length() < 16 || etCvv.getText().toString().length() < 3 || etVence.getText().toString().length() < 5) {
-                Toast.makeText(getContext(), "Por favor, completa los datos de la tarjeta bancaria", Toast.LENGTH_SHORT).show();
+            String numeroTarjeta = etNoTarjeta.getText().toString().trim();
+            String vencimiento = etVence.getText().toString().trim();
+            String cvv = etCvv.getText().toString().trim();
+
+            if (numeroTarjeta.length() < 16 || vencimiento.length() < 5 || cvv.length() < 3) {
+                Toast.makeText(getContext(), "Por favor, completa todos los campos de la tarjeta", Toast.LENGTH_SHORT).show();
                 return;
             }
+
+            try {
+                String[] partes = vencimiento.split("/");
+                if (partes.length != 2) {
+                    Toast.makeText(getContext(), "Formato de fecha inválido", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                int mesInput = Integer.parseInt(partes[0]);
+                int anoInput = Integer.parseInt(partes[1]);
+
+                if (mesInput < 1 || mesInput > 12) {
+                    Toast.makeText(getContext(), "El mes debe estar entre 01 y 12", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                java.util.Calendar calendarioSistema = java.util.Calendar.getInstance();
+                int anoActualCorto = calendarioSistema.get(java.util.Calendar.YEAR) % 100;
+                int mesActual = calendarioSistema.get(java.util.Calendar.MONTH) + 1;
+
+                if (anoInput < anoActualCorto) {
+                    Toast.makeText(getContext(), "La tarjeta ya ha expirado", Toast.LENGTH_SHORT).show();
+                    return;
+                } else if (anoInput == anoActualCorto && mesInput < mesActual) {
+                    Toast.makeText(getContext(), "La tarjeta expiró este año", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+            } catch (NumberFormatException e) {
+                Toast.makeText(getContext(), "La fecha de vencimiento debe contener números válidos", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
             layoutTarjeta.setVisibility(View.GONE);
             tvProgresoPago.setText("Conectando con pasarela bancaria...");
             layoutCargando.setVisibility(View.VISIBLE);
@@ -401,7 +489,6 @@ public class DetalleAlojamientoFragment extends Fragment {
         btnEntendidoOxxo.setOnClickListener(v -> {
             dialog.dismiss();
             Toast.makeText(getContext(), "Orden de pago guardada. Estado: Pendiente de confirmación.", Toast.LENGTH_LONG).show();
-
             actualizarEstadoViajeEnServidor("pending");
         });
 

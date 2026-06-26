@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar; // 🌟 NUEVO
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -30,11 +31,12 @@ public class AlojamientosFragment extends Fragment {
 
     private TextView btnAlojamientos, btnExperiencias, btnServicios;
     private RecyclerView recyclerCarrusel;
+    private ProgressBar progressCargaAlojamientos;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.activity_home, container, false);
+        View view = inflater.inflate(R.layout.fragment_alojamientos, container, false);
         View header = view.findViewById(R.id.header_home);
 
         if (header != null) {
@@ -43,14 +45,16 @@ public class AlojamientosFragment extends Fragment {
             btnServicios = header.findViewById(R.id.btnServicios);
         }
 
+        progressCargaAlojamientos = view.findViewById(R.id.progressCargaAlojamientos);
+
         recyclerCarrusel = view.findViewById(R.id.recyclerCarrusel);
         recyclerCarrusel.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
 
         seleccionarSeccion("Alojamientos");
 
-        btnAlojamientos.setOnClickListener(v -> seleccionarSeccion("Alojamientos"));
-        btnExperiencias.setOnClickListener(v -> seleccionarSeccion("Experiencias"));
-        btnServicios.setOnClickListener(v -> seleccionarSeccion("Servicios"));
+        if (btnAlojamientos != null) btnAlojamientos.setOnClickListener(v -> seleccionarSeccion("Alojamientos"));
+        if (btnExperiencias != null) btnExperiencias.setOnClickListener(v -> seleccionarSeccion("Experiencias"));
+        if (btnServicios != null) btnServicios.setOnClickListener(v -> seleccionarSeccion("Servicios"));
 
         return view;
     }
@@ -59,38 +63,56 @@ public class AlojamientosFragment extends Fragment {
         int colorRosa = Color.parseColor("#FF385C");
         int colorGrisMutado = Color.parseColor("#888888");
 
-        btnAlojamientos.setBackgroundResource(R.drawable.bg_chip_inactive);
-        btnAlojamientos.setTextColor(colorGrisMutado);
-        btnExperiencias.setBackgroundResource(R.drawable.bg_chip_inactive);
-        btnExperiencias.setTextColor(colorGrisMutado);
-        btnServicios.setBackgroundResource(R.drawable.bg_chip_inactive);
-        btnServicios.setTextColor(colorGrisMutado);
+        if (btnAlojamientos != null) {
+            btnAlojamientos.setBackgroundResource(R.drawable.bg_chip_inactive);
+            btnAlojamientos.setTextColor(colorGrisMutado);
+        }
+        if (btnExperiencias != null) {
+            btnExperiencias.setBackgroundResource(R.drawable.bg_chip_inactive);
+            btnExperiencias.setTextColor(colorGrisMutado);
+        }
+        if (btnServicios != null) {
+            btnServicios.setBackgroundResource(R.drawable.bg_chip_inactive);
+            btnServicios.setTextColor(colorGrisMutado);
+        }
 
         switch (seccion) {
             case "Alojamientos":
-                btnAlojamientos.setBackgroundResource(R.drawable.bg_chip_active);
-                btnAlojamientos.setTextColor(colorRosa);
+                if (btnAlojamientos != null) {
+                    btnAlojamientos.setBackgroundResource(R.drawable.bg_chip_active);
+                    btnAlojamientos.setTextColor(colorRosa);
+                }
                 cargarAlojamientosDesdeServidor();
                 break;
 
             case "Experiencias":
-                btnExperiencias.setBackgroundResource(R.drawable.bg_chip_active);
-                btnExperiencias.setTextColor(colorRosa);
+                if (btnExperiencias != null) {
+                    btnExperiencias.setBackgroundResource(R.drawable.bg_chip_active);
+                    btnExperiencias.setTextColor(colorRosa);
+                }
                 break;
 
             case "Servicios":
-                btnServicios.setBackgroundResource(R.drawable.bg_chip_active);
-                btnServicios.setTextColor(colorRosa);
+                if (btnServicios != null) {
+                    btnServicios.setBackgroundResource(R.drawable.bg_chip_active);
+                    btnServicios.setTextColor(colorRosa);
+                }
                 break;
         }
     }
 
     private void cargarAlojamientosDesdeServidor() {
+        if (progressCargaAlojamientos != null) progressCargaAlojamientos.setVisibility(View.VISIBLE);
+        if (recyclerCarrusel != null) recyclerCarrusel.setVisibility(View.GONE);
+
         ApiService apiService = RetrofitClient.getApiService(requireContext());
 
         apiService.getAlojamientos().enqueue(new Callback<List<Alojamiento>>() {
             @Override
             public void onResponse(@NonNull Call<List<Alojamiento>> call, @NonNull Response<List<Alojamiento>> response) {
+                if (progressCargaAlojamientos != null) progressCargaAlojamientos.setVisibility(View.GONE);
+                if (recyclerCarrusel != null) recyclerCarrusel.setVisibility(View.VISIBLE);
+
                 if (response.isSuccessful() && response.body() != null) {
                     List<Alojamiento> listaAlojamientos = response.body();
 
@@ -108,6 +130,9 @@ public class AlojamientosFragment extends Fragment {
 
             @Override
             public void onFailure(@NonNull Call<List<Alojamiento>> call, @NonNull Throwable t) {
+                if (progressCargaAlojamientos != null) progressCargaAlojamientos.setVisibility(View.GONE);
+                if (recyclerCarrusel != null) recyclerCarrusel.setVisibility(View.VISIBLE);
+
                 Toast.makeText(getContext(), "Error de conexión: " + t.getMessage(), Toast.LENGTH_LONG).show();
             }
         });
