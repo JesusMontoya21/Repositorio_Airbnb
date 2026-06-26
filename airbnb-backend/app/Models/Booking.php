@@ -14,12 +14,16 @@ class Booking extends Model
         'guests',
         'total_price',
         'status',
+        'reminder_template_sent_at',
+        'checkin_template_sent_at',
     ];
 
     protected $casts = [
         'check_in'    => 'date',
         'check_out'   => 'date',
         'total_price' => 'decimal:2',
+        'reminder_template_sent_at' => 'datetime',
+        'checkin_template_sent_at' => 'datetime',
     ];
 
     public function user()
@@ -31,8 +35,4 @@ class Booking extends Model
     {
         return $this->belongsTo(Property::class)->with('images');
     }
-    public function bookings()
-{
-    return $this->hasMany(Booking::class);
-}
 }

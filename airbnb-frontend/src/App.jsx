@@ -14,15 +14,18 @@ import MyBookings from './pages/MyBookings.jsx';
 import Profile from './pages/Profile.jsx';
 import Services from "./pages/Services.jsx"; 
 import Experiences from "./pages/Experiences.jsx"; 
+import Todos from './pages/Todos.jsx';
 import BecomeHostIntro from './pages/BecomeHostIntro.jsx'; 
 import CreateProperty from './pages/CreateProperty.jsx'; 
 import CreateExperience from './pages/CreateExperience.jsx';
 import CreateService from './pages/CreateService.jsx';
+import EditProperty from './pages/EditProperty.jsx';
 import Favorites from './pages/Favorites.jsx';
 import NotFound from './pages/NotFound.jsx';
 import ExperienceDetails from './pages/ExperienceDetails.jsx';
 import ServiceDetails from './pages/ServiceDetails.jsx';
 import HostDashboard from './pages/HostDashboard.jsx';
+import Messages from './pages/Messages.jsx';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -47,10 +50,12 @@ function AppLayout() {
           <Route path="/property/:id" element={<PropertyDetails />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/todos" element={<Todos />} />
           <Route path="/services" element={<Services />} />
           <Route path="/experiences" element={<Experiences />} />
           <Route path="/anuncio-alojamiento" element={<BecomeHostIntro />} />
           <Route path="/create-property" element={<CreateProperty />} />
+          <Route path="/host/properties/:id/edit" element={<ProtectedRoute><EditProperty /></ProtectedRoute>} />
           <Route path="/create-experience" element={<CreateExperience />} />
           <Route path="/create-service" element={<CreateService />} />
 
@@ -62,6 +67,7 @@ function AppLayout() {
           <Route path="/experiences/:id" element={<ExperienceDetails />} />
           <Route path="/services/:id" element={<ServiceDetails />} />
           <Route path="/host-dashboard" element={<ProtectedRoute><HostDashboard /></ProtectedRoute>} />
+          <Route path="/messages" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
         </Routes>
       </main>
 

@@ -12,18 +12,20 @@ use App\Http\Controllers\ExperienceController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\ExperienceBookingController;
 use App\Http\Controllers\ServiceBookingController;
+use App\Http\Controllers\ConversationController;
 
 // Rutas públicas
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']);
 Route::get('/properties', [PropertyController::class, 'index']);
 Route::get('/properties/{id}', [PropertyController::class, 'show']);
+Route::get('/properties/{id}/availability', [BookingController::class, 'availability']);
+Route::post('/properties/{id}/quote', [BookingController::class, 'quote']);
 Route::get('/properties/{id}/reviews', [ReviewController::class, 'index']);
 Route::get('/experiences', [ExperienceController::class, 'index']);
 Route::get('/experiences/{id}', [ExperienceController::class, 'show']);
 Route::get('/services', [ServiceController::class, 'index']);
 Route::get('/services/{id}', [ServiceController::class, 'show']);
-Route::get('/host/dashboard', [PropertyController::class, 'dashboard']);
 
 // Rutas protegidas
 Route::middleware('auth:sanctum')->group(function () {
@@ -41,11 +43,28 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/properties/{id}', [PropertyController::class, 'update']);
     Route::delete('/properties/{id}', [PropertyController::class, 'destroy']);
     Route::get('/my-properties', [PropertyController::class, 'myProperties']);
+    Route::get('/host/dashboard', [PropertyController::class, 'dashboard']);
+    Route::get('/host/properties/{id}', [PropertyController::class, 'hostShow']);
+    Route::get('/host/properties/{id}/availability', [PropertyController::class, 'hostAvailability']);
+    Route::post('/host/properties/{id}/availability-blocks', [PropertyController::class, 'addAvailabilityBlock']);
+    Route::delete('/host/properties/{id}/availability-blocks/{blockId}', [PropertyController::class, 'removeAvailabilityBlock']);
 
     // Reservas de hospedaje
     Route::post('/bookings', [BookingController::class, 'store']);
     Route::get('/my-bookings', [BookingController::class, 'myBookings']);
     Route::put('/bookings/{id}/cancel', [BookingController::class, 'cancel']);
+
+    // Mensajería y notificaciones
+    Route::get('/conversations', [ConversationController::class, 'index']);
+    Route::post('/conversations/from-booking/{bookingId}', [ConversationController::class, 'startFromBooking']);
+    Route::get('/conversations/{id}/messages', [ConversationController::class, 'messages']);
+    Route::post('/conversations/{id}/messages', [ConversationController::class, 'sendMessage']);
+    Route::post('/conversations/{id}/mark-read', [ConversationController::class, 'markAsRead']);
+    Route::get('/messages/attachments/{attachmentId}/download', [ConversationController::class, 'downloadAttachment']);
+
+    Route::get('/notifications', [ConversationController::class, 'notifications']);
+    Route::get('/notifications/unread-count', [ConversationController::class, 'unreadCount']);
+    Route::post('/notifications/{id}/read', [ConversationController::class, 'markNotificationAsRead']);
 
     // Reseñas
     Route::post('/properties/{id}/reviews', [ReviewController::class, 'store']);

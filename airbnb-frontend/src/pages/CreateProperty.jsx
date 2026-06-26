@@ -1,9 +1,13 @@
 import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import api from '../api/axios';
+import { useAuth } from '../context/AuthContext';
 
 export default function CreateProperty() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const { user } = useAuth();
   const [currentStep, setCurrentStep] = useState(1);
   const [showIntroModal, setShowIntroModal] = useState(false);
   const [isSuperHost, setIsSuperHost] = useState(false);
@@ -53,7 +57,7 @@ export default function CreateProperty() {
 
   const handleCreateProperty = async () => {
     try {
-      await api.post('/properties', {
+      const res = await api.post('/properties', {
         title: propertyData.title || 'Mi propiedad',
         description: propertyData.description || 'Descripción de mi propiedad',
         city: propertyData.address.split(',')[0] || propertyData.address,
@@ -64,8 +68,22 @@ export default function CreateProperty() {
         bedrooms: propertyData.basics.bedrooms,
         bathrooms: propertyData.basics.bathrooms,
         type: propertyData.propertyType || 'apartment',
+        amenities: propertyData.amenities,
+        house_rules: [],
+        cancellation_policy: propertyData.discounts.includes('monthly') ? 'strict' : 'moderate',
+        booking_preference: propertyData.bookingPreference,
+        guest_preference: propertyData.guestPreference,
         images: propertyData.images,
       });
+
+      const createdProperty = res.data;
+      queryClient.setQueryData(['my-properties', user?.id], (previous = []) => {
+        if (!Array.isArray(previous)) return [createdProperty];
+        const alreadyExists = previous.some((item) => item.id === createdProperty.id);
+        return alreadyExists ? previous : [createdProperty, ...previous];
+      });
+      queryClient.invalidateQueries({ queryKey: ['my-properties'] });
+
       alert('¡Felicidades! Tu propiedad ha sido creada exitosamente.');
       navigate('/my-properties');
     } catch (error) {

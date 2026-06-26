@@ -19,6 +19,7 @@ export default function PropertyDetails() {
   const [reviewError, setReviewError] = useState('');
   const [reviewLoading, setReviewLoading] = useState(false);
   const [showReviewForm, setShowReviewForm] = useState(false);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(null);
 
   const { data: property, isLoading } = useQuery({
     queryKey: ['property', id],
@@ -36,6 +37,34 @@ export default function PropertyDetails() {
     },
   });
 
+  const { data: availability } = useQuery({
+    queryKey: ['propertyAvailability', id],
+    queryFn: async () => {
+      const res = await api.get(`/properties/${id}/availability`);
+      return res.data;
+    },
+    enabled: !!id,
+  });
+
+  const { data: quote, error: quoteError } = useQuery({
+    queryKey: ['propertyQuote', id, checkIn, checkOut, guests],
+    queryFn: async () => {
+      const res = await api.post(`/properties/${id}/quote`, {
+        check_in: checkIn,
+        check_out: checkOut,
+        guests,
+      });
+      return res.data;
+    },
+    enabled: !!id && !!checkIn && !!checkOut,
+    retry: false,
+  });
+
+  const overlapsBlockedRange = (start, end) => {
+    const blocked = availability?.blocked_ranges || [];
+    return blocked.some((range) => start < range.check_out && end > range.check_in);
+  };
+
   const handleBooking = async (e) => {
     e.preventDefault();
     setBookingError('');
@@ -43,6 +72,14 @@ export default function PropertyDetails() {
     if (!checkIn || !checkOut) { setBookingError('Selecciona las fechas de entrada y salida'); return; }
     const nights = Math.ceil((new Date(checkOut) - new Date(checkIn)) / (1000 * 60 * 60 * 24));
     if (nights <= 0) { setBookingError('La fecha de salida debe ser posterior a la de entrada'); return; }
+    if (overlapsBlockedRange(checkIn, checkOut)) {
+      setBookingError('Las fechas seleccionadas están ocupadas. Elige otras fechas.');
+      return;
+    }
+    if (!quote?.available) {
+      setBookingError('No se pudo confirmar la disponibilidad actual. Intenta con otras fechas.');
+      return;
+    }
     setBookingLoading(true);
     try {
       await api.post('/bookings', {
@@ -50,7 +87,6 @@ export default function PropertyDetails() {
         check_in: checkIn,
         check_out: checkOut,
         guests,
-        total_price: nights * property.price_per_night,
       });
       alert('¡Reserva creada exitosamente!');
       navigate('/my-bookings');
@@ -114,6 +150,8 @@ export default function PropertyDetails() {
   const nights = checkIn && checkOut
     ? Math.ceil((new Date(checkOut) - new Date(checkIn)) / (1000 * 60 * 60 * 24))
     : 0;
+  const blockedRanges = availability?.blocked_ranges || [];
+  const selectedDatesBlocked = checkIn && checkOut ? overlapsBlockedRange(checkIn, checkOut) : false;
 
   const StarRating = ({ value, onChange }) => (
     <div className="flex gap-1">
@@ -125,6 +163,63 @@ export default function PropertyDetails() {
       ))}
     </div>
   );
+
+  const placeOffers = [
+    { icon: '📶', label: 'Wifi' },
+    { icon: '🍳', label: 'Cocina' },
+    { icon: '🧺', label: 'Lavadora' },
+    { icon: '🚗', label: 'Estacionamiento' },
+    { icon: '🛁', label: 'Baño privado' },
+    { icon: '🧼', label: 'Limpieza incluida' },
+  ];
+
+  const spaceHighlights = [
+    {
+      title: 'Habitación',
+      description: `${property.bedrooms} ${property.bedrooms === 1 ? 'habitación privada' : 'habitaciones privadas'} para descansar cómodamente.`
+    },
+    {
+      title: 'Baño',
+      description: `${property.bathrooms} ${property.bathrooms === 1 ? 'baño' : 'baños'} con todos los servicios esenciales.`
+    },
+    {
+      title: 'Zona común',
+      description: 'Espacio pensado para relajarte, trabajar o recibir a tus huéspedes con comodidad.'
+    },
+  ];
+
+  const mapQuery = encodeURIComponent(`${property.address || property.city}, ${property.city}, ${property.country}`);
+  const propertyImages = property.images || [];
+  const hasMultipleImages = propertyImages.length > 1;
+
+  const openImageViewer = (index) => {
+    setSelectedImageIndex(index);
+  };
+
+  const closeImageViewer = () => {
+    setSelectedImageIndex(null);
+  };
+
+  const showPreviousImage = () => {
+    setSelectedImageIndex((current) => {
+      if (current === null) return current;
+      return current === 0 ? propertyImages.length - 1 : current - 1;
+    });
+  };
+
+  const showNextImage = () => {
+    setSelectedImageIndex((current) => {
+      if (current === null) return current;
+      return current === propertyImages.length - 1 ? 0 : current + 1;
+    });
+  };
+
+  const handleGalleryKeyDown = (event, index) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      openImageViewer(index);
+    }
+  };
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -142,11 +237,25 @@ export default function PropertyDetails() {
 
       {/* Galería */}
       <div className="grid grid-cols-2 gap-2 mb-8 rounded-2xl overflow-hidden">
-        {property.images?.length > 0 ? (
-          property.images.slice(0, 5).map((img, idx) => (
-            <div key={img.id} className={idx === 0 ? 'col-span-2' : ''}>
+        {propertyImages.length > 0 ? (
+          propertyImages.slice(0, 5).map((img, idx) => (
+            <div
+              key={img.id}
+              role="button"
+              tabIndex={0}
+              onClick={() => openImageViewer(idx)}
+              onKeyDown={(event) => handleGalleryKeyDown(event, idx)}
+              className={`${idx === 0 ? 'col-span-2' : ''} relative w-full overflow-hidden cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#FF385C]`}
+              style={{ height: idx === 0 ? '400px' : '200px' }}
+              aria-label={`Abrir imagen ${idx + 1} de ${property.title}`}
+            >
               <img src={img.url} alt={`${property.title} ${idx + 1}`}
-                className="w-full object-cover" style={{ height: idx === 0 ? '400px' : '200px' }} />
+                className="h-full w-full object-cover transition duration-200 hover:scale-[1.02]" />
+              {idx === 4 && propertyImages.length > 5 && (
+                <div className="absolute inset-0 bg-black/45 flex items-center justify-center text-white text-xl font-semibold">
+                  +{propertyImages.length - 5} fotos
+                </div>
+              )}
             </div>
           ))
         ) : (
@@ -155,6 +264,72 @@ export default function PropertyDetails() {
           </div>
         )}
       </div>
+
+      {selectedImageIndex !== null && propertyImages[selectedImageIndex] && (
+        <div className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-4 sm:p-8" onClick={closeImageViewer}>
+          <button
+            type="button"
+            onClick={closeImageViewer}
+            className="absolute top-4 right-4 sm:top-6 sm:right-6 w-11 h-11 rounded-full bg-white/10 text-white text-2xl hover:bg-white/20 transition"
+          >
+            ×
+          </button>
+
+          {hasMultipleImages && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                showPreviousImage();
+              }}
+              className="absolute left-3 sm:left-6 w-11 h-11 rounded-full bg-white/10 text-white text-2xl hover:bg-white/20 transition"
+            >
+              ‹
+            </button>
+          )}
+
+          <div className="w-full max-w-6xl" onClick={(e) => e.stopPropagation()}>
+            <img
+              src={propertyImages[selectedImageIndex].url}
+              alt={`${property.title} ${selectedImageIndex + 1}`}
+              className="w-full max-h-[78vh] object-contain rounded-2xl"
+            />
+
+            <div className="mt-4 flex items-center justify-between text-white">
+              <p className="text-sm sm:text-base font-medium">
+                Imagen {selectedImageIndex + 1} de {propertyImages.length}
+              </p>
+              {hasMultipleImages && (
+                <div className="flex gap-2 overflow-x-auto pl-4">
+                  {propertyImages.map((img, index) => (
+                    <button
+                      key={img.id}
+                      type="button"
+                      onClick={() => setSelectedImageIndex(index)}
+                      className={`h-16 w-20 overflow-hidden rounded-lg border-2 transition ${index === selectedImageIndex ? 'border-white' : 'border-transparent opacity-70 hover:opacity-100'}`}
+                    >
+                      <img src={img.url} alt={`${property.title} miniatura ${index + 1}`} className="h-full w-full object-cover" />
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {hasMultipleImages && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                showNextImage();
+              }}
+              className="absolute right-3 sm:right-6 w-11 h-11 rounded-full bg-white/10 text-white text-2xl hover:bg-white/20 transition"
+            >
+              ›
+            </button>
+          )}
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Info principal */}
@@ -176,9 +351,55 @@ export default function PropertyDetails() {
           </div>
 
           <div className="border-b pb-6 mb-6">
-            <h3 className="text-xl font-semibold mb-3">Ubicación</h3>
-            <p className="text-gray-700">{property.address}</p>
-            <p className="text-gray-500">{property.city}, {property.country}</p>
+            <h3 className="text-xl font-semibold mb-4">Dónde vas a estar</h3>
+            <div className="grid gap-4 md:grid-cols-3">
+              {spaceHighlights.map((item) => (
+                <div key={item.title} className="rounded-2xl border border-gray-200 p-4">
+                  <h4 className="font-semibold text-gray-900 mb-2">{item.title}</h4>
+                  <p className="text-sm text-gray-600">{item.description}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="border-b pb-6 mb-6">
+            <h3 className="text-xl font-semibold mb-4">Lo que ofrece este lugar</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {placeOffers.map((item) => (
+                <div key={item.label} className="flex items-center gap-3 rounded-2xl border border-gray-200 p-3">
+                  <span className="text-xl">{item.icon}</span>
+                  <span className="text-sm font-medium text-gray-700">{item.label}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="border-b pb-6 mb-6">
+            <h3 className="text-xl font-semibold mb-4">Ubicación</h3>
+            <div className="bg-gray-50 rounded-2xl p-6 mb-4 border border-gray-200">
+              <p className="text-gray-900 font-semibold mb-1">{property.address}</p>
+              <p className="text-gray-600 text-sm mb-4">{property.city}, {property.country}</p>
+              <div className="overflow-hidden rounded-xl border border-gray-300 shadow-sm">
+                <iframe
+                  title={`Mapa de ${property.title}`}
+                  className="h-96 w-full"
+                  loading="lazy"
+                  allowFullScreen
+                  referrerPolicy="no-referrer-when-downgrade"
+                  src={`https://www.google.com/maps?q=${mapQuery}&z=16&output=embed`}
+                />
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <a href={`https://maps.google.com/?q=${mapQuery}`} target="_blank" rel="noopener noreferrer"
+                className="flex-1 border border-gray-900 text-gray-900 px-4 py-3 rounded-lg font-semibold hover:bg-gray-50 transition text-center">
+                Abrir en Maps
+              </a>
+              <a href={`https://www.google.com/search?q=${mapQuery}`} target="_blank" rel="noopener noreferrer"
+                className="flex-1 bg-gray-900 text-white px-4 py-3 rounded-lg font-semibold hover:bg-black transition text-center">
+                Buscar en zona
+              </a>
+            </div>
           </div>
 
           {/* Reseñas */}
@@ -284,7 +505,13 @@ export default function PropertyDetails() {
                 <div className="grid grid-cols-2 divide-x">
                   <div className="p-3">
                     <label className="block text-xs font-semibold mb-1">LLEGADA</label>
-                    <input type="date" value={checkIn} onChange={(e) => setCheckIn(e.target.value)}
+                    <input type="date" value={checkIn} onChange={(e) => {
+                      const nextCheckIn = e.target.value;
+                      setCheckIn(nextCheckIn);
+                      if (checkOut && nextCheckIn && nextCheckIn >= checkOut) {
+                        setCheckOut('');
+                      }
+                    }}
                       min={new Date().toISOString().split('T')[0]}
                       className="w-full text-sm focus:outline-none" required />
                   </div>
@@ -306,7 +533,33 @@ export default function PropertyDetails() {
                 </div>
               </div>
 
-              <button type="submit" disabled={bookingLoading}
+              {blockedRanges.length > 0 && (
+                <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+                  <p className="font-semibold mb-1">Fechas ocupadas</p>
+                  <ul className="space-y-1 max-h-28 overflow-auto">
+                    {blockedRanges.slice(0, 6).map((range) => (
+                      <li key={`${range.check_in}-${range.check_out}`}>
+                        {range.check_in} al {range.check_out}
+                      </li>
+                    ))}
+                    {blockedRanges.length > 6 && <li>...y {blockedRanges.length - 6} periodos más</li>}
+                  </ul>
+                </div>
+              )}
+
+              {selectedDatesBlocked && (
+                <p className="text-sm text-red-600">
+                  Las fechas seleccionadas se traslapan con una reserva existente.
+                </p>
+              )}
+
+              {quoteError && !selectedDatesBlocked && (
+                <p className="text-sm text-red-600">
+                  {quoteError.response?.data?.message || 'No se pudo calcular el precio para esas fechas.'}
+                </p>
+              )}
+
+              <button type="submit" disabled={bookingLoading || selectedDatesBlocked || (!!checkIn && !!checkOut && !quote?.available)}
                 className="w-full bg-gradient-to-r from-[#E61E4D] to-[#E31C5F] text-white py-3 rounded-xl font-semibold hover:opacity-90 transition disabled:opacity-50">
                 {bookingLoading ? 'Reservando...' : 'Reservar'}
               </button>
@@ -315,12 +568,19 @@ export default function PropertyDetails() {
             {nights > 0 && (
               <div className="mt-4 pt-4 border-t space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span>${property.price_per_night} x {nights} noches</span>
-                  <span>${property.price_per_night * nights} MXN</span>
+                  <span>
+                    ${quote?.base_price_per_night ?? property.price_per_night} x {nights} noches
+                  </span>
+                  <span>${quote?.subtotal ?? property.price_per_night * nights} MXN</span>
                 </div>
+                {quote?.nightly_breakdown?.some((night) => night.source !== 'base') && (
+                  <div className="text-xs text-gray-600">
+                    Precio dinámico aplicado por temporada en fechas seleccionadas.
+                  </div>
+                )}
                 <div className="flex justify-between font-semibold">
                   <span>Total</span>
-                  <span>${property.price_per_night * nights} MXN</span>
+                  <span>${quote?.total_price ?? property.price_per_night * nights} MXN</span>
                 </div>
               </div>
             )}

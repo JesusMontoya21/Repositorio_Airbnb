@@ -20,6 +20,11 @@ export default function Footer() {
 
   const [activeCategory, setActiveCategory] = useState('populares');
 
+  const selectCategory = (categoryId) => {
+    setActiveCategory(categoryId);
+    setShowMoreDestinations(false);
+  };
+
   const destinations = {
     populares: [
       { ciudad: 'Dallas', tipo: 'Departamentos' },
@@ -38,13 +43,83 @@ export default function Footer() {
       { ciudad: 'Queens', tipo: 'Departamentos' },
       { ciudad: 'St. Petersburg', tipo: 'Departamentos' },
       { ciudad: 'Charlotte', tipo: 'Villas' },
-      { ciudad: 'West Palm Beach', tipo: 'Casas en renta' },
+      { ciudad: 'West Palm Beach', tipo: 'Casas en renta' }
+    ],
+    arte: [
+      { ciudad: 'París', tipo: 'Apartamentos cerca de museos' },
+      { ciudad: 'Florencia', tipo: 'Estancias con encanto' },
+      { ciudad: 'Madrid', tipo: 'Pisos con estilo' },
+      { ciudad: 'Ciudad de México', tipo: 'Lofts artísticos' },
+      { ciudad: 'Roma', tipo: 'Viviendas históricas' },
+      { ciudad: 'Ámsterdam', tipo: 'Casas cerca de galerías' },
+      { ciudad: 'Londres', tipo: 'Departamentos céntricos' },
+      { ciudad: 'Barcelona', tipo: 'Pisos boutique' },
+      { ciudad: 'Buenos Aires', tipo: 'Casas con arte' },
+      { ciudad: 'Lisboa', tipo: 'Alojamientos culturales' },
+      { ciudad: 'Nueva York', tipo: 'Lofts creativos' },
+      { ciudad: 'Seúl', tipo: 'Estancias modernas' }
+    ],
+    playa: [
+      { ciudad: 'Cancún', tipo: 'Villas frente al mar' },
+      { ciudad: 'Maldivas', tipo: 'Bungalows sobre el agua' },
+      { ciudad: 'Miami Beach', tipo: 'Apartamentos de playa' },
+      { ciudad: 'Tulum', tipo: 'Casas tropicales' },
+      { ciudad: 'Barbados', tipo: 'Resorts boutique' },
+      { ciudad: 'Bali', tipo: 'Villas con piscina' },
+      { ciudad: 'Isla Holbox', tipo: 'Cabañas relajadas' },
+      { ciudad: 'Phuket', tipo: 'Bungalows con vista' },
+      { ciudad: 'Seychelles', tipo: 'Estancias de lujo' },
+      { ciudad: 'Costa Rica', tipo: 'Casas ecológicas' },
+      { ciudad: 'Maui', tipo: 'Resorts familiares' },
+      { ciudad: 'Ibiza', tipo: 'Pisos junto al mar' }
+    ],
+    montanas: [
+      { ciudad: 'Aspen', tipo: 'Chalets de montaña' },
+      { ciudad: 'Bariloche', tipo: 'Cabañas acogedoras' },
+      { ciudad: 'Zermatt', tipo: 'Apartamentos ski-in/ski-out' },
+      { ciudad: 'Banff', tipo: 'Refugios de montaña' },
+      { ciudad: 'Chamonix', tipo: 'Estancias alpinas' },
+      { ciudad: "Cortina d'Ampezzo", tipo: 'Pisos con vistas' },
+      { ciudad: 'Queenstown', tipo: 'Lodges de aventura' },
+      { ciudad: 'Sierra Nevada', tipo: 'Casas rurales' },
+      { ciudad: 'Patagonia', tipo: 'Estancias aisladas' },
+      { ciudad: 'Grindelwald', tipo: 'Chalets tranquilos' },
+      { ciudad: 'Jackson Hole', tipo: 'Cabañas de ski' },
+      { ciudad: 'Sapporo', tipo: 'Alojamientos de invierno' }
+    ],
+    aire: [
+      { ciudad: 'Sedona', tipo: 'Casas junto a senderos' },
+      { ciudad: 'Parque Nacional Torres del Paine', tipo: 'Refugios naturales' },
+      { ciudad: 'Zion', tipo: 'Cabañas al aire libre' },
+      { ciudad: 'Lake Tahoe', tipo: 'Casas con paisaje' },
+      { ciudad: 'Joshua Tree', tipo: 'Estancias desérticas' },
+      { ciudad: 'Yosemite', tipo: 'Casas de campo' },
+      { ciudad: 'Isla de Vancouver', tipo: 'Bungalows en la naturaleza' },
+      { ciudad: 'Hokkaido', tipo: 'Retiro al aire libre' },
+      { ciudad: 'Costa Verde', tipo: 'Cabañas ecológicas' },
+      { ciudad: 'Islas Azores', tipo: 'Alojamientos verdes' },
+      { ciudad: 'Parque Nacional Kruger', tipo: 'Lodges naturales' },
+      { ciudad: 'Fiordland', tipo: 'Cabañas aisladas' }
+    ],
+    actividades: [
+      { ciudad: 'Queenstown', tipo: 'Aventuras en kayak' },
+      { ciudad: 'Whistler', tipo: 'Escapadas de ski' },
+      { ciudad: 'Riviera Maya', tipo: 'Tours de snorkel' },
+      { ciudad: 'Costa Brava', tipo: 'Clases de surf' },
+      { ciudad: 'Mendoza', tipo: 'Rutas de vino' },
+      { ciudad: 'Reikiavik', tipo: 'Observación de auroras' },
+      { ciudad: 'Dubái', tipo: 'Paseos en globo' },
+      { ciudad: 'Kioto', tipo: 'Experiencias de cocina' },
+      { ciudad: 'Patagonia', tipo: 'Trekking guiado' },
+      { ciudad: 'Ámsterdam', tipo: 'Ciclismo urbano' },
+      { ciudad: 'Nairobi', tipo: 'Safaris cortos' },
+      { ciudad: 'Marrakech', tipo: 'Mercados y cultura' }
     ]
   };
 
-  const visibleDestinations = showMoreDestinations 
-    ? destinations[activeCategory] 
-    : destinations[activeCategory]?.slice(0, 12);
+  const visibleDestinations = showMoreDestinations
+    ? destinations[activeCategory] ?? destinations.populares
+    : destinations[activeCategory]?.slice(0, 12) ?? destinations.populares.slice(0, 12);
 
   const footerSections = [
     {
@@ -70,13 +145,14 @@ export default function Footer() {
         'Foro de la comunidad',
         'Ser un anfitrión responsable',
         'Apúntate a una clase gratuita sobre cómo ser anfitrión',
-        'Busca un coanfitrión'
+        'Busca un coanfitrión',
+        'Invita a un anfitrión'
       ]
     },
     {
       title: 'Airbnb',
       links: [
-        'Lanzamiento de verano 2025',
+        'Lanzamiento de verano 2026',
         'Sala de prensa',
         'Empleo',
         'Inversores',
@@ -111,7 +187,10 @@ export default function Footer() {
             {inspirationCategories.map((cat) => (
               <button
                 key={cat.id}
-                onClick={() => setActiveCategory(cat.id)}
+                onClick={() => {
+                  setActiveCategory(cat.id);
+                  setShowMoreDestinations(false);
+                }}
                 className={`pb-3 text-sm font-medium whitespace-nowrap transition ${
                   activeCategory === cat.id
                     ? 'text-gray-900 border-b-2 border-gray-900'
@@ -121,6 +200,12 @@ export default function Footer() {
                 {cat.label}
               </button>
             ))}
+          </div>
+
+          <div className="mb-4">
+            <p className="text-sm font-semibold text-gray-700">
+              Mostrando categoría: {inspirationCategories.find((cat) => cat.id === activeCategory)?.label}
+            </p>
           </div>
 
           {/* Grid de destinos */}

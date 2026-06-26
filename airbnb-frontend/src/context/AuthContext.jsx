@@ -5,14 +5,38 @@ const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let isActive = true;
     const token = localStorage.getItem("token");
+
     if (token) {
       api.get("/user")
-        .then((res) => setUser(res.data))
-        .catch(() => setUser(null));
+        .then((res) => {
+          // Prevent stale bootstrap requests from overriding a newer login token.
+          if (isActive && localStorage.getItem("token") === token) {
+            setUser(res.data);
+          }
+        })
+        .catch(() => {
+          if (isActive && localStorage.getItem("token") === token) {
+            localStorage.removeItem("token");
+            setUser(null);
+          }
+        })
+        .finally(() => {
+          if (isActive) {
+            setLoading(false);
+          }
+        });
+    } else {
+      setLoading(false);
     }
+
+    return () => {
+      isActive = false;
+    };
   }, []);
 
   const login = async (email, password) => {
@@ -35,12 +59,15 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = async () => {
+    try {
+      await api.post("/logout");
+    } catch {}
     localStorage.removeItem("token");
     setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, register }}>
+    <AuthContext.Provider value={{ user, loading, login, logout, register }}>
       {children}
     </AuthContext.Provider>
   );
