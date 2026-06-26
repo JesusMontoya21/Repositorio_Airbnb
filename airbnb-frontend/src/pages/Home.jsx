@@ -5,6 +5,7 @@ import api from '../api/axios';
 import FlexibleDates from '../components/FlexibleDates';
 import { useAuth } from '../context/AuthContext';
 import { useQueryClient } from '@tanstack/react-query';
+import { SkeletonCarouselRow } from '../components/SkeletonCard';
 
 const mockProperties = [
   { id: 1, city: 'Mazatlán', country: 'México', title: 'Departamento frente al mar', price_per_night: 850, guests: 4, bedrooms: 2, average_rating: 4.91, images: [{ url: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=400' }] },
@@ -431,10 +432,12 @@ export default function Home() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {isLoading ? (
-          <div className="flex justify-center items-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#FF385C]"></div>
-          </div>
-        ) : isSearching ? (
+  <>
+    <SkeletonCarouselRow />
+    <SkeletonCarouselRow />
+    <SkeletonCarouselRow />
+  </>
+) : isSearching ? (
           <SearchResults properties={filteredProperties} searchCity={searchParams.city} />
         ) : (
           cities.map(city => (
